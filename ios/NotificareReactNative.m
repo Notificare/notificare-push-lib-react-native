@@ -42,6 +42,18 @@ static PushHandler *pushHandler = nil;
 
 RCT_EXPORT_MODULE()
 
+RCT_EXPORT_METHOD(registerForNotifications) {
+  
+  [[NotificarePushLib shared] registerForNotifications];
+  
+}
+
+RCT_EXPORT_METHOD(startLocationUpdates) {
+  
+  [[NotificarePushLib shared] startLocationUpdates];
+  
+}
+
 RCT_EXPORT_METHOD(addTags:(NSArray *)tags:(RCTResponseSenderBlock)callback) {
   
   [[NotificarePushLib shared] addTags:tags completionHandler:^(NSDictionary * _Nonnull info) {
@@ -56,9 +68,11 @@ RCT_EXPORT_METHOD(addTags:(NSArray *)tags:(RCTResponseSenderBlock)callback) {
 @end
 
 @implementation PushHandler
+
 -(void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info{
 
   [[NotificareReactNative getInstance] dispatchEvent:@"onReady" body:info];
+  
 }
 
 @end
