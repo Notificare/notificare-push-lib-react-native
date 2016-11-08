@@ -1,0 +1,42 @@
+{
+  "name": "notificare-push-lib-react-native",
+  "version": "0.0.1",
+  "description": "React Native module for Notificare",
+  "main": "index.js",
+  "homepage": "https://github.com/Notificare/notificare-push-lib-react-native#readme",
+  "author": "Notificare",
+  "contributors": [
+    {
+      "name": "Joel Oliveira",
+      "email": "joel@notifica.re"
+    },
+    {
+      "name": "Joris Verbogt",
+      "email": "joris@notifica.re"
+    }
+  ],
+  "dependencies": {},
+  "engines": {
+    "npm": "^2.0.0"
+  },
+  "license": "MIT",
+  "keywords": [
+    "react-component",
+    "react-native",
+    "ios",
+    "android",
+    "notifications",
+    "push",
+    "apns",
+    "gcm",
+    "notificare",
+    "fcm"
+  ],
+  "bugs": {
+    "url": "https://github.com/Notificare/notificare-push-lib-react-native/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:Notificare/notificare-push-lib-react-native.git"
+  }
+}
