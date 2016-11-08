@@ -2,12 +2,11 @@ package com.awesomeproject;
 
 import android.os.Bundle;
 import android.util.Log;
-
+import android.support.annotation.Nullable;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import re.notifica.model.NotificareNotification;
 
 public class NotificareEventEmitter {
 
@@ -22,10 +21,10 @@ public class NotificareEventEmitter {
         this.context.addLifecycleEventListener(NotificareReceiverHelper.getInstance(context));
     }
 
-    public void sendEvent(String eventName, NotificareNotification message) {
+    public void sendEvent(String eventName, @Nullable ReadableMap params) {
         if (context.hasActiveCatalystInstance() && this.context.hasCurrentActivity()) {
             context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(
-                    "receivedNotification", message
+                    eventName, params
             );
         }
     }

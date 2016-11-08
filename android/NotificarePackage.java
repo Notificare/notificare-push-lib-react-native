@@ -27,7 +27,7 @@ class NotificarePackage implements ReactPackage {
     public List<NativeModule> createNativeModules(
             ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-
+        NotificareEventEmitter.setup(reactContext);
         modules.add(new NotificareModule(reactContext));
 
         return modules;

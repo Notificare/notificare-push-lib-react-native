@@ -1,21 +1,20 @@
 package com.awesomeproject;
 
-import android.widget.Toast;
-
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
-import java.util.Map;
-import java.util.HashMap;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
+import java.util.List;
 import re.notifica.Notificare;
+import re.notifica.NotificareCallback;
+import re.notifica.NotificareError;
 
 public class NotificareModule extends ReactContextBaseJavaModule {
-
-    private static final String DURATION_SHORT_KEY = "SHORT";
-    private static final String DURATION_LONG_KEY = "LONG";
 
     public NotificareModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -26,17 +25,62 @@ public class NotificareModule extends ReactContextBaseJavaModule {
         return "NotificareReactNativeAndroid";
     }
 
-    @Override
-    public Map<String, Object> getConstants() {
-        final Map<String, Object> constants = new HashMap<>();
-        constants.put(DURATION_SHORT_KEY, Toast.LENGTH_SHORT);
-        constants.put(DURATION_LONG_KEY, Toast.LENGTH_LONG);
-        return constants;
+    @ReactMethod
+    public void launch() {
+        Notificare.shared().launch(getReactApplicationContext());
+        Notificare.shared().setDebugLogging(BuildConfig.DEBUG);
+        Notificare.shared().setIntentReceiver(NotificareReceiver.class);
+        Notificare.shared().setSmallIcon(R.mipmap.ic_launcher);
+        Notificare.shared().setAllowJavaScript(true);
     }
-
 
     @ReactMethod
-    public void show(String message, int duration) {
-        Toast.makeText(getReactApplicationContext(), message, duration).show();
+    public void setCrashLogs(boolean logs) {
+        Notificare.shared().setCrashLogs(logs);
     }
+
+    @ReactMethod
+    public void enableNotifications() {
+        Notificare.shared().enableNotifications();
+    }
+
+    @ReactMethod
+    public void enableLocationUpdates() {
+        Notificare.shared().enableLocationUpdates();
+    }
+
+    @ReactMethod
+    public void enableBeacons(int rate) {
+        Notificare.shared().enableBeacons(rate);
+    }
+
+    @ReactMethod
+    public void fetchTags( final Callback callback ) {
+
+        Notificare.shared().fetchDeviceTags(new NotificareCallback<List<String>>() {
+
+            @Override
+            public void onError(NotificareError arg0) {
+
+                callback.invoke(arg0.getMessage(), null);
+
+            }
+
+            @Override
+            public void onSuccess(List<String> arg0) {
+
+                WritableArray map = Arguments.createArray();
+
+                for (String tag : arg0) {
+                    map.pushString(tag);
+                }
+
+                callback.invoke(null, map);
+
+            }
+
+        });
+
+    }
+
 }
