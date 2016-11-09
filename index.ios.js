@@ -54,15 +54,14 @@ export default class AwesomeProject extends Component {
               }
             });
 
+          Notificare.startLocationUpdates();
+
         }
       });
     });
 
-    this.eventEmitter.addListener('didLoadStore',(data) => {
-        console.log(data);
-    });
 
-    this.eventEmitter.addListener('onNotificationClicked',(data) => {
+    this.eventEmitter.addListener('onNotificationOpened',(data) => {
         Notificare.openNotification(data);
     });
 
@@ -73,6 +72,137 @@ export default class AwesomeProject extends Component {
     this.eventEmitter.addListener('didUpdateBadge',(data) => {
         this._reloadInbox();
     });
+
+    this.eventEmitter.addListener('didReceiveSystemPush',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('willOpenNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didOpenNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didClickURL',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didCloseNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToOpenNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('willExecuteAction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didExecuteAction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('shouldPerformSelectorWithURL',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didNotExecuteAction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToExecuteAction',(data) => {
+        console.log(data);
+    });
+
+
+    this.eventEmitter.addListener('didReceiveLocationServiceAuthorizationStatus',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToStartLocationServiceWithError',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didUpdateLocations',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didStartMonitoringForRegion',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('monitoringDidFailForRegion',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didDetermineState',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didEnterRegion',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didExitRegion',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('rangingBeaconsDidFailForRegion',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didRangeBeacons',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didLoadStore',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToLoadStore',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailProductTransaction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didCompleteProductTransaction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didRestoreProductTransaction',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didStartDownloadContent',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didPauseDownloadContent',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didCancelDownloadContent',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didReceiveProgressDownloadContent',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailDownloadContent',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFinishDownloadContent',(data) => {
+        console.log(data);
+    });
+
+
   }
 
   _reloadInbox (){

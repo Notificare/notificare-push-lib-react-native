@@ -64,7 +64,7 @@ static PushHandler *pushHandler = nil;
 
 
 - (NSArray<NSString*> *)supportedEvents {
-  return @[@"onNotificationReceived", @"onNotificationClicked", @"onReady", @"didUpdateBadge", @"didReceiveSystemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"didRegisterDevice", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
+  return @[@"onNotificationReceived", @"onNotificationOpened", @"onReady", @"didUpdateBadge", @"didReceiveSystemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"didRegisterDevice", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -402,6 +402,96 @@ RCT_EXPORT_METHOD(doCloudHostOperation:(NSString *)http path:(NSString *)path UR
 }
 
 
+RCT_EXPORT_METHOD(fetchProducts:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] fetchProducts:^(NSArray * _Nonnull info) {
+        
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        NSMutableArray * prods = [NSMutableArray new];
+        
+        for (NotificareProduct * product in info) {
+            NSMutableDictionary * p = [NSMutableDictionary new];
+            [p setObject:[product identifier] forKey:@"identifier"];
+            [p setObject:[product productName] forKey:@"productName"];
+            [p setObject:[product productDescription] forKey:@"productDescription"];
+            [p setObject:[product price] forKey:@"price"];
+            [p setObject:[product priceLocale] forKey:@"priceLocale"];
+            [p setObject:[product stores] forKey:@"stores"];
+            [prods addObject:p];
+        }
+        
+        [payload setObject:prods forKey:@"products"];
+        
+        callback(@[[NSNull null], payload]);
+        
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(fetchPurchasedProducts:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] fetchPurchasedProducts:^(NSArray * _Nonnull info) {
+        
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        NSMutableArray * prods = [NSMutableArray new];
+        
+        for (NotificareProduct * product in info) {
+            NSMutableDictionary * p = [NSMutableDictionary new];
+            [p setObject:[product identifier] forKey:@"identifier"];
+            [p setObject:[product productName] forKey:@"productName"];
+            [p setObject:[product productDescription] forKey:@"productDescription"];
+            [p setObject:[product price] forKey:@"price"];
+            [p setObject:[product priceLocale] forKey:@"priceLocale"];
+            [p setObject:[product stores] forKey:@"stores"];
+            [prods addObject:p];
+        }
+        
+        [payload setObject:prods forKey:@"products"];
+        
+        callback(@[[NSNull null], payload]);
+        
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(fetchProduct:(NSString *)productIdentifier callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] fetchProduct:productIdentifier completionHandler:^(NotificareProduct * _Nonnull product) {
+        NSMutableDictionary * p = [NSMutableDictionary new];
+        [p setObject:[product identifier] forKey:@"identifier"];
+        [p setObject:[product productName] forKey:@"productName"];
+        [p setObject:[product productDescription] forKey:@"productDescription"];
+        [p setObject:[product price] forKey:@"price"];
+        [p setObject:[product priceLocale] forKey:@"priceLocale"];
+        [p setObject:[product stores] forKey:@"stores"];
+        callback(@[[NSNull null], p]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(buyProduct:(NSDictionary *)product) {
+    
+    [[NotificarePushLib shared]  fetchProduct:[product objectForKey:@"identifier"] completionHandler:^(NotificareProduct *product) {
+        //
+        [[NotificarePushLib shared] buyProduct:product];
+        
+    } errorHandler:^(NSError *error) {
+        //
+    }];
+
+}
+
+
 @end
 
 /**
@@ -419,7 +509,7 @@ RCT_EXPORT_METHOD(doCloudHostOperation:(NSString *)http path:(NSString *)path UR
 
 -(void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification{
   
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationClicked" body:notification.request.content.userInfo];
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationOpened" body:notification.request.content.userInfo];
   
 }
 
@@ -614,19 +704,16 @@ RCT_EXPORT_METHOD(doCloudHostOperation:(NSString *)http path:(NSString *)path UR
 
 - (void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray *)products{
     
+    NSMutableDictionary * payload = [NSMutableDictionary dictionary];
     NSMutableArray * prods = [NSMutableArray new];
     
     for (NotificareProduct * product in products) {
-        NSMutableDictionary * p = [NSMutableDictionary new];
-        [p setObject:[product productName] forKey:@"productName"];
-        [p setObject:[product productDescription] forKey:@"productDescription"];
-        [p setObject:[product price] forKey:@"price"];
-        [p setObject:[product priceLocale] forKey:@"priceLocale"];
-        [p setObject:[product stores] forKey:@"stores"];
-        [prods addObject:p];
+        [prods addObject:[self dictionaryFromProduct:product]];
     }
     
-    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didLoadStore" body:@{@"products":products}];
+    [payload setObject:prods forKey:@"products"];
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didLoadStore" body:payload];
     
 }
 
@@ -782,5 +869,21 @@ RCT_EXPORT_METHOD(doCloudHostOperation:(NSString *)http path:(NSString *)path UR
     return payload;
 }
 
+
+/**
+ * Helper method to convert NotificareProduct to NSDictionary
+ */
+-(NSDictionary *)dictionaryFromProduct:(NotificareProduct *)product{
+    
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[product identifier] forKey:@"identifier"];
+    [payload setObject:[product productName] forKey:@"productName"];
+    [payload setObject:[product productDescription] forKey:@"productDescription"];
+    [payload setObject:[product price] forKey:@"price"];
+    [payload setObject:[product priceLocale] forKey:@"priceLocale"];
+    [payload setObject:[product stores] forKey:@"stores"];
+    
+    return payload;
+}
 
 @end
