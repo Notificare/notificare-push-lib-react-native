@@ -8,12 +8,13 @@
 
 #import "RCTBridgeModule.h"
 #import "RCTEventEmitter.h"
-#import "NotificarePushLib.h"
+#import "../Libraries/notificare-push-lib/NotificarePushLib.h"
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>
   +(void)launch:(NSDictionary *)launchOptions;
-  +(void)registerDevice:(NSData *)deviceToken withUserID:(NSString *)userID withUserName:(NSString *)userName completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+  +(void)registerDevice:(NSData *)deviceToken completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
   +(void)handleNotification:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+  + (void)handleAction:(NSString *)identifier forNotification:(NSDictionary *)userInfo withData:(NSDictionary *)data completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
 @end
 
 @interface PushHandler : NSObject <NotificarePushLibDelegate>

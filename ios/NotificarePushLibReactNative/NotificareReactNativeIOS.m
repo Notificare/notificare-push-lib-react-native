@@ -11,7 +11,7 @@
 
 @implementation NotificareReactNativeIOS
 
-@synthesize bridge = _bridge; 
+@synthesize bridge = _bridge;
 
 static NotificareReactNativeIOS *instance = nil;
 static PushHandler *pushHandler = nil;
@@ -44,37 +44,21 @@ static PushHandler *pushHandler = nil;
     }];
 }
 
-+ (void)registerDevice:(NSData *)deviceToken withUserID:(NSString *)userID withUserName:(NSString *)userName completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock {
++ (void)registerDevice:(NSData *)deviceToken completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock {
   
-  if (userID && userName) {
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:@{@"device": [deviceToken hexadecimalString]}];
+    
+    result(@{@"device" : [deviceToken hexadecimalString]});
   
-    [[NotificarePushLib shared] registerDevice:deviceToken withUserID:userID withUsername:userName completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:@{@"device": [deviceToken hexadecimalString]}];
-      result(info);
+}
+
++ (void)handleAction:(NSString *)identifier forNotification:(NSDictionary *)userInfo withData:(NSDictionary *)data completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock{
+
+    [[NotificarePushLib shared] handleAction:identifier forNotification:userInfo withData:data completionHandler:^(NSDictionary * _Nonnull info) {
+        result(info);
     } errorHandler:^(NSError * _Nonnull error) {
-      errorBlock(error);
+        errorBlock(error);
     }];
-    
-  } else if (userID && !userName) {
-    
-    [[NotificarePushLib shared] registerDevice:deviceToken withUserID:userID completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:@{@"device": [deviceToken hexadecimalString]}];
-      result(info);
-    } errorHandler:^(NSError * _Nonnull error) {
-      errorBlock(error);
-    }];
-    
-  } else {
-    
-    [[NotificarePushLib shared] registerDevice:deviceToken completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:@{@"device": [deviceToken hexadecimalString]}];
-      result(info);
-    } errorHandler:^(NSError * _Nonnull error) {
-      errorBlock(error);
-    }];
-    
-  }
-  
 }
 
 
@@ -309,11 +293,169 @@ RCT_EXPORT_METHOD(markAsRead:(NSDictionary*)inboxItem callback:(RCTResponseSende
   
 }
 
--(void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray *)products{
-  
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didLoadStore" body:@{@"products":products}];
-  
+
+- (void)notificarePushLib:(NotificarePushLib *)library willOpenNotification:(NotificareNotification *)notification{
+    
 }
+
+- (void)notificarePushLib:(NotificarePushLib *)library didOpenNotification:(NotificareNotification *)notification{
+    
+
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didClickURL:(NSURL *)url inNotification:(NotificareNotification *)notification{
+
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didCloseNotification:(NotificareNotification *)notification{
+ 
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(NotificareNotification *)notification{
+
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library willExecuteAction:(NotificareNotification *)notification{
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didExecuteAction:(NSDictionary *)info{
+
+}
+
+
+-(void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelectorWithURL:(NSURL *)url{
+    
+    NSLog(@"%@ %@ %@ %@",[url host], [url path], [url query], [url pathComponents]);
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didNotExecuteAction:(NSDictionary *)info{
+
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToExecuteAction:(NSError *)error{
+
+}
+
+
+#pragma Notificare Location delegates
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLocationServiceAuthorizationStatus:(NSDictionary *)status{
+
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToStartLocationServiceWithError:(NSError *)error{
+
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didUpdateLocations:(NSArray *)locations{
+    
+    
+}
+
+//Use this delegate to know if any region failed to be monitored
+- (void)notificarePushLib:(NotificarePushLib *)library monitoringDidFailForRegion:(CLRegion *)region withError:(NSError *)error{
+    
+}
+
+//iOS 7 only delegate. When on iOS7 this delegate will give a status of a monitored region
+// You can request a state of a region by doing [[[NotificarePushLib shared] locationManager] requestStateForRegion:(CLRegion *) region];
+
+- (void)notificarePushLib:(NotificarePushLib *)library didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region{
+    
+    
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didEnterRegion:(CLRegion *)region{
+    
+    
+}
+
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didExitRegion:(CLRegion *)region{
+
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didStartMonitoringForRegion:(CLRegion *)region{
+
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error{
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didRangeBeacons:(NSArray *)beacons inRegion:(CLBeaconRegion *)region{
+    
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailProductTransaction:(SKPaymentTransaction *)transaction withError:(NSError *)error{
+
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didCompleteProductTransaction:(SKPaymentTransaction *)transaction{
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didRestoreProductTransaction:(SKPaymentTransaction *)transaction{
+
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray *)products{
+    
+    NSMutableArray * prods = [NSMutableArray new];
+    
+    for (NotificareProduct * product in products) {
+        NSMutableDictionary * p = [NSMutableDictionary new];
+        [p setObject:[product productName] forKey:@"productName"];
+        [p setObject:[product productDescription] forKey:@"productDescription"];
+        [p setObject:[product price] forKey:@"price"];
+        [p setObject:[product priceLocale] forKey:@"priceLocale"];
+        [p setObject:[product stores] forKey:@"stores"];
+        [prods addObject:p];
+    }
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didLoadStore" body:@{@"products":products}];
+    
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToLoadStore:(NSError *)error{
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didLoadStore" body:@{@"products": @[]}];
+    
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didStartDownloadContent:(SKPaymentTransaction *)transaction{
+    
+}
+- (void)notificarePushLib:(NotificarePushLib *)library didPauseDownloadContent:(SKDownload *)download{
+    
+
+}
+- (void)notificarePushLib:(NotificarePushLib *)library didCancelDownloadContent:(SKDownload *)download{
+    
+
+}
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveProgressDownloadContent:(SKDownload *)download{
+    
+}
+- (void)notificarePushLib:(NotificarePushLib *)library didFailDownloadContent:(SKDownload *)download{
+    
+}
+- (void)notificarePushLib:(NotificarePushLib *)library didFinishDownloadContent:(SKDownload *)download{
+    
+
+}
+
+
 
 
 @end
