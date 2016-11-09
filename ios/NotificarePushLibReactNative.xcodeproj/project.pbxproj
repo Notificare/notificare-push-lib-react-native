@@ -136,10 +136,8 @@
 		5DA03D111DD2C16D0077017E /* ActionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionDelegate.h; sourceTree = "<group>"; };
 		5DA03D121DD2C16D0077017E /* ActionType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionType.h; sourceTree = "<group>"; };
 		5DA03D131DD2C16D0077017E /* base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = base64.h; sourceTree = "<group>"; };
-		5DA03D141DD2C16D0077017E /* DefaultTheme.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = DefaultTheme.bundle; sourceTree = "<group>"; };
 		5DA03D151DD2C16D0077017E /* libNotificarePushLib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libNotificarePushLib.a; sourceTree = "<group>"; };
 		5DA03D161DD2C16D0077017E /* Notificare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notificare.h; sourceTree = "<group>"; };
-		5DA03D171DD2C16D0077017E /* Notificare.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Notificare.plist; sourceTree = "<group>"; };
 		5DA03D181DD2C16D0077017E /* NotificareAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareAction.h; sourceTree = "<group>"; };
 		5DA03D191DD2C16D0077017E /* NotificareActions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareActions.h; sourceTree = "<group>"; };
 		5DA03D1A1DD2C16D0077017E /* NotificareAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareAlert.h; sourceTree = "<group>"; };
@@ -166,7 +164,6 @@
 		5DA03D2F1DD2C16D0077017E /* NotificareLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareLocation.h; sourceTree = "<group>"; };
 		5DA03D301DD2C16D0077017E /* NotificareMail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareMail.h; sourceTree = "<group>"; };
 		5DA03D311DD2C16D0077017E /* NotificareManagedDeviceInbox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareManagedDeviceInbox.h; sourceTree = "<group>"; };
-		5DA03D321DD2C16D0077017E /* NotificareManagedModels.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = NotificareManagedModels.bundle; sourceTree = "<group>"; };
 		5DA03D331DD2C16D0077017E /* NotificareMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareMap.h; sourceTree = "<group>"; };
 		5DA03D341DD2C16D0077017E /* NotificareNetworkHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareNetworkHost.h; sourceTree = "<group>"; };
 		5DA03D351DD2C16D0077017E /* NotificareNetworkOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareNetworkOperation.h; sourceTree = "<group>"; };
@@ -198,7 +195,6 @@
 		5DA03D4F1DD2C16D0077017E /* NotificareSMS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareSMS.h; sourceTree = "<group>"; };
 		5DA03D501DD2C16D0077017E /* NotificareSocketRocket-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NotificareSocketRocket-Prefix.pch"; sourceTree = "<group>"; };
 		5DA03D511DD2C16D0077017E /* NotificareSRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareSRWebSocket.h; sourceTree = "<group>"; };
-		5DA03D521DD2C16D0077017E /* NotificareTags.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = NotificareTags.plist; sourceTree = "<group>"; };
 		5DA03D531DD2C16D0077017E /* NotificareTelephone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareTelephone.h; sourceTree = "<group>"; };
 		5DA03D541DD2C16D0077017E /* NotificareURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareURL.h; sourceTree = "<group>"; };
 		5DA03D551DD2C16D0077017E /* NotificareURLScheme.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareURLScheme.h; sourceTree = "<group>"; };
@@ -389,10 +385,8 @@
 				5DA03D111DD2C16D0077017E /* ActionDelegate.h */,
 				5DA03D121DD2C16D0077017E /* ActionType.h */,
 				5DA03D131DD2C16D0077017E /* base64.h */,
-				5DA03D141DD2C16D0077017E /* DefaultTheme.bundle */,
 				5DA03D151DD2C16D0077017E /* libNotificarePushLib.a */,
 				5DA03D161DD2C16D0077017E /* Notificare.h */,
-				5DA03D171DD2C16D0077017E /* Notificare.plist */,
 				5DA03D181DD2C16D0077017E /* NotificareAction.h */,
 				5DA03D191DD2C16D0077017E /* NotificareActions.h */,
 				5DA03D1A1DD2C16D0077017E /* NotificareAlert.h */,
@@ -419,7 +413,6 @@
 				5DA03D2F1DD2C16D0077017E /* NotificareLocation.h */,
 				5DA03D301DD2C16D0077017E /* NotificareMail.h */,
 				5DA03D311DD2C16D0077017E /* NotificareManagedDeviceInbox.h */,
-				5DA03D321DD2C16D0077017E /* NotificareManagedModels.bundle */,
 				5DA03D331DD2C16D0077017E /* NotificareMap.h */,
 				5DA03D341DD2C16D0077017E /* NotificareNetworkHost.h */,
 				5DA03D351DD2C16D0077017E /* NotificareNetworkOperation.h */,
@@ -451,7 +444,6 @@
 				5DA03D4F1DD2C16D0077017E /* NotificareSMS.h */,
 				5DA03D501DD2C16D0077017E /* NotificareSocketRocket-Prefix.pch */,
 				5DA03D511DD2C16D0077017E /* NotificareSRWebSocket.h */,
-				5DA03D521DD2C16D0077017E /* NotificareTags.plist */,
 				5DA03D531DD2C16D0077017E /* NotificareTelephone.h */,
 				5DA03D541DD2C16D0077017E /* NotificareURL.h */,
 				5DA03D551DD2C16D0077017E /* NotificareURLScheme.h */,

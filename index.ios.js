@@ -29,14 +29,7 @@ export default class AwesomeProject extends Component {
       dataSource: ds.cloneWithRows([])
     };
 
-    Notificare.fetchInbox(null, 0, 100, (error, inboxItems) => {
-        if (!error) {
-          console.log(inboxItems);
-          this.setState({
-            dataSource : this.state.dataSource.cloneWithRows(inboxItems)
-          });
-        }
-    });
+    this._reloadInbox();
 
   }
 
@@ -49,12 +42,18 @@ export default class AwesomeProject extends Component {
       Notificare.registerForNotifications();
     });
 
-    this.eventEmitter.addListener('didRegisterDevice',(data) => {
-      Notificare.fetchTags((error, tags) => {
-        if (error) {
-          console.error(error);
-        } else {
-        console.log(tags);
+    this.eventEmitter.addListener('didReceiveDeviceToken',(data) => {
+
+      Notificare.registerDevice(data.device, null, null, (error, data) => {
+
+        if (!error) {
+
+          Notificare.fetchTags((error, data) => {
+              if (!error) {
+                console.log(data);
+              }
+            });
+
         }
       });
     });
@@ -72,9 +71,21 @@ export default class AwesomeProject extends Component {
     });
 
     this.eventEmitter.addListener('didUpdateBadge',(data) => {
-        console.log(data);
+        this._reloadInbox();
     });
   }
+
+  _reloadInbox (){
+    Notificare.fetchInbox(null, 0, 100, (error, inboxItems) => {
+            if (!error) {
+              console.log(inboxItems);
+              this.setState({
+                dataSource : this.state.dataSource.cloneWithRows(inboxItems)
+              });
+            }
+        });
+  }
+
 
   render() {
     return (
