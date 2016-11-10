@@ -55,6 +55,27 @@ public class NotificareModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void registerDevice( String deviceId, String userId, String userName, final Callback callback ) {
+
+        Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {
+
+            @Override
+            public void onSuccess(String result) {
+                callback.invoke(null, result);
+            }
+
+            @Override
+            public void onError(NotificareError error) {
+
+                callback.invoke(error.getMessage(), null);
+
+            }
+
+        });
+
+    }
+
+    @ReactMethod
     public void fetchTags( final Callback callback ) {
 
         Notificare.shared().fetchDeviceTags(new NotificareCallback<List<String>>() {

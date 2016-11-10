@@ -39,8 +39,12 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onNotificationOpened(String alert, String notificationId, @Nullable String inboxItemId, Bundle extras) {
-        NotificareNotification notification = extras.getParcelable(Notificare.INTENT_EXTRA_NOTIFICATION);
-
+        Bundle messageBundle = new Bundle();
+        messageBundle.putString("alert", alert);
+        messageBundle.putString("notificationId", notificationId);
+        messageBundle.putString("inboxItemId", inboxItemId);
+        ReadableMap map = Arguments.fromBundle(messageBundle);
+        NotificareEventEmitter.getInstance().sendEvent("onNotificationOpened", map);
         super.onNotificationOpened(alert, notificationId, inboxItemId, extras);
     }
 
@@ -51,11 +55,8 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onUrlClicked(Uri urlClicked, Bundle extras) {
-        Log.i(TAG, "URL was clicked: " + urlClicked);
-        NotificareNotification notification = extras.getParcelable(Notificare.INTENT_EXTRA_NOTIFICATION);
-        if (notification != null) {
-            Log.i(TAG, "URL was clicked for \"" + notification.getMessage() + "\"");
-        }
+        ReadableMap map = Arguments.fromBundle(extras);
+        NotificareEventEmitter.getInstance().sendEvent("onUrlClicked", map);
     }
 
     @Override
@@ -67,18 +68,12 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onRegistrationFinished(String deviceId) {
-        // Register as a device
-        Notificare.shared().registerDevice(deviceId, new NotificareCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
 
-            }
+        Bundle messageBundle = new Bundle();
+        messageBundle.putString("device", deviceId);
+        ReadableMap map = Arguments.fromBundle(messageBundle);
 
-            @Override
-            public void onError(NotificareError error) {
-                //Log.e(TAG, "Error registering device", error);
-            }
-        });
+        NotificareEventEmitter.getInstance().sendEvent("didRegisterDevice", map);
     }
 
 }
