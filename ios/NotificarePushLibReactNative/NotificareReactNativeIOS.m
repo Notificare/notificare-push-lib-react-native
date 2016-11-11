@@ -273,6 +273,17 @@ RCT_EXPORT_METHOD(markAsRead:(NSDictionary*)inboxItem callback:(RCTResponseSende
 }
 
 
+RCT_EXPORT_METHOD(clearInbox:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] clearInbox:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
 RCT_EXPORT_METHOD(fetchAssets:(NSString*)group callback:(RCTResponseSenderBlock)callback) {
     
     NSMutableDictionary * trans = [NSMutableDictionary dictionary];
@@ -491,6 +502,16 @@ RCT_EXPORT_METHOD(buyProduct:(NSDictionary *)product) {
 
 }
 
+
+RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
 
 @end
 
