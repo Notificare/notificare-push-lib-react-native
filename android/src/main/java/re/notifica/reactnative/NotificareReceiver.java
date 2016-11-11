@@ -10,12 +10,15 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
+import org.json.JSONObject;
+
 import java.util.HashMap;
 
 import re.notifica.Notificare;
 import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareContent;
 import re.notifica.model.NotificareNotification;
+import re.notifica.model.NotificareUserDataField;
 import re.notifica.push.gcm.DefaultIntentReceiver;
 
 
@@ -96,7 +99,11 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onNotificationOpenRegistered(NotificareNotification notification, Boolean handled) {
-        Log.d(TAG, "Notification with type " + notification.getType() + " was opened, handled by SDK: " + handled);
+        WritableMap payload = Arguments.createMap();
+        WritableMap message = Arguments.createMap();
+        message.putString("id", notification.getNotificationId());
+        payload.putMap("notification", message);
+        NotificareEventEmitter.getInstance().sendEvent("didOpenNotification", payload);
     }
 
     @Override
@@ -108,18 +115,54 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onReady() {
+        WritableMap payload = Arguments.createMap();
         WritableMap info = Arguments.createMap();
-        info.putString("application", Notificare.shared().getApplicationInfo().getName());
-        NotificareEventEmitter.getInstance().sendEvent("onReady", info);
+        info.putString("id", Notificare.shared().getApplicationInfo().getId());
+        info.putString("name", Notificare.shared().getApplicationInfo().getName());
+
+        WritableArray theServices = Arguments.createArray();
+        for (HashMap.Entry<String, Boolean> services : Notificare.shared().getApplicationInfo().getServices().entrySet()){
+            WritableMap s = Arguments.createMap();
+            s.putBoolean(services.getKey(), services.getValue());
+            theServices.pushMap(s);
+        }
+        info.putArray("services", theServices);
+
+        WritableArray theActionCategories = Arguments.createArray();
+        for (HashMap.Entry<String, JSONObject> services : Notificare.shared().getApplicationInfo().getActionCategories().entrySet()){
+            WritableMap c = Arguments.createMap();
+            c.putString(services.getKey(), services.getValue().toString());
+            theActionCategories.pushMap(c);
+        }
+        info.putArray("actionCategories", theActionCategories);
+
+        WritableMap inboxConfig = Arguments.createMap();
+        inboxConfig.putBoolean("autoBadge", Notificare.shared().getApplicationInfo().getInboxConfig().getAutoBadge());
+        inboxConfig.putBoolean("useInbox", Notificare.shared().getApplicationInfo().getInboxConfig().getUseInbox());
+        info.putMap("inboxConfig", inboxConfig);
+
+        WritableMap regionConfig = Arguments.createMap();
+        regionConfig.putString("proximityUUID", Notificare.shared().getApplicationInfo().getRegionConfig().getProximityUUID());
+        info.putMap("regionConfig", regionConfig);
+
+
+        WritableArray userDataFields = Arguments.createArray();
+        for (HashMap.Entry<String, NotificareUserDataField> fields : Notificare.shared().getApplicationInfo().getUserDataFields().entrySet()){
+            WritableMap c = Arguments.createMap();
+            c.putString(fields.getKey(), fields.getValue().toString());
+            userDataFields.pushMap(c);
+        }
+        info.putArray("userDataFields", userDataFields);
+
+        payload.putMap("application", info);
+        NotificareEventEmitter.getInstance().sendEvent("onReady", payload);
     }
 
     @Override
     public void onRegistrationFinished(String deviceId) {
-
         Bundle messageBundle = new Bundle();
         messageBundle.putString("device", deviceId);
         ReadableMap map = Arguments.fromBundle(messageBundle);
-
         NotificareEventEmitter.getInstance().sendEvent("didReceiveDeviceToken", map);
     }
 
