@@ -18,7 +18,6 @@ public class NotificareEventEmitter {
 
     private NotificareEventEmitter(ReactContext reactContext) {
         this.context = reactContext;
-        this.context.addLifecycleEventListener(NotificareReceiverHelper.getInstance(context));
     }
 
     public void sendEvent(String eventName, @Nullable ReadableMap params) {

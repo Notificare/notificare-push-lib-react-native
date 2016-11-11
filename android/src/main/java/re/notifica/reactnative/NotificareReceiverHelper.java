@@ -5,6 +5,8 @@ import android.content.Intent;
 
 import com.facebook.react.bridge.LifecycleEventListener;
 
+import re.notifica.Notificare;
+
 
 public class NotificareReceiverHelper implements LifecycleEventListener {
 
@@ -34,8 +36,12 @@ public class NotificareReceiverHelper implements LifecycleEventListener {
         }
     }
 
+
+
     @Override
     public void onHostResume() {
+        Notificare.shared().setForeground(true);
+
         sendPushIntent();
     }
 

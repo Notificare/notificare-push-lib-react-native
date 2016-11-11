@@ -13,7 +13,8 @@ repositories {
     mavenLocal()
     jcenter()
     maven {
-        url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+        //url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+        url "file:///Users/joris/Developer/Projects/notificare-mvn-repo/releases"
     }
 }
 
@@ -34,5 +35,5 @@ android {
 
 dependencies {
     compile "com.facebook.react:react-native:+"
-    compile "re.notifica:notificare-push-lib-android:1.9.0"
+    compile "re.notifica:notificare-push-lib-android:1.9.1"
 }

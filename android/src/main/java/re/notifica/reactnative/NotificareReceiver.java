@@ -25,26 +25,11 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onNotificationReceived(String alert, String notificationId, final String inboxItemId, Bundle extras) {
-
-        Bundle messageBundle = extras;
-        messageBundle.putString("alert", alert);
-        messageBundle.putString("notificationId", notificationId);
-        messageBundle.putString("inboxItemId", inboxItemId);
-        ReadableMap map = Arguments.fromBundle(messageBundle);
-
-        NotificareEventEmitter.getInstance().sendEvent("onNotificationReceived", map);
-
         super.onNotificationReceived(alert, notificationId, inboxItemId, extras);
     }
 
     @Override
     public void onNotificationOpened(String alert, String notificationId, @Nullable String inboxItemId, Bundle extras) {
-        Bundle messageBundle = new Bundle();
-        messageBundle.putString("alert", alert);
-        messageBundle.putString("notificationId", notificationId);
-        messageBundle.putString("inboxItemId", inboxItemId);
-        ReadableMap map = Arguments.fromBundle(messageBundle);
-        NotificareEventEmitter.getInstance().sendEvent("onNotificationOpened", map);
         super.onNotificationOpened(alert, notificationId, inboxItemId, extras);
     }
 
@@ -57,13 +42,6 @@ public class NotificareReceiver extends DefaultIntentReceiver {
     public void onUrlClicked(Uri urlClicked, Bundle extras) {
         ReadableMap map = Arguments.fromBundle(extras);
         NotificareEventEmitter.getInstance().sendEvent("onUrlClicked", map);
-    }
-
-    @Override
-    public void onReady() {
-
-        NotificareEventEmitter.getInstance().sendEvent("onReady", null);
-
     }
 
     @Override
