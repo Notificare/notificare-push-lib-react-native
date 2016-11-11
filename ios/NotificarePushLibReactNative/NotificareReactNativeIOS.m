@@ -492,6 +492,16 @@ RCT_EXPORT_METHOD(buyProduct:(NSDictionary *)product) {
 }
 
 
+RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
 @end
 
 /**

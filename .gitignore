@@ -1,2 +1,6 @@
 .idea
 android/build
+android/local.properties
+android/.gradle
+android/android.iml
+android/notificare-push-lib-react-native.iml

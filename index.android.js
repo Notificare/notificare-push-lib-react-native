@@ -23,11 +23,21 @@ export default class AwesomeProject extends Component {
     Notificare.launch();
 
     DeviceEventEmitter.addListener('onReady', function(e: Event) {
+        console.log(e);
         Notificare.enableNotifications();
     });
 
-    DeviceEventEmitter.addListener('didRegisterDevice', function(e: Event) {
+    DeviceEventEmitter.addListener('didReceiveDeviceToken', function(e: Event) {
         console.log(e);
+
+      	Notificare.registerDevice(e.device, null, null, (error, msg) => {
+          if (!error) {
+            Notificare.fetchTags((error, msg) => {
+              console.log(msg);
+            });
+          }
+    	  });
+
     });
 
 
@@ -35,6 +45,9 @@ export default class AwesomeProject extends Component {
       console.log(e);
     });
 
+    DeviceEventEmitter.addListener('onNotificationOpened', function(e: Event) {
+      Notificare.openNotification(e);
+    });
   }
 
   render() {
