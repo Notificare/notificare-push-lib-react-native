@@ -17,6 +17,8 @@
 static NotificareReactNativeIOS *instance = nil;
 static PushHandler *pushHandler = nil;
 
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:(v) options:NSNumericSearch] != NSOrderedAscending)
+
 + (NotificareReactNativeIOS *)getInstance {
   return instance;
 }
@@ -37,7 +39,16 @@ static PushHandler *pushHandler = nil;
 
     [[NotificarePushLib shared] handleNotification:notification forApplication:application completionHandler:^(NSDictionary * _Nonnull info) {
       //
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationReceived" body:notification];
+        NSMutableDictionary * theNotification = [NSMutableDictionary dictionaryWithDictionary:notification];
+
+        if ([application applicationState] == UIApplicationStateActive) {
+            [theNotification setObject:[NSNumber numberWithBool:YES] forKey:@"foreground"];
+        } else {
+            [theNotification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
+        }
+        
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationReceived" body:theNotification];
+
       result(info);
     } errorHandler:^(NSError * _Nonnull error) {
       //
@@ -64,7 +75,7 @@ static PushHandler *pushHandler = nil;
 
 
 - (NSArray<NSString*> *)supportedEvents {
-  return @[@"onNotificationReceived", @"onNotificationOpened", @"onReady", @"didUpdateBadge", @"didReceiveSystemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"didRegisterDevice", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
+  return @[@"onNotificationReceived", @"onNotificationOpened", @"onReady", @"didUpdateBadge", @"didReceiveSystemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -124,7 +135,6 @@ RCT_EXPORT_METHOD(registerDevice:(NSString *)deviceToken userID:(NSString *)user
   if (userID && userName) {
     
     [[NotificarePushLib shared] registerDevice:token withUserID:userID withUsername:userName completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:info];
       callback(@[[NSNull null], info]);
     } errorHandler:^(NSError * _Nonnull error) {
       callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
@@ -133,7 +143,6 @@ RCT_EXPORT_METHOD(registerDevice:(NSString *)deviceToken userID:(NSString *)user
   } else if (userID && !userName) {
     
     [[NotificarePushLib shared] registerDevice:token withUserID:userID completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:info];
       callback(@[[NSNull null], info]);
     } errorHandler:^(NSError * _Nonnull error) {
       callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
@@ -142,7 +151,6 @@ RCT_EXPORT_METHOD(registerDevice:(NSString *)deviceToken userID:(NSString *)user
   } else {
     
     [[NotificarePushLib shared] registerDevice:token completionHandler:^(NSDictionary * _Nonnull info) {
-      [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didRegisterDevice" body:info];
       callback(@[[NSNull null], info]);
     } errorHandler:^(NSError * _Nonnull error) {
       callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
