@@ -912,6 +912,13 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     [payload setObject:[product priceLocale] forKey:@"priceLocale"];
     [payload setObject:[product stores] forKey:@"stores"];
     
+    NSMutableArray * downloads = [NSMutableArray array];
+    for (SKDownload * d in [product downloads]) {
+        [downloads addObject:[self dictionaryFromSKDownload:d]];
+    }
+    [payload setObject:downloads forKey:@"downloads"];
+    
+    
     return payload;
 }
 
