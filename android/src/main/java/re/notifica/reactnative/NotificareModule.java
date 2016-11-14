@@ -50,8 +50,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     private Map<String,NotificareNotification> notificationCache = new HashMap<>();
     private Boolean launched = false;
-    private Intent launchIntent;
-    private NotificareApplicationInfo applicationInfo;
+    private Boolean intentHandled = false;
 
 
     public NotificareModule(ReactApplicationContext reactContext) {
@@ -72,9 +71,11 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      * @param notificationMap
      */
     private void sendNotification(WritableMap notificationMap) {
-        WritableMap payload = Arguments.createMap();
-        payload.putMap("notification", notificationMap);
-        NotificareEventEmitter.getInstance().sendEvent("onNotificationOpened", payload);
+        if (notificationMap != null) {
+            WritableMap payload = Arguments.createMap();
+            payload.putMap("notification", notificationMap);
+            NotificareEventEmitter.getInstance().sendEvent("onNotificationOpened", payload);
+        }
     }
 
     // React methods
@@ -611,6 +612,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onNewIntent(Intent intent) {
+        Log.i(TAG, "new intent: " + intent);
         // Check for launch with notification or tokens
         sendNotification(parseNotificationIntent(intent));
 //        sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
@@ -627,6 +629,10 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     @Override
     public void onHostResume() {
         Log.i(TAG, "host resume");
+        if (!intentHandled) {
+            sendNotification(parseNotificationIntent(getCurrentActivity().getIntent()));
+            intentHandled = true;
+        }
         Notificare.shared().addServiceErrorListener(this);
         Notificare.shared().setForeground(true);
         Notificare.shared().addNotificationReceivedListener(this);
@@ -669,21 +675,11 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
         infoMap.putString("id", notificareApplicationInfo.getId());
         infoMap.putString("name", notificareApplicationInfo.getName());
 
-        WritableArray servicesArray = Arguments.createArray();
+        WritableMap servicesMap = Arguments.createMap();
         for (String key : notificareApplicationInfo.getServices().keySet()){
-            WritableMap serviceMap = Arguments.createMap();
-            serviceMap.putBoolean(key, notificareApplicationInfo.getServices().get(key));
-            servicesArray.pushMap(serviceMap);
+            servicesMap.putBoolean(key, notificareApplicationInfo.getServices().get(key));
         }
-        infoMap.putArray("services", servicesArray);
-
-        WritableArray actionCategoriesArray = Arguments.createArray();
-        for (String key : notificareApplicationInfo.getActionCategories().keySet()){
-            WritableMap categoryMap = Arguments.createMap();
-            categoryMap.putString(key, notificareApplicationInfo.getActionCategories().get(key).toString());
-            actionCategoriesArray.pushMap(categoryMap);
-        }
-        infoMap.putArray("actionCategories", actionCategoriesArray);
+        infoMap.putMap("services", servicesMap);
 
         if (notificareApplicationInfo.getInboxConfig() != null) {
             WritableMap inboxConfigMap = Arguments.createMap();
@@ -702,14 +698,14 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
         WritableArray userDataFieldsArray = Arguments.createArray();
         for (String key : notificareApplicationInfo.getUserDataFields().keySet()){
             WritableMap userDataFieldMap = Arguments.createMap();
-            userDataFieldMap.putString(key, notificareApplicationInfo.getUserDataFields().get(key).toString());
+            userDataFieldMap.putString("key", key);
+            userDataFieldMap.putString("label", notificareApplicationInfo.getUserDataFields().get(key).getLabel());
             userDataFieldsArray.pushMap(userDataFieldMap);
         }
         infoMap.putArray("userDataFields", userDataFieldsArray);
 
         payload.putMap("application", infoMap);
         NotificareEventEmitter.getInstance().sendEvent("onReady", payload);
-        Notificare.shared().removeNotificareReadyListener(this);
     }
 
     // OnServiceErrorListener
@@ -738,53 +734,55 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     protected WritableMap parseNotificationIntent(Intent intent) {
         NotificareNotification notification = intent.getParcelableExtra(Notificare.INTENT_EXTRA_NOTIFICATION);
-        WritableMap payload = Arguments.createMap();
-        WritableMap notificationMap = Arguments.createMap();
-        notificationMap.putString("id", notification.getNotificationId());
-        if (intent.hasExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID)) {
-            notificationMap.putString("inboxItemId", intent.getStringExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID));
-        }
-        notificationMap.putString("message", notification.getMessage());
-        notificationMap.putString("title", notification.getTitle());
-        notificationMap.putString("subtitle", notification.getSubtitle());
-        notificationMap.putString("type", notification.getType());
-        notificationMap.putString("time", notification.getTime().toString());
-
-
-        if (notification.getExtra() != null) {
-            WritableMap extraMap = Arguments.createMap();
-            for(HashMap.Entry<String, String> prop : notification.getExtra().entrySet()){
-                extraMap.putString(prop.getKey(), prop.getValue());
+        if (notification != null) {
+            WritableMap notificationMap = Arguments.createMap();
+            notificationMap.putString("id", notification.getNotificationId());
+            if (intent.hasExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID)) {
+                notificationMap.putString("inboxItemId", intent.getStringExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID));
             }
-            notificationMap.putMap("extra", extraMap);
-        }
+            notificationMap.putString("message", notification.getMessage());
+            notificationMap.putString("title", notification.getTitle());
+            notificationMap.putString("subtitle", notification.getSubtitle());
+            notificationMap.putString("type", notification.getType());
+            notificationMap.putString("time", notification.getTime().toString());
 
-        if (notification.getContent().size() > 0) {
-            WritableArray contentArray = Arguments.createArray();
-            for(NotificareContent c : notification.getContent()){
-                WritableMap contentMap = Arguments.createMap();
-                contentMap.putString("type", c.getType());
-                contentMap.putString("data", c.getData().toString());
-                contentArray.pushMap(contentMap);
+
+            if (notification.getExtra() != null) {
+                WritableMap extraMap = Arguments.createMap();
+                for (HashMap.Entry<String, String> prop : notification.getExtra().entrySet()) {
+                    extraMap.putString(prop.getKey(), prop.getValue());
+                }
+                notificationMap.putMap("extra", extraMap);
             }
-            notificationMap.putArray("content", contentArray);
-        }
 
-        if (notification.getActions().size() > 0) {
-            WritableArray actionsArray = Arguments.createArray();
-            for(NotificareAction a : notification.getActions()){
-                WritableMap actionMap = Arguments.createMap();
-                actionMap.putString("label", a.getLabel());
-                actionMap.putString("type", a.getType());
-                actionMap.putString("target", a.getTarget());
-                actionMap.putBoolean("camera", a.getCamera());
-                actionMap.putBoolean("keyboard", a.getKeyboard());
-                actionsArray.pushMap(actionMap);
+            if (notification.getContent().size() > 0) {
+                WritableArray contentArray = Arguments.createArray();
+                for (NotificareContent c : notification.getContent()) {
+                    WritableMap contentMap = Arguments.createMap();
+                    contentMap.putString("type", c.getType());
+                    contentMap.putString("data", c.getData().toString());
+                    contentArray.pushMap(contentMap);
+                }
+                notificationMap.putArray("content", contentArray);
             }
-            notificationMap.putArray("actions", actionsArray);
-        }
 
-        return notificationMap;
+            if (notification.getActions().size() > 0) {
+                WritableArray actionsArray = Arguments.createArray();
+                for (NotificareAction a : notification.getActions()) {
+                    WritableMap actionMap = Arguments.createMap();
+                    actionMap.putString("label", a.getLabel());
+                    actionMap.putString("type", a.getType());
+                    actionMap.putString("target", a.getTarget());
+                    actionMap.putBoolean("camera", a.getCamera());
+                    actionMap.putBoolean("keyboard", a.getKeyboard());
+                    actionsArray.pushMap(actionMap);
+                }
+                notificationMap.putArray("actions", actionsArray);
+            }
+
+            return notificationMap;
+        }
+        return null;
     }
 
 
