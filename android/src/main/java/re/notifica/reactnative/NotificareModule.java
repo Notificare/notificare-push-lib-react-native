@@ -50,7 +50,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     private Map<String,NotificareNotification> notificationCache = new HashMap<>();
     private Boolean launched = false;
-    private Boolean intentHandled = false;
+    private Intent launchIntent;
 
 
     public NotificareModule(ReactApplicationContext reactContext) {
@@ -83,46 +83,10 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     @ReactMethod
     public void launch() {
-//        Notificare.shared().launch(getReactApplicationContext());
-//        Notificare.shared().setIntentReceiver(NotificareReceiver.class);
-//        Notificare.shared().setAllowJavaScript(true);
         if (!launched) {
             Notificare.shared().addNotificareReadyListener(this);
             launched = true;
         }
-    }
-
-    @ReactMethod
-    public void setSmallIcon(String iconName) {
-        int iconId = getDrawableResource(iconName);
-        Notificare.shared().setSmallIcon(iconId);
-    }
-
-    @ReactMethod
-    public void setAllowJavaScript(Boolean allowJS) {
-        Notificare.shared().setAutoCancel(allowJS);
-    }
-
-    @ReactMethod
-    public void setAutoCancel(Boolean autoCancel) {
-        Notificare.shared().setAutoCancel(autoCancel);
-    }
-
-    @ReactMethod
-    public void setDefaultLights(String color, int on, int off) {
-        Notificare.shared().setDefaultLightsColor(color);
-        Notificare.shared().setDefaultLightsOn(on);
-        Notificare.shared().setDefaultLightsOff(off);
-    }
-
-    @ReactMethod
-    public void setNotificationAccentColor(String color) {
-        Notificare.shared().setNotificationAccentColor(ContextCompat.getColor(getReactApplicationContext(), getColorResource(color)));
-    }
-
-    @ReactMethod
-    public void setCrashLogs(Boolean crashLogs) {
-        Notificare.shared().setCrashLogs(crashLogs);
     }
 
     @ReactMethod
@@ -226,6 +190,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     @ReactMethod
     public void openNotification(ReadableMap notification) {
+        Log.i(TAG, "open notification " + notification);
         ReadableMap notificationMap = notification.getMap("notification");
         String notificationId = notificationMap.getString("id");
         if (notificationId != null && !notificationId.isEmpty()) {
@@ -439,26 +404,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
                 WritableMap payload = Arguments.createMap();
 
                 for (NotificareAsset asset : notificareAssets) {
-
-                    WritableMap theAsset = Arguments.createMap();
-
-                    theAsset.putString("title", asset.getTitle());
-                    theAsset.putString("description", asset.getDescription());
-                    theAsset.putString("url", asset.getUrl().toString());
-
-                    WritableMap theMeta = Arguments.createMap();
-                    theMeta.putString("originalFileName", asset.getOriginalFileName());
-                    theMeta.putString("key", asset.getKey());
-                    theMeta.putString("contentType", asset.getContentType());
-                    theMeta.putInt("contentLength", asset.getContentLength());
-                    theAsset.putMap("metaData", theMeta);
-
-                    WritableMap theButton = Arguments.createMap();
-                    theButton.putString("label", asset.getButtonLabel());
-                    theButton.putString("action", asset.getButtonAction());
-                    theAsset.putMap("button", theButton);
-
-                    assets.pushMap(theAsset);
+                    assets.pushMap(NotificareUtils.mapAsset(asset));
                 }
 
                 payload.putArray("assets", assets);
@@ -530,12 +476,9 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
         Notificare.shared().fetchDoNotDisturb(new NotificareCallback<NotificareTimeOfDayRange>() {
             @Override
-            public void onSuccess(NotificareTimeOfDayRange notificareTimeOfDayRange) {
+            public void onSuccess(NotificareTimeOfDayRange dnd) {
                 WritableMap payload = Arguments.createMap();
-                WritableMap dnd = Arguments.createMap();
-                dnd.putString("start", notificareTimeOfDayRange.getStart().toString());
-                dnd.putString("end", notificareTimeOfDayRange.getEnd().toString());
-                payload.putMap("dnd", dnd);
+                payload.putMap("dnd", NotificareUtils.mapTimeOfDayRange(dnd));
                 callback.invoke(null, payload);
             }
 
@@ -628,10 +571,11 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostResume() {
-        Log.i(TAG, "host resume");
-        if (!intentHandled) {
-            sendNotification(parseNotificationIntent(getCurrentActivity().getIntent()));
-            intentHandled = true;
+        Log.i(TAG, "host resume for activity " + getCurrentActivity());
+        if (getCurrentActivity().getIntent() != launchIntent) {
+            launchIntent = getCurrentActivity().getIntent();
+            Log.i(TAG, "handling intent " + launchIntent);
+            sendNotification(parseNotificationIntent(launchIntent));
         }
         Notificare.shared().addServiceErrorListener(this);
         Notificare.shared().setForeground(true);
@@ -645,7 +589,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostPause() {
-        Log.i(TAG, "host pause");
+        Log.i(TAG, "host pause for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificationReceivedListener(this);
         Notificare.shared().setForeground(false);
@@ -658,7 +602,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostDestroy() {
-        Log.i(TAG, "host destroy");
+        Log.i(TAG, "host destroy for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificationReceivedListener(this);
         Notificare.shared().setForeground(false);
@@ -669,42 +613,8 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     @Override
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
-        Log.i(TAG, "on ready in module");
         WritableMap payload = Arguments.createMap();
-        WritableMap infoMap = Arguments.createMap();
-        infoMap.putString("id", notificareApplicationInfo.getId());
-        infoMap.putString("name", notificareApplicationInfo.getName());
-
-        WritableMap servicesMap = Arguments.createMap();
-        for (String key : notificareApplicationInfo.getServices().keySet()){
-            servicesMap.putBoolean(key, notificareApplicationInfo.getServices().get(key));
-        }
-        infoMap.putMap("services", servicesMap);
-
-        if (notificareApplicationInfo.getInboxConfig() != null) {
-            WritableMap inboxConfigMap = Arguments.createMap();
-            inboxConfigMap.putBoolean("autoBadge", notificareApplicationInfo.getInboxConfig().getAutoBadge());
-            inboxConfigMap.putBoolean("useInbox", notificareApplicationInfo.getInboxConfig().getUseInbox());
-            infoMap.putMap("inboxConfig", inboxConfigMap);
-        }
-
-        if (notificareApplicationInfo.getRegionConfig() != null) {
-            WritableMap regionConfigMap = Arguments.createMap();
-            regionConfigMap.putString("proximityUUID", notificareApplicationInfo.getRegionConfig().getProximityUUID());
-            infoMap.putMap("regionConfig", regionConfigMap);
-        }
-
-
-        WritableArray userDataFieldsArray = Arguments.createArray();
-        for (String key : notificareApplicationInfo.getUserDataFields().keySet()){
-            WritableMap userDataFieldMap = Arguments.createMap();
-            userDataFieldMap.putString("key", key);
-            userDataFieldMap.putString("label", notificareApplicationInfo.getUserDataFields().get(key).getLabel());
-            userDataFieldsArray.pushMap(userDataFieldMap);
-        }
-        infoMap.putArray("userDataFields", userDataFieldsArray);
-
-        payload.putMap("application", infoMap);
+        payload.putMap("application", NotificareUtils.mapApplicationInfo(notificareApplicationInfo));
         NotificareEventEmitter.getInstance().sendEvent("onReady", payload);
     }
 
@@ -720,9 +630,11 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     // OnNotificationReceivedListener
 
     @Override
-    public void onNotificationReceived(NotificareNotification notificareNotification) {
-        // TODO: serialize notification to event arguments
-        //NotificareEventEmitter.getInstance().sendEvent("onNotificationReceived", notificareNotification);
+    public void onNotificationReceived(NotificareNotification notification) {
+        if (notification != null) {
+            WritableMap notificationMap = NotificareUtils.mapNotification(notification);
+            NotificareEventEmitter.getInstance().sendEvent("onNotificationReceived", notificationMap);
+        }
     }
 
     // Utility methods
@@ -735,51 +647,11 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     protected WritableMap parseNotificationIntent(Intent intent) {
         NotificareNotification notification = intent.getParcelableExtra(Notificare.INTENT_EXTRA_NOTIFICATION);
         if (notification != null) {
-            WritableMap notificationMap = Arguments.createMap();
-            notificationMap.putString("id", notification.getNotificationId());
+            WritableMap notificationMap = NotificareUtils.mapNotification(notification);
+            // Add inbox item id if present
             if (intent.hasExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID)) {
                 notificationMap.putString("inboxItemId", intent.getStringExtra(Notificare.INTENT_EXTRA_INBOX_ITEM_ID));
             }
-            notificationMap.putString("message", notification.getMessage());
-            notificationMap.putString("title", notification.getTitle());
-            notificationMap.putString("subtitle", notification.getSubtitle());
-            notificationMap.putString("type", notification.getType());
-            notificationMap.putString("time", notification.getTime().toString());
-
-
-            if (notification.getExtra() != null) {
-                WritableMap extraMap = Arguments.createMap();
-                for (HashMap.Entry<String, String> prop : notification.getExtra().entrySet()) {
-                    extraMap.putString(prop.getKey(), prop.getValue());
-                }
-                notificationMap.putMap("extra", extraMap);
-            }
-
-            if (notification.getContent().size() > 0) {
-                WritableArray contentArray = Arguments.createArray();
-                for (NotificareContent c : notification.getContent()) {
-                    WritableMap contentMap = Arguments.createMap();
-                    contentMap.putString("type", c.getType());
-                    contentMap.putString("data", c.getData().toString());
-                    contentArray.pushMap(contentMap);
-                }
-                notificationMap.putArray("content", contentArray);
-            }
-
-            if (notification.getActions().size() > 0) {
-                WritableArray actionsArray = Arguments.createArray();
-                for (NotificareAction a : notification.getActions()) {
-                    WritableMap actionMap = Arguments.createMap();
-                    actionMap.putString("label", a.getLabel());
-                    actionMap.putString("type", a.getType());
-                    actionMap.putString("target", a.getTarget());
-                    actionMap.putBoolean("camera", a.getCamera());
-                    actionMap.putBoolean("keyboard", a.getKeyboard());
-                    actionsArray.pushMap(actionMap);
-                }
-                notificationMap.putArray("actions", actionsArray);
-            }
-
             return notificationMap;
         }
         return null;
