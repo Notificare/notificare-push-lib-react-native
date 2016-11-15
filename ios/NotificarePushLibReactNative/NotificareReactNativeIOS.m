@@ -74,8 +74,17 @@ static PushHandler *pushHandler = nil;
 }
 
 
++ (void)handleOpenURL:(NSURL *)url{
+    
+    [[NotificarePushLib shared] handleOpenURL:url];
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[url absoluteString] forKey:@"url"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"willOpenURL" body:payload];
+    
+}
+
 - (NSArray<NSString*> *)supportedEvents {
-  return @[@"notificationReceived", @"notificationOpened", @"ready", @"badge", @"systemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
+    return @[@"notificationReceived", @"notificationOpened", @"ready", @"badge", @"systemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenURL", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent", @"didChangeAccountNotification", @"didFailToRequestAccessNotification", @"didValidateAccount", @"didFailToValidateAccount", @"didReceiveResetPasswordToken"];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -545,6 +554,188 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     
 }
 
+
+RCT_EXPORT_METHOD(fetchNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] getNotification:[notification objectForKey:@"id"] completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(clearNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] clearNotification:[notification objectForKey:@"id"]];
+    callback(@[[NSNull null], notification]);
+    
+}
+
+
+RCT_EXPORT_METHOD(resetPassword:(NSString *)password token:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] resetPassword:password withToken:token completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(sendPassword:(NSString *)email callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] sendPassword:email completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(createAccount:(NSString *)email name:(NSString *)name password:(NSString *)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] createAccount:email withName:name andPassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(login:(NSString *)email password:(NSString *)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] loginWithUsername:email andPassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(logout){
+    
+    [[NotificarePushLib shared] logoutAccount];
+    
+}
+
+
+RCT_EXPORT_METHOD(fetchAccountDetails:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] fetchAccountDetails:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(fetchUserPreferences:(RCTResponseSenderBlock)callback) {
+    
+    NSMutableArray * prefs = [NSMutableArray array];
+    
+    [[NotificarePushLib shared] fetchUserPreferences:^(NSArray *result) {
+
+        NSMutableDictionary * trans = [NSMutableDictionary dictionary];
+        
+        for (NotificareUserPreference * preference in result){
+            
+            NSMutableDictionary * pref = [NSMutableDictionary dictionary];
+            
+            [pref setObject:[preference preferenceId] forKey:@"preferenceId"];
+            [pref setObject:[preference preferenceLabel] forKey:@"label"];
+            [pref setObject:[preference preferenceType] forKey:@"type"];
+            
+            NSMutableArray * segments = [NSMutableArray array];
+            
+            for (NotificareSegment * seg in [preference preferenceOptions]) {
+                NSMutableDictionary * s = [NSMutableDictionary dictionary];
+                [s setObject:[seg segmentId] forKey:@"segmentId"];
+                [s setObject:[seg segmentLabel] forKey:@"label"];
+                [s setObject:[NSNumber numberWithBool:[seg selected]] forKey:@"selected"];
+                [segments addObject:s];
+            }
+            
+            [pref setObject:segments forKey:@"segments"];
+            [prefs addObject:pref];
+        }
+        
+        [trans setObject:prefs forKey:@"userPreferences"];
+        
+        callback(@[[NSNull null], trans]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(addSegmentToPreference:(NSDictionary*)segment preference:(NSDictionary*)preference callback:(RCTResponseSenderBlock)callback) {
+    
+    NotificareSegment * s = [NotificareSegment new];
+    [s setSegmentId:[segment objectForKey:@"segmentId"]];
+    
+    NotificareUserPreference * p = [NotificareUserPreference new];
+    [p setPreferenceId:[preference objectForKey:@"preferenceId"]];
+    
+    [[NotificarePushLib shared] addSegment:s toPreference:p completionHandler:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(removeSegmentFromPreference:(NSDictionary*)segment preference:(NSDictionary*)preference callback:(RCTResponseSenderBlock)callback) {
+    
+    NotificareSegment * s = [NotificareSegment new];
+    [s setSegmentId:[segment objectForKey:@"segmentId"]];
+    
+    NotificareUserPreference * p = [NotificareUserPreference new];
+    [p setPreferenceId:[preference objectForKey:@"preferenceId"]];
+    
+    [[NotificarePushLib shared] removeSegment:s fromPreference:p completionHandler:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(generateAccessToken:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] generateAccessToken:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(changePassword:(NSString*)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] changePassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        
+        callback(@[[NSNull null], info]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
 @end
 
 /**
@@ -846,6 +1037,39 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFinishDownloadContent" body:[self dictionaryFromSKDownload:download]];
 }
+
+
+#pragma Notificare OAuth2 delegates
+
+- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountNotification:(NSDictionary *)info{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didChangeAccountNotification" body:info];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError *)error{
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFailToRequestAccessNotification" body:RCTJSErrorFromNSError(error)];
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{
+    
+    [[NotificarePushLib shared] validateAccount:token completionHandler:^(NSDictionary *info) {
+        
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didValidateAccount" body:info];
+        
+    } errorHandler:^(NSError *error) {
+        
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFailToValidateAccount" body:RCTJSErrorFromNSError(error)];
+        
+    }];
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token{
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didReceiveResetPasswordToken" body:@{@"token": token}];
+}
+
 
 /**
  * Helper method to convert NotificareNotification to a dictionary

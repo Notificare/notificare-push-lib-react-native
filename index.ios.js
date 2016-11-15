@@ -69,6 +69,10 @@ export default class AwesomeProject extends Component {
     });
 
 
+    this.eventEmitter.addListener('willOpenURL',(data) => {
+        console.log(data);
+    });
+
     this.eventEmitter.addListener('notificationOpened',(data) => {
         Notificare.openNotification(data);
     });
@@ -210,6 +214,25 @@ export default class AwesomeProject extends Component {
         console.log(data);
     });
 
+    this.eventEmitter.addListener('didChangeAccountNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToRequestAccessNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didValidateAccount',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToValidateAccount',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didReceiveResetPasswordToken',(data) => {
+        console.log(data);
+    });
 
   }
 
