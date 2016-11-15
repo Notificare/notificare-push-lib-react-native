@@ -47,7 +47,7 @@ static PushHandler *pushHandler = nil;
             [theNotification setObject:[NSNumber numberWithBool:NO] forKey:@"foreground"];
         }
         
-        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationReceived" body:theNotification];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationReceived" body:theNotification];
 
       result(info);
     } errorHandler:^(NSError * _Nonnull error) {
@@ -74,8 +74,17 @@ static PushHandler *pushHandler = nil;
 }
 
 
++ (void)handleOpenURL:(NSURL *)url{
+    
+    [[NotificarePushLib shared] handleOpenURL:url];
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[url absoluteString] forKey:@"url"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"willOpenURL" body:payload];
+    
+}
+
 - (NSArray<NSString*> *)supportedEvents {
-  return @[@"onNotificationReceived", @"onNotificationOpened", @"onReady", @"didUpdateBadge", @"didReceiveSystemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent"];
+    return @[@"notificationReceived", @"notificationOpened", @"ready", @"badge", @"systemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenURL", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent", @"didChangeAccountNotification", @"didFailToRequestAccessNotification", @"didValidateAccount", @"didFailToValidateAccount", @"didReceiveResetPasswordToken"];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -86,6 +95,50 @@ static PushHandler *pushHandler = nil;
 
 - (void)dispatchEvent:(NSString *)event body:(NSDictionary *)notification {
   [self sendEventWithName:event body:notification];
+}
+
+
+/**
+ * Helper method to convert SKDownload to NSDictionary
+ */
+-(NSDictionary *)dictionaryFromSKDownload:(SKDownload *)download{
+    
+    NSMutableDictionary * payload = [NSMutableDictionary dictionary];
+    NSMutableDictionary * theDownload = [NSMutableDictionary dictionary];
+    [theDownload setObject:[download contentIdentifier] forKey:@"contentIdentifier"];
+    [theDownload setObject:[download contentURL] forKey:@"contentURL"];
+    [theDownload setObject:[NSNumber numberWithLong:[download contentLength]] forKey:@"contentLength"];
+    [theDownload setObject:[download contentVersion] forKey:@"contentVersion"];
+    [theDownload setObject:[NSNumber numberWithInt:[download downloadState]] forKey:@"downloadState"];
+    [theDownload setObject:[NSNumber numberWithFloat:[download progress]] forKey:@"progress"];
+    [theDownload setObject:[NSNumber numberWithDouble:[download timeRemaining]] forKey:@"timeRemaining"];
+    [payload setObject:theDownload forKey:@"download"];
+    
+    return payload;
+}
+
+
+/**
+ * Helper method to convert NotificareProduct to NSDictionary
+ */
+-(NSDictionary *)dictionaryFromProduct:(NotificareProduct *)product{
+    
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[product identifier] forKey:@"identifier"];
+    [payload setObject:[product productName] forKey:@"productName"];
+    [payload setObject:[product productDescription] forKey:@"productDescription"];
+    [payload setObject:[product price] forKey:@"price"];
+    [payload setObject:[product priceLocale] forKey:@"priceLocale"];
+    [payload setObject:[product stores] forKey:@"stores"];
+    
+    NSMutableArray * downloads = [NSMutableArray array];
+    for (SKDownload * d in [product downloads]) {
+        [downloads addObject:[self dictionaryFromSKDownload:d]];
+    }
+    [payload setObject:downloads forKey:@"downloads"];
+    
+    
+    return payload;
 }
 
 RCT_EXPORT_MODULE()
@@ -429,14 +482,8 @@ RCT_EXPORT_METHOD(fetchProducts:(RCTResponseSenderBlock)callback) {
         NSMutableArray * prods = [NSMutableArray new];
         
         for (NotificareProduct * product in info) {
-            NSMutableDictionary * p = [NSMutableDictionary new];
-            [p setObject:[product identifier] forKey:@"identifier"];
-            [p setObject:[product productName] forKey:@"productName"];
-            [p setObject:[product productDescription] forKey:@"productDescription"];
-            [p setObject:[product price] forKey:@"price"];
-            [p setObject:[product priceLocale] forKey:@"priceLocale"];
-            [p setObject:[product stores] forKey:@"stores"];
-            [prods addObject:p];
+
+            [prods addObject:[self dictionaryFromProduct:product]];
         }
         
         [payload setObject:prods forKey:@"products"];
@@ -459,14 +506,7 @@ RCT_EXPORT_METHOD(fetchPurchasedProducts:(RCTResponseSenderBlock)callback) {
         NSMutableArray * prods = [NSMutableArray new];
         
         for (NotificareProduct * product in info) {
-            NSMutableDictionary * p = [NSMutableDictionary new];
-            [p setObject:[product identifier] forKey:@"identifier"];
-            [p setObject:[product productName] forKey:@"productName"];
-            [p setObject:[product productDescription] forKey:@"productDescription"];
-            [p setObject:[product price] forKey:@"price"];
-            [p setObject:[product priceLocale] forKey:@"priceLocale"];
-            [p setObject:[product stores] forKey:@"stores"];
-            [prods addObject:p];
+            [prods addObject:[self dictionaryFromProduct:product]];
         }
         
         [payload setObject:prods forKey:@"products"];
@@ -483,14 +523,7 @@ RCT_EXPORT_METHOD(fetchPurchasedProducts:(RCTResponseSenderBlock)callback) {
 RCT_EXPORT_METHOD(fetchProduct:(NSString *)productIdentifier callback:(RCTResponseSenderBlock)callback) {
     
     [[NotificarePushLib shared] fetchProduct:productIdentifier completionHandler:^(NotificareProduct * _Nonnull product) {
-        NSMutableDictionary * p = [NSMutableDictionary new];
-        [p setObject:[product identifier] forKey:@"identifier"];
-        [p setObject:[product productName] forKey:@"productName"];
-        [p setObject:[product productDescription] forKey:@"productDescription"];
-        [p setObject:[product price] forKey:@"price"];
-        [p setObject:[product priceLocale] forKey:@"priceLocale"];
-        [p setObject:[product stores] forKey:@"stores"];
-        callback(@[[NSNull null], p]);
+        callback(@[[NSNull null], [self dictionaryFromProduct:product]]);
     } errorHandler:^(NSError * _Nonnull error) {
         callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
     }];
@@ -521,6 +554,188 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     
 }
 
+
+RCT_EXPORT_METHOD(fetchNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] getNotification:[notification objectForKey:@"id"] completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(clearNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] clearNotification:[notification objectForKey:@"id"]];
+    callback(@[[NSNull null], notification]);
+    
+}
+
+
+RCT_EXPORT_METHOD(resetPassword:(NSString *)password token:(NSString *)token callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] resetPassword:password withToken:token completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(sendPassword:(NSString *)email callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] sendPassword:email completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(createAccount:(NSString *)email name:(NSString *)name password:(NSString *)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] createAccount:email withName:name andPassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(login:(NSString *)email password:(NSString *)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] loginWithUsername:email andPassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(logout){
+    
+    [[NotificarePushLib shared] logoutAccount];
+    
+}
+
+
+RCT_EXPORT_METHOD(fetchAccountDetails:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] fetchAccountDetails:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(fetchUserPreferences:(RCTResponseSenderBlock)callback) {
+    
+    NSMutableArray * prefs = [NSMutableArray array];
+    
+    [[NotificarePushLib shared] fetchUserPreferences:^(NSArray *result) {
+
+        NSMutableDictionary * trans = [NSMutableDictionary dictionary];
+        
+        for (NotificareUserPreference * preference in result){
+            
+            NSMutableDictionary * pref = [NSMutableDictionary dictionary];
+            
+            [pref setObject:[preference preferenceId] forKey:@"preferenceId"];
+            [pref setObject:[preference preferenceLabel] forKey:@"label"];
+            [pref setObject:[preference preferenceType] forKey:@"type"];
+            
+            NSMutableArray * segments = [NSMutableArray array];
+            
+            for (NotificareSegment * seg in [preference preferenceOptions]) {
+                NSMutableDictionary * s = [NSMutableDictionary dictionary];
+                [s setObject:[seg segmentId] forKey:@"segmentId"];
+                [s setObject:[seg segmentLabel] forKey:@"label"];
+                [s setObject:[NSNumber numberWithBool:[seg selected]] forKey:@"selected"];
+                [segments addObject:s];
+            }
+            
+            [pref setObject:segments forKey:@"segments"];
+            [prefs addObject:pref];
+        }
+        
+        [trans setObject:prefs forKey:@"userPreferences"];
+        
+        callback(@[[NSNull null], trans]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(addSegmentToPreference:(NSDictionary*)segment preference:(NSDictionary*)preference callback:(RCTResponseSenderBlock)callback) {
+    
+    NotificareSegment * s = [NotificareSegment new];
+    [s setSegmentId:[segment objectForKey:@"segmentId"]];
+    
+    NotificareUserPreference * p = [NotificareUserPreference new];
+    [p setPreferenceId:[preference objectForKey:@"preferenceId"]];
+    
+    [[NotificarePushLib shared] addSegment:s toPreference:p completionHandler:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
+RCT_EXPORT_METHOD(removeSegmentFromPreference:(NSDictionary*)segment preference:(NSDictionary*)preference callback:(RCTResponseSenderBlock)callback) {
+    
+    NotificareSegment * s = [NotificareSegment new];
+    [s setSegmentId:[segment objectForKey:@"segmentId"]];
+    
+    NotificareUserPreference * p = [NotificareUserPreference new];
+    [p setPreferenceId:[preference objectForKey:@"preferenceId"]];
+    
+    [[NotificarePushLib shared] removeSegment:s fromPreference:p completionHandler:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(generateAccessToken:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] generateAccessToken:^(NSDictionary * result) {
+        
+        callback(@[[NSNull null], result]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+RCT_EXPORT_METHOD(changePassword:(NSString*)password callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] changePassword:password completionHandler:^(NSDictionary * _Nonnull info) {
+        
+        callback(@[[NSNull null], info]);
+        
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+    
+}
+
+
 @end
 
 /**
@@ -532,25 +747,25 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
 
 -(void)notificarePushLib:(NotificarePushLib *)library onReady:(NSDictionary *)info{
 
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onReady" body:info];
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"ready" body:info];
   
 }
 
 -(void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification{
   
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"onNotificationOpened" body:notification.request.content.userInfo];
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationOpened" body:notification.request.content.userInfo];
   
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveSystemPush:(nonnull NSDictionary *)info{
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didReceiveSystemPush" body:info];
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"systemPush" body:info];
 }
 
 -(void)notificarePushLib:(NotificarePushLib *)library didUpdateBadge:(int)badge{
   
   NSMutableDictionary * info = [NSMutableDictionary new];
   [info setObject:[NSNumber numberWithInt:badge] forKey:@"badge"];
-  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didUpdateBadge" body:info];
+  [[NotificareReactNativeIOS getInstance] dispatchEvent:@"badge" body:info];
   
 }
 
@@ -823,6 +1038,39 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFinishDownloadContent" body:[self dictionaryFromSKDownload:download]];
 }
 
+
+#pragma Notificare OAuth2 delegates
+
+- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountNotification:(NSDictionary *)info{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didChangeAccountNotification" body:info];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToRequestAccessNotification:(NSError *)error{
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFailToRequestAccessNotification" body:RCTJSErrorFromNSError(error)];
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{
+    
+    [[NotificarePushLib shared] validateAccount:token completionHandler:^(NSDictionary *info) {
+        
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didValidateAccount" body:info];
+        
+    } errorHandler:^(NSError *error) {
+        
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didFailToValidateAccount" body:RCTJSErrorFromNSError(error)];
+        
+    }];
+    
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token{
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"didReceiveResetPasswordToken" body:@{@"token": token}];
+}
+
+
 /**
  * Helper method to convert NotificareNotification to a dictionary
  **/
@@ -911,6 +1159,13 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     [payload setObject:[product price] forKey:@"price"];
     [payload setObject:[product priceLocale] forKey:@"priceLocale"];
     [payload setObject:[product stores] forKey:@"stores"];
+    
+    NSMutableArray * downloads = [NSMutableArray array];
+    for (SKDownload * d in [product downloads]) {
+        [downloads addObject:[self dictionaryFromSKDownload:d]];
+    }
+    [payload setObject:downloads forKey:@"downloads"];
+    
     
     return payload;
 }

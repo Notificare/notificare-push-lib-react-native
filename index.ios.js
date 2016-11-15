@@ -35,9 +35,11 @@ export default class AwesomeProject extends Component {
 
   componentWillMount() {
 
+    console.log("componentWillMount");
+
     Notificare.launch();
 
-    this.eventEmitter.addListener('onReady', (data) => {
+    this.eventEmitter.addListener('ready', (data) => {
       console.log(data);
       Notificare.registerForNotifications();
     });
@@ -51,6 +53,12 @@ export default class AwesomeProject extends Component {
           Notificare.fetchTags((error, data) => {
               if (!error) {
                 console.log(data);
+
+                Notificare.addTags(["react-native"], (error, data) => {
+                  if (!error) {
+                    console.log(data);
+                  }
+                });
               }
             });
 
@@ -61,19 +69,23 @@ export default class AwesomeProject extends Component {
     });
 
 
-    this.eventEmitter.addListener('onNotificationOpened',(data) => {
-        Notificare.openNotification(data);
-    });
-
-    this.eventEmitter.addListener('onNotificationReceived',(data) => {
+    this.eventEmitter.addListener('willOpenURL',(data) => {
         console.log(data);
     });
 
-    this.eventEmitter.addListener('didUpdateBadge',(data) => {
+    this.eventEmitter.addListener('notificationOpened',(data) => {
+        Notificare.openNotification(data);
+    });
+
+    this.eventEmitter.addListener('notificationReceived',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('badge',(data) => {
         this._reloadInbox();
     });
 
-    this.eventEmitter.addListener('didReceiveSystemPush',(data) => {
+    this.eventEmitter.addListener('systemPush',(data) => {
         console.log(data);
     });
 
@@ -159,7 +171,7 @@ export default class AwesomeProject extends Component {
     });
 
     this.eventEmitter.addListener('didLoadStore',(data) => {
-        console.log(data);
+        console.log('didLoadStore' , data);
     });
 
     this.eventEmitter.addListener('didFailToLoadStore',(data) => {
@@ -202,6 +214,25 @@ export default class AwesomeProject extends Component {
         console.log(data);
     });
 
+    this.eventEmitter.addListener('didChangeAccountNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToRequestAccessNotification',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didValidateAccount',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didFailToValidateAccount',(data) => {
+        console.log(data);
+    });
+
+    this.eventEmitter.addListener('didReceiveResetPasswordToken',(data) => {
+        console.log(data);
+    });
 
   }
 
