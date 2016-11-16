@@ -111,10 +111,9 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onRegistrationFinished(String deviceId) {
-        Bundle messageBundle = new Bundle();
-        messageBundle.putString("device", deviceId);
-        ReadableMap map = Arguments.fromBundle(messageBundle);
-        NotificareEventEmitter.getInstance().sendEvent("didReceiveDeviceToken", map);
+        WritableMap map = Arguments.createMap();
+        map.putString("device", deviceId);
+        NotificareEventEmitter.getInstance().sendEvent("didReceiveDeviceToken", map, true);
     }
 
 }

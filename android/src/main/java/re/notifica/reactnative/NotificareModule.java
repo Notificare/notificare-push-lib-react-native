@@ -50,13 +50,18 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     private Map<String,NotificareNotification> notificationCache = new HashMap<>();
     private Boolean launched = false;
+    private Boolean firstLaunch = true;
     private Intent launchIntent;
+    private List<String> eventQueue;
+    private List<WritableMap> eventParamsQueue;
 
 
     public NotificareModule(ReactApplicationContext reactContext) {
         super(reactContext);
         getReactApplicationContext().addActivityEventListener(this);
         getReactApplicationContext().addLifecycleEventListener(this);
+        eventQueue = new ArrayList<>();
+        eventParamsQueue = new ArrayList<>();
     }
 
     @Override
@@ -67,6 +72,42 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     // Event methods
 
     /**
+     * Send an event to the JS context
+     * @param eventName
+     * @param payload
+     */
+    public void sendEvent(String eventName, WritableMap payload) {
+        sendEvent(eventName, payload, false);
+    }
+
+    /**
+     * Send an event to the JS context
+     * @param eventName
+     * @param payload
+     * @param queue
+     */
+    public void sendEvent(String eventName, WritableMap payload, Boolean queue) {
+        if (launched) {
+            NotificareEventEmitter.getInstance().sendEvent(eventName, payload);
+        } else if (queue) {
+            Log.i(TAG, "queueing event until listeners ready");
+            eventQueue.add(eventName);
+            eventParamsQueue.add(payload);
+        }
+    }
+
+    /**
+     * Process the queued events
+     */
+    private void processEventQueue() {
+        for (int i = 0; i < eventQueue.size(); i++) {
+            sendEvent(eventQueue.get(i), eventParamsQueue.get(i));
+        }
+        eventQueue.clear();
+        eventParamsQueue.clear();
+    }
+
+    /**
      * Send a notification opened event
      * @param notificationMap
      */
@@ -74,7 +115,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
         if (notificationMap != null) {
             WritableMap payload = Arguments.createMap();
             payload.putMap("notification", notificationMap);
-            NotificareEventEmitter.getInstance().sendEvent("onNotificationOpened", payload);
+            sendEvent("onNotificationOpened", payload, true);
         }
     }
 
@@ -83,10 +124,12 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
     @ReactMethod
     public void launch() {
-        if (!launched) {
+        launched = true;
+        if (firstLaunch) {
             Notificare.shared().addNotificareReadyListener(this);
-            launched = true;
+            firstLaunch = false;
         }
+        processEventQueue();
     }
 
     @ReactMethod
@@ -572,6 +615,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     @Override
     public void onHostResume() {
         Log.i(TAG, "host resume for activity " + getCurrentActivity());
+        launched = false;
         if (getCurrentActivity().getIntent() != launchIntent) {
             launchIntent = getCurrentActivity().getIntent();
             Log.i(TAG, "handling intent " + launchIntent);
@@ -615,7 +659,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
         WritableMap payload = Arguments.createMap();
         payload.putMap("application", NotificareUtils.mapApplicationInfo(notificareApplicationInfo));
-        NotificareEventEmitter.getInstance().sendEvent("onReady", payload);
+        sendEvent("onReady", payload, true);
     }
 
     // OnServiceErrorListener
@@ -633,7 +677,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     public void onNotificationReceived(NotificareNotification notification) {
         if (notification != null) {
             WritableMap notificationMap = NotificareUtils.mapNotification(notification);
-            NotificareEventEmitter.getInstance().sendEvent("onNotificationReceived", notificationMap);
+            sendEvent("onNotificationReceived", notificationMap, true);
         }
     }
 

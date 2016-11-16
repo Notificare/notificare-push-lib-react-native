@@ -20,10 +20,22 @@ public class NotificareEventEmitter {
         this.context = reactContext;
     }
 
+    public void sendEvent(String eventName) {
+        sendEvent(eventName, (ReadableMap)null);
+    }
+
+    public void sendEvent(String eventName, Boolean queue) {
+        sendEvent(eventName, null, queue);
+    }
+
     public void sendEvent(String eventName, @Nullable ReadableMap params) {
+        sendEvent(eventName, params, false);
+    }
+
+    public void sendEvent(String eventName, @Nullable ReadableMap params, Boolean queue) {
         Log.i(TAG, "send event " + eventName);
         if (context.hasActiveCatalystInstance() && this.context.hasCurrentActivity()) {
-            Log.i(TAG, "send event done");
+            Log.i(TAG, "sent event to " + this.context.getCurrentActivity());
             context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(
                     eventName, params
             );
