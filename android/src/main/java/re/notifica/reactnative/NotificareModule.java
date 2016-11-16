@@ -616,7 +616,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     public void onHostResume() {
         Log.i(TAG, "host resume for activity " + getCurrentActivity());
         launched = false;
-        if (getCurrentActivity().getIntent() != launchIntent) {
+        if (getCurrentActivity().getIntent() != null && getCurrentActivity().getIntent() != launchIntent) {
             launchIntent = getCurrentActivity().getIntent();
             Log.i(TAG, "handling intent " + launchIntent);
             sendNotification(parseNotificationIntent(launchIntent));
