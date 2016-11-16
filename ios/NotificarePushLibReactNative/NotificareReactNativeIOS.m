@@ -736,6 +736,18 @@ RCT_EXPORT_METHOD(changePassword:(NSString*)password callback:(RCTResponseSender
 }
 
 
+RCT_EXPORT_METHOD(logOpenNotification:(NSDictionary*)notification) {
+    
+    [[NotificarePushLib shared] logOpenNotification:notification];
+    
+}
+
+RCT_EXPORT_METHOD(logInfluencedOpenNotification:(NSDictionary*)notification) {
+    
+    [[NotificarePushLib shared] logInfluencedOpenNotification:notification];
+    
+}
+
 @end
 
 /**
