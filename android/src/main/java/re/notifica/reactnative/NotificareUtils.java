@@ -12,13 +12,14 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import re.notifica.Notificare;
 import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareContent;
+import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareTimeOfDayRange;
+import re.notifica.util.ISODateFormatter;
 
 
 public class NotificareUtils {
@@ -108,7 +109,7 @@ public class NotificareUtils {
         notificationMap.putString("title", notification.getTitle());
         notificationMap.putString("subtitle", notification.getSubtitle());
         notificationMap.putString("type", notification.getType());
-        notificationMap.putString("time", notification.getTime().toString());
+        notificationMap.putString("time", ISODateFormatter.format(notification.getTime()));
 
 
         if (notification.getExtra() != null) {
@@ -175,6 +176,16 @@ public class NotificareUtils {
         timeOfDayRangeMap.putString("start", notificareTimeOfDayRange.getStart().toString());
         timeOfDayRangeMap.putString("end", notificareTimeOfDayRange.getEnd().toString());
         return timeOfDayRangeMap;
+    }
+
+    public static WritableMap mapInboxItem(NotificareInboxItem notificareInboxItem) {
+        WritableMap inboxItemMap = Arguments.createMap();
+        inboxItemMap.putString("inboxId", notificareInboxItem.getItemId());
+        inboxItemMap.putString("notification", notificareInboxItem.getNotification().getNotificationId());
+        inboxItemMap.putString("message", notificareInboxItem.getNotification().getMessage());
+        inboxItemMap.putString("time", ISODateFormatter.format(notificareInboxItem.getTimestamp()));
+        inboxItemMap.putBoolean("opened", notificareInboxItem.getStatus());
+        return inboxItemMap;
     }
 
 }

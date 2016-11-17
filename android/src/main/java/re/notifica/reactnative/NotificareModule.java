@@ -2,8 +2,6 @@ package re.notifica.reactnative;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -17,13 +15,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,35 +25,29 @@ import javax.annotation.Nullable;
 import re.notifica.Notificare;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
-import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
-import re.notifica.model.NotificareContent;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareTimeOfDay;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.model.NotificareUserData;
 import re.notifica.model.NotificareUserDataField;
+import re.notifica.util.Log;
 
-public class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener {
+class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener {
 
     private static final String TAG = NotificareModule.class.getSimpleName();
+    private static final int DEFAULT_LIST_SIZE = 25;
 
     private Map<String,NotificareNotification> notificationCache = new HashMap<>();
-    private Boolean launched = false;
-    private Boolean firstLaunch = true;
-    private Intent launchIntent;
-    private List<String> eventQueue;
-    private List<WritableMap> eventParamsQueue;
+    private Boolean mounted = false;
 
 
-    public NotificareModule(ReactApplicationContext reactContext) {
+    NotificareModule(ReactApplicationContext reactContext) {
         super(reactContext);
         getReactApplicationContext().addActivityEventListener(this);
         getReactApplicationContext().addLifecycleEventListener(this);
-        eventQueue = new ArrayList<>();
-        eventParamsQueue = new ArrayList<>();
     }
 
     @Override
@@ -86,25 +72,8 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      * @param payload
      * @param queue
      */
-    public void sendEvent(String eventName, WritableMap payload, Boolean queue) {
-        if (launched) {
-            NotificareEventEmitter.getInstance().sendEvent(eventName, payload);
-        } else if (queue) {
-            Log.i(TAG, "queueing event until listeners ready");
-            eventQueue.add(eventName);
-            eventParamsQueue.add(payload);
-        }
-    }
-
-    /**
-     * Process the queued events
-     */
-    private void processEventQueue() {
-        for (int i = 0; i < eventQueue.size(); i++) {
-            sendEvent(eventQueue.get(i), eventParamsQueue.get(i));
-        }
-        eventQueue.clear();
-        eventParamsQueue.clear();
+    private void sendEvent(String eventName, WritableMap payload, Boolean queue) {
+        NotificareEventEmitter.getInstance().sendEvent(eventName, payload, queue);
     }
 
     /**
@@ -115,28 +84,65 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
         if (notificationMap != null) {
             WritableMap payload = Arguments.createMap();
             payload.putMap("notification", notificationMap);
-            sendEvent("onNotificationOpened", payload, true);
+            sendEvent("notificationOpened", payload, true);
         }
     }
 
     // React methods
 
 
+    /**
+     * Launch the module, alias for mount()
+     * @see #mount()
+     */
     @ReactMethod
     public void launch() {
-        launched = true;
-        if (firstLaunch) {
-            Notificare.shared().addNotificareReadyListener(this);
-            firstLaunch = false;
+        if (!mounted) {
+            mount();
         }
-        processEventQueue();
     }
 
+    /**
+     * Mount the module, listen for ready events and process event queue
+     */
+    @ReactMethod
+    public void mount() {
+        mounted = true;
+        NotificareEventEmitter.getInstance().setMounted(true);
+        Notificare.shared().addNotificareReadyListener(this);
+        NotificareEventEmitter.getInstance().processEventQueue();
+    }
+
+    /**
+     * Unmount the module, stop listening for ready events and queue incoming events
+     */
+    @ReactMethod
+    public void unmount() {
+        mounted = false;
+        NotificareEventEmitter.getInstance().setMounted(false);
+        Notificare.shared().removeNotificareReadyListener(this);
+    }
+
+    /**
+     * Enable notifications, alias for enableNotifications
+     * @see #enableNotifications()
+     */
+    @ReactMethod
+    public void registerForNotifications() {
+        enableNotifications();
+    }
+
+    /**
+     * Enable notifications
+     */
     @ReactMethod
     public void enableNotifications() {
         Notificare.shared().enableNotifications();
     }
 
+    /**
+     * Disable notifications
+     */
     @ReactMethod
     public void disableNotifications() {
         Notificare.shared().disableNotifications();
@@ -145,34 +151,6 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     @ReactMethod
     public void enableLocationUpdates() {
         Notificare.shared().enableLocationUpdates();
-//        if (!Notificare.shared().hasLocationPermissionGranted()) {
-//            if (Notificare.shared().didRequestLocationPermission()) {
-//                if (Notificare.shared().shouldShowRequestPermissionRationale(getCurrentActivity())) {
-//                    // Here we should show a dialog explaining location updates
-//                    builder.setMessage(R.string.alert_location_permission_rationale)
-//                            .setTitle(R.string.app_name)
-//                            .setCancelable(true)
-//                            .setPositiveButton(R.string.button_location_permission_rationale_ok, new DialogInterface.OnClickListener() {
-//                                public void onClick(DialogInterface dialog, int id) {
-//                                    Notificare.shared().requestLocationPermission(MainActivity.this, LOCATION_PERMISSION_REQUEST_CODE);
-//                                }
-//                            })
-//                            .create()
-//                            .show();
-//                }
-//            } else {
-//                Notificare.shared().requestLocationPermission(this, LOCATION_PERMISSION_REQUEST_CODE);
-//            }
-//        }
-//
-//
-//
-//        if (!Notificare.shared().hasLocationPermissionGranted()) {
-//            Log.i(TAG, "permission not granted");
-//            getCurrentActivity().requestPermissions(this, LOCATION_PERMISSION_REQUEST_CODE, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION});
-//        } else {
-//            Notificare.shared().enableLocationUpdates();
-//        }
     }
 
     @ReactMethod
@@ -201,20 +179,25 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     }
 
     @ReactMethod
-    public void isNotificationsEnabled(final Callback callback) {
+    public void isNotificationsEnabled(Callback callback) {
         callback.invoke(Notificare.shared().isNotificationsEnabled());
     }
 
     @ReactMethod
-    public void isLocationUpdatesEnabled(final Callback callback) {
+    public void isLocationUpdatesEnabled(Callback callback) {
         callback.invoke(Notificare.shared().isLocationUpdatesEnabled());
     }
 
+    /**
+     * Register device with Notificare API
+     * @param deviceId
+     * @param userId
+     * @param userName
+     * @param callback
+     */
     @ReactMethod
-    public void registerDevice( String deviceId, String userId, String userName, final Callback callback ) {
-
+    public void registerDevice( String deviceId, String userId, String userName, final Callback callback) {
         Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {
-
             @Override
             public void onSuccess(String result) {
                 callback.invoke(null, result);
@@ -222,20 +205,18 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
             @Override
             public void onError(NotificareError error) {
-
                 callback.invoke(error.getMessage(), null);
-
             }
-
         });
-
     }
 
+    /**
+     * Open notification in a NotificationActivity
+     * @param notification
+     */
     @ReactMethod
     public void openNotification(ReadableMap notification) {
-        Log.i(TAG, "open notification " + notification);
-        ReadableMap notificationMap = notification.getMap("notification");
-        String notificationId = notificationMap.getString("id");
+        String notificationId = notification.getString("id");
         if (notificationId != null && !notificationId.isEmpty()) {
             if (notificationCache.containsKey(notificationId)) {
                 Notificare.shared().openNotification(getCurrentActivity(), notificationCache.get(notificationId));
@@ -249,134 +230,125 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
 
                     @Override
                     public void onError(NotificareError notificareError) {
-
+                        Log.e(TAG, "error fetching notification: " + notificareError.getMessage());
                     }
                 });
             }
         }
     }
 
+    /**
+     * Fetch inbox items
+     * @param date
+     * @param skip
+     * @param limit
+     * @param callback
+     */
     @ReactMethod
-    public void fetchInboxItems(@Nullable String date, @Nullable int skip, @Nullable int limit, final Callback callback ) {
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date theDate = null;
-        if (date != null) {
-            try {
-                theDate = format.parse(date);
-            } catch (ParseException e) {
-                e.printStackTrace();
+    public void fetchInbox(@Nullable String date, @Nullable int skip, @Nullable int limit, final Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            int size = Notificare.shared().getInboxManager().getItems().size();
+            if (limit <= 0) {
+                limit = DEFAULT_LIST_SIZE;
             }
+            if (skip < 0) {
+                skip = 0;
+            }
+            if (skip > size) {
+                skip = size;
+            }
+            int end = limit + skip;
+            if (end > size) {
+                end = size;
+            }
+            List<NotificareInboxItem> items = new ArrayList<NotificareInboxItem>(Notificare.shared().getInboxManager().getItems()).subList(skip, end);
+            WritableArray inbox = Arguments.createArray();
+            for (NotificareInboxItem item : items) {
+                inbox.pushMap(NotificareUtils.mapInboxItem(item));
+            }
+            WritableMap payload = Arguments.createMap();
+            payload.putArray("inbox", inbox);
+            payload.putInt("total", size);
+            payload.putInt("unread", Notificare.shared().getInboxManager().getUnreadCount());
+            callback.invoke(null, payload);
+        } else {
+            callback.invoke("inbox not enabled", null);
         }
-
-        Notificare.shared().fetchInboxItems(theDate, skip, limit, new NotificareCallback<List<NotificareInboxItem>>() {
-            @Override
-            public void onSuccess(List<NotificareInboxItem> notificareInboxItems) {
-
-                WritableMap payload = Arguments.createMap();
-                WritableArray inboxItems = Arguments.createArray();
-
-                for (NotificareInboxItem item : notificareInboxItems){
-                    WritableMap inboxItem = Arguments.createMap();
-                    inboxItem.putString("inboxId", item.getItemId());
-                    inboxItem.putString("notification", item.getNotification().getNotificationId());
-                    inboxItem.putString("message", item.getNotification().getMessage());
-                    inboxItem.putBoolean("opened", item.getStatus());
-                    inboxItem.putString("time", item.getTimestamp().toString());
-                    inboxItems.pushMap(inboxItem);
-                }
-
-                payload.putArray("inbox", inboxItems);
-                callback.invoke(null, payload);
-
-            }
-
-            @Override
-            public void onError(NotificareError notificareError) {
-                callback.invoke(notificareError.getMessage(), null);
-            }
-        });
     }
 
     @ReactMethod
-    public void openInboxItem(ReadableMap inboxItem, final Callback callback ) {
-
-        Notificare.shared().fetchNotification(inboxItem.getString("notification"), new NotificareCallback<NotificareNotification>() {
-            @Override
-            public void onSuccess(NotificareNotification notificareNotification) {
-
-                Notificare.shared().openNotification(getCurrentActivity(), notificareNotification);
-
+    public void openInboxItem(ReadableMap inboxItem, final Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                Notificare.shared().openInboxItem(getCurrentActivity(), notificareInboxItem);
+            } else {
+                callback.invoke("inbox item not found", null);
             }
-
-            @Override
-            public void onError(NotificareError notificareError) {
-
-            }
-        });
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
     }
 
     @ReactMethod
-    public void removeInboxItem(String inboxItemId, final Callback callback ) {
-
-        Notificare.shared().deleteInboxItem(inboxItemId, new NotificareCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                callback.invoke(null, "Inbox item removed successfully");
+    public void removeFromInbox(ReadableMap inboxItem, Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                Notificare.shared().getInboxManager().removeItem(notificareInboxItem);
+            } else {
+                callback.invoke("inbox item not found", null);
             }
-
-            @Override
-            public void onError(NotificareError notificareError) {
-                callback.invoke(notificareError.getMessage(), null);
-            }
-        });
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
     }
 
     @ReactMethod
-    public void clearInbox(final Callback callback ) {
-
-        Notificare.shared().clearInbox(new NotificareCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                callback.invoke(null, "Inbox cleared successfully");
+    public void markAsRead(ReadableMap inboxItem, Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                Notificare.shared().getInboxManager().markItem(notificareInboxItem);
+            } else {
+                callback.invoke("inbox item not found", null);
             }
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
+    }
 
-            @Override
-            public void onError(NotificareError notificareError) {
-                callback.invoke(notificareError.getMessage(), null);
-            }
-        });
+    @ReactMethod
+    public void clearInbox(Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().getInboxManager().clearInbox();
+            callback.invoke(null, "inbox cleared");
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
     }
 
     @ReactMethod
     public void fetchTags( final Callback callback ) {
-
         Notificare.shared().fetchDeviceTags(new NotificareCallback<List<String>>() {
-
             @Override
-            public void onError(NotificareError arg0) {
-
-                callback.invoke(arg0.getMessage(), null);
-
+            public void onError(NotificareError notificareError) {
+                callback.invoke(notificareError.getMessage(), null);
             }
 
             @Override
-            public void onSuccess(List<String> arg0) {
+            public void onSuccess(List<String> tags) {
+                WritableArray tagsArray = Arguments.createArray();
+                WritableMap payload = Arguments.createMap();
 
-                WritableArray tags = Arguments.createArray();
-                WritableMap a = Arguments.createMap();
-
-                for (String tag : arg0) {
-                    tags.pushString(tag);
+                for (String tag : tags) {
+                    tagsArray.pushString(tag);
                 }
 
-                a.putArray("tags", tags);
-                callback.invoke(null, a);
-
+                payload.putArray("tags", tagsArray);
+                callback.invoke(null, payload);
             }
-
         });
-
     }
 
     @ReactMethod
@@ -443,14 +415,14 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
             @Override
             public void onSuccess(List<NotificareAsset> notificareAssets) {
 
-                WritableArray assets = Arguments.createArray();
+                WritableArray assetsArray = Arguments.createArray();
                 WritableMap payload = Arguments.createMap();
 
                 for (NotificareAsset asset : notificareAssets) {
-                    assets.pushMap(NotificareUtils.mapAsset(asset));
+                    assetsArray.pushMap(NotificareUtils.mapAsset(asset));
                 }
 
-                payload.putArray("assets", assets);
+                payload.putArray("assets", assetsArray);
                 callback.invoke(null, payload);
 
             }
@@ -571,9 +543,38 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
         });
     }
 
+    /**
+     * Log an open of notification
+     * @param notificationId
+     * @param callback
+     */
     @ReactMethod
-    public void logCustomEvent(String name, @Nullable ReadableMap data, final Callback callback) {
+    public void logOpenNotification(String notificationId, Callback callback) {
+        Notificare.shared().getEventLogger().logOpenNotification(notificationId);
+        callback.invoke(null, "open notification logged");
+    }
+
+    /**
+     * Log an influenced open of notification
+     * @param notificationId
+     * @param callback
+     */
+    @ReactMethod
+    public void logOpenNotificationInfluenced(String notificationId, Callback callback) {
+        Notificare.shared().getEventLogger().logOpenNotificationInfluenced(notificationId);
+        callback.invoke(null, "influenced open notification logged");
+    }
+
+    /**
+     * Log a custom event
+     * @param name
+     * @param data
+     * @param callback
+     */
+    @ReactMethod
+    public void logCustomEvent(String name, @Nullable ReadableMap data, Callback callback) {
         Notificare.shared().getEventLogger().logCustomEvent(name, NotificareUtils.createMap(data));
+        callback.invoke(null, "custom event logged");
     }
 
     // ActivityEventListener methods
@@ -598,9 +599,15 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onNewIntent(Intent intent) {
-        Log.i(TAG, "new intent: " + intent);
+        Log.d(TAG, "received new intent for activity " + getCurrentActivity());
         // Check for launch with notification or tokens
-        sendNotification(parseNotificationIntent(intent));
+        WritableMap notificationMap = parseNotificationIntent(intent);
+        if (notificationMap != null) {
+            sendNotification(notificationMap);
+            getCurrentActivity().setIntent(null);
+        } else {
+            getCurrentActivity().setIntent(intent);
+        }
 //        sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
 //        sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
     }
@@ -614,17 +621,18 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostResume() {
-        Log.i(TAG, "host resume for activity " + getCurrentActivity());
-        launched = false;
-        if (getCurrentActivity().getIntent() != null && getCurrentActivity().getIntent() != launchIntent) {
-            launchIntent = getCurrentActivity().getIntent();
-            Log.i(TAG, "handling intent " + launchIntent);
-            sendNotification(parseNotificationIntent(launchIntent));
-        }
+        Log.d(TAG, "host resume for activity " + getCurrentActivity());
         Notificare.shared().addServiceErrorListener(this);
         Notificare.shared().setForeground(true);
         Notificare.shared().addNotificationReceivedListener(this);
         Notificare.shared().getEventLogger().logStartSession();
+        if (getCurrentActivity().getIntent() != null) {
+            WritableMap notificationMap = parseNotificationIntent(getCurrentActivity().getIntent());
+            if (notificationMap != null) {
+                sendNotification(notificationMap);
+                getCurrentActivity().setIntent(null);
+            }
+        }
     }
 
     /**
@@ -633,7 +641,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostPause() {
-        Log.i(TAG, "host pause for activity " + getCurrentActivity());
+        Log.d(TAG, "host pause for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificationReceivedListener(this);
         Notificare.shared().setForeground(false);
@@ -646,7 +654,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
      */
     @Override
     public void onHostDestroy() {
-        Log.i(TAG, "host destroy for activity " + getCurrentActivity());
+        Log.d(TAG, "host destroy for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
         Notificare.shared().removeNotificationReceivedListener(this);
         Notificare.shared().setForeground(false);
@@ -659,7 +667,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     public void onNotificareReady(NotificareApplicationInfo notificareApplicationInfo) {
         WritableMap payload = Arguments.createMap();
         payload.putMap("application", NotificareUtils.mapApplicationInfo(notificareApplicationInfo));
-        sendEvent("onReady", payload, true);
+        sendEvent("ready", payload, true);
     }
 
     // OnServiceErrorListener
@@ -677,7 +685,7 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
     public void onNotificationReceived(NotificareNotification notification) {
         if (notification != null) {
             WritableMap notificationMap = NotificareUtils.mapNotification(notification);
-            sendEvent("onNotificationReceived", notificationMap, true);
+            sendEvent("notificationReceived", notificationMap, true);
         }
     }
 
@@ -699,48 +707,6 @@ public class NotificareModule extends ReactContextBaseJavaModule implements Acti
             return notificationMap;
         }
         return null;
-    }
-
-
-    /**
-     * Get a resource by name and type
-     * @param resourceName
-     * @param resourceType
-     * @return
-     */
-    private int getResource(String resourceName, String resourceType) {
-        return getReactApplicationContext().getResources().getIdentifier(
-                resourceName,
-                resourceType,
-                getReactApplicationContext().getPackageName());
-    }
-
-    /**
-     * Get a drawable resource by name
-     * @param imageName
-     * @return
-     */
-    private int getDrawableResource(String imageName) {
-        if (imageName == null || imageName.isEmpty()) {
-            return 0;
-        }
-        return getResource(imageName, "drawable");
-    }
-
-    /**
-     * Get a color resource by name
-     * @param colorName
-     * @return
-     */
-    private int getColorResource(String colorName) {
-        if (colorName == null || colorName.isEmpty()) {
-            return 0;
-        }
-        return getResource(colorName, "color");
-    }
-
-    private Boolean isActive() {
-        return getReactApplicationContext().hasActiveCatalystInstance() && getReactApplicationContext().hasCurrentActivity();
     }
 
 }
