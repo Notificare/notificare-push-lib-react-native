@@ -7,22 +7,36 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
+  ListView,
   StyleSheet,
+  Text,
   NativeModules,
   DeviceEventEmitter,
-  Text,
-  View
+  TouchableHighlight,
+  View,
+  PermissionsAndroid
 } from 'react-native';
 
 const Notificare = NativeModules.NotificareReactNativeAndroid;
 
 export default class AwesomeProject extends Component {
+  
+  constructor(props) {
+    super(props);
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+    this.state = {
+      dataSource: ds.cloneWithRows([])
+    };
+    this._reloadInbox();
+  }
 
-  componentWillMount() {
+  componentDidMount() {
+    console.log('componentDidMount');
+    this.setState({mounts: this.state.mounts + 1});
 
-    Notificare.launch();
+    Notificare.mount();
 
-    DeviceEventEmitter.addListener('onReady', function(e: Event) {
+    DeviceEventEmitter.addListener('ready', function(e: Event) {
         console.log(e);
         Notificare.enableNotifications();
     });
@@ -30,61 +44,111 @@ export default class AwesomeProject extends Component {
     DeviceEventEmitter.addListener('didReceiveDeviceToken', function(e: Event) {
         console.log(e);
 
-      	Notificare.registerDevice(e.device, null, null, (error, msg) => {
+        Notificare.registerDevice(e.device, null, null, (error, msg) => {
           if (!error) {
-            Notificare.fetchTags((error, msg) => {
-              console.log(msg);
+            Notificare.fetchTags((error, data) => {
+              if (!error) {
+                console.log(data);
+                Notificare.addTags(["react-native"], (error, data) => {
+                  if (!error) {
+                    console.log(data);
+                  }
+                });
+              }
             });
+            (async function() {
+              try {
+                let granted = await PermissionsAndroid.requestPermission(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+                  'title': 'Location Permission',
+                  'message': 'We need your location so we can send you relevant push notifications'
+                });
+                if (granted) {
+                  Notificare.enableLocationUpdates()
+                }
+              } catch (err) {
+                console.warn(err)
+              }
+            }());
           }
-    	  });
+        });
 
     });
 
 
-    DeviceEventEmitter.addListener('onNotificationReceived', function(e: Event) {
+    DeviceEventEmitter.addListener('notificationReceived', (e: Event) => {
       console.log(e);
+      this._reloadInbox();
     });
 
-    DeviceEventEmitter.addListener('onNotificationOpened', function(e: Event) {
-      Notificare.openNotification(e);
+    DeviceEventEmitter.addListener('notificationOpened', (e: Event) => {
+      console.log(e);
+      Notificare.openNotification(e.notification);
     });
+  }
+
+  componentWillUnmount() {
+    console.log('componentWillUnmount');
+    Notificare.unmount();
+    DeviceEventEmitter.removeAllListeners();
+  }
+
+  _reloadInbox (){
+    Notificare.fetchInbox(null, 0, 100, (error, data) => {
+            if (!error) {
+              console.log(data);
+              this.setState({
+                dataSource : this.state.dataSource.cloneWithRows(data.inbox)
+              });
+            }
+        });
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
-      </View>
+        <View style={styles.view}>
+        <ListView
+          enableEmptySections={true}
+          dataSource={this.state.dataSource}
+          renderRow={this.renderRow}
+          />
+        </View>
     );
+  }
+
+  renderRow (rowData) {
+        return (
+          <TouchableHighlight>
+          <View>
+            <View style={styles.row}>
+                <Text style={styles.text}>
+                {rowData.message}
+                </Text>
+                <Text style={styles.text}>
+                  {rowData.time}
+                </Text>
+            </View>
+          </View>
+          </TouchableHighlight>
+      );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  view: {flex: 1, paddingTop: 22},
+  row: {
+    flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 10,
+    paddingRight: 5,
+    backgroundColor: '#F6F6F6',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  text: {
+    flex: 1,
+    fontSize: 12,
+  }
 });
 
 AppRegistry.registerComponent('AwesomeProject', () => AwesomeProject);
+
