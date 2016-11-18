@@ -561,10 +561,9 @@ RCT_EXPORT_METHOD(fetchNotification:(NSDictionary *)notification callback:(RCTRe
     
 }
 
-RCT_EXPORT_METHOD(clearNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(clearNotification:(NSDictionary *)notification) {
     
     [[NotificarePushLib shared] clearNotification:[notification objectForKey:@"id"]];
-    callback(@[[NSNull null], notification]);
     
 }
 
