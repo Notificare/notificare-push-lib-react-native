@@ -275,18 +275,24 @@ RCT_EXPORT_METHOD(fetchInbox:(NSDate*)since skip:(NSNumber* _Nonnull)skip limit:
   
   [[NotificarePushLib shared] fetchInbox:since skip:skip limit:limit completionHandler:^(NSDictionary * _Nonnull info) {
     
-    NSMutableArray * items = [NSMutableArray new];
-    for (NotificareDeviceInbox * item in [info objectForKey:@"inbox"]) {
-      NSMutableDictionary * inboxItem = [NSMutableDictionary new];
-      [inboxItem setObject:[item inboxId] forKey:@"inboxId"];
-      [inboxItem setObject:[item notification] forKey:@"notification"];
-      [inboxItem setObject:[item message] forKey:@"message"];
-      [inboxItem setObject:[item time] forKey:@"time"];
-      [inboxItem setObject:[NSNumber numberWithBool:[item opened]] forKey:@"opened"];
-      [items addObject:inboxItem];
-    }
+      NSMutableDictionary * payload = [NSMutableDictionary new];
     
-    callback(@[[NSNull null], items]);
+      NSMutableArray * items = [NSMutableArray new];
+      for (NotificareDeviceInbox * item in [info objectForKey:@"inbox"]) {
+          NSMutableDictionary * inboxItem = [NSMutableDictionary new];
+          [inboxItem setObject:[item inboxId] forKey:@"inboxId"];
+          [inboxItem setObject:[item notification] forKey:@"notification"];
+          [inboxItem setObject:[item message] forKey:@"message"];
+          [inboxItem setObject:[item time] forKey:@"time"];
+          [inboxItem setObject:[NSNumber numberWithBool:[item opened]] forKey:@"opened"];
+          [items addObject:inboxItem];
+      }
+    
+      [payload setObject:items forKey:@"inbox"];
+      [payload setObject:[NSNumber numberWithInt:[[info objectForKey:@"total"] intValue]] forKey:@"total"];
+      [payload setObject:[NSNumber numberWithInt:[[info objectForKey:@"unread"] intValue]] forKey:@"unread"];
+      callback(@[[NSNull null], payload]);
+      
   } errorHandler:^(NSError * _Nonnull error) {
     callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
   }];
@@ -544,16 +550,6 @@ RCT_EXPORT_METHOD(buyProduct:(NSDictionary *)product) {
 }
 
 
-RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  callback:(RCTResponseSenderBlock)callback) {
-    
-    [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(NSDictionary * _Nonnull info) {
-        callback(@[[NSNull null], info]);
-    } errorHandler:^(NSError * _Nonnull error) {
-        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
-    }];
-    
-}
-
 
 RCT_EXPORT_METHOD(fetchNotification:(NSDictionary *)notification callback:(RCTResponseSenderBlock)callback) {
     
@@ -745,6 +741,18 @@ RCT_EXPORT_METHOD(logOpenNotification:(NSDictionary*)notification) {
 RCT_EXPORT_METHOD(logInfluencedOpenNotification:(NSDictionary*)notification) {
     
     [[NotificarePushLib shared] logInfluencedOpenNotification:notification];
+    
+}
+
+
+
+RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  callback:(RCTResponseSenderBlock)callback) {
+    
+    [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
     
 }
 

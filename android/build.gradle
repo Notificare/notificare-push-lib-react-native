@@ -13,7 +13,6 @@ repositories {
     mavenLocal()
     jcenter()
     maven {
-        //url "file:///Users/joris/Developer/Projects/notificare-mvn-repo/releases"
         url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
     }
 }
