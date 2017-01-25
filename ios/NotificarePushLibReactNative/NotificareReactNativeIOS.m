@@ -5,10 +5,10 @@
 //  Created by Joel Oliveira on 03/11/2016.
 //  Copyright © 2016 Notificare. All rights reserved.
 //
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 #import "NotificareReactNativeIOS.h"
-#import "RCTLog.h"
-#import "RCTUtils.h"
+#import <React/RCTLog.h>
+#import <React/RCTUtils.h>
 
 @implementation NotificareReactNativeIOS
 
