@@ -34,5 +34,5 @@ android {
 
 dependencies {
     compile "com.facebook.react:react-native:+"
-    compile "re.notifica:notificare-push-lib-android:1.9.1"
+    compile "re.notifica:notificare-push-lib-android:1.9.2"
 }

@@ -2,6 +2,8 @@ package re.notifica.reactnative;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -25,23 +27,28 @@ import javax.annotation.Nullable;
 import re.notifica.Notificare;
 import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
+import re.notifica.billing.BillingManager;
+import re.notifica.billing.BillingResult;
+import re.notifica.billing.Purchase;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
+import re.notifica.model.NotificareProduct;
 import re.notifica.model.NotificareTimeOfDay;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.model.NotificareUserData;
 import re.notifica.model.NotificareUserDataField;
 import re.notifica.util.Log;
 
-class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener {
+class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
     private static final String TAG = NotificareModule.class.getSimpleName();
     private static final int DEFAULT_LIST_SIZE = 25;
 
     private Map<String,NotificareNotification> notificationCache = new HashMap<>();
     private Boolean mounted = false;
+    private Boolean isBillingReady = false;
 
 
     NotificareModule(ReactApplicationContext reactContext) {
@@ -577,6 +584,16 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         callback.invoke(null, "custom event logged");
     }
 
+    /**
+     * Buy a product
+     * @param product
+     */
+    @ReactMethod
+    public void buyProduct(ReadableMap product) {
+        NotificareProduct notificareProduct = Notificare.shared().getBillingManager().getProduct(product.getString("identifier"));
+        Notificare.shared().getBillingManager().launchPurchaseFlow(getCurrentActivity(), notificareProduct, this);
+    }
+
     // ActivityEventListener methods
 
     /**
@@ -590,6 +607,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         Notificare.shared().handleServiceErrorResolution(requestCode, resultCode, data);
+
+        if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
+            // Billingmanager handled the result
+            isBillingReady = true; // wait for purchase to finish before doing other calls
+        }
     }
 
     /**
@@ -626,6 +648,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         Notificare.shared().setForeground(true);
         Notificare.shared().addNotificationReceivedListener(this);
         Notificare.shared().getEventLogger().logStartSession();
+        Notificare.shared().addBillingReadyListener(this);
         if (getCurrentActivity().getIntent() != null) {
             WritableMap notificationMap = parseNotificationIntent(getCurrentActivity().getIntent());
             if (notificationMap != null) {
@@ -646,6 +669,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         Notificare.shared().removeNotificationReceivedListener(this);
         Notificare.shared().setForeground(false);
         Notificare.shared().getEventLogger().logEndSession();
+        Notificare.shared().removeBillingReadyListener(this);
     }
 
     /**
@@ -709,4 +733,32 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         return null;
     }
 
+
+    @Override
+    public void onBillingReady() {
+        if (!isBillingReady) {
+            Notificare.shared().getBillingManager().refresh(this);
+        }
+    }
+
+    @Override
+    public void onPurchaseFinished(BillingResult billingResult, Purchase purchase) {
+        isBillingReady = false;
+        Notificare.shared().getBillingManager().refresh(this);
+    }
+
+    @Override
+    public void onRefreshFinished() {
+        WritableMap payload = Arguments.createMap();
+        List<NotificareProduct> list = Notificare.shared().getBillingManager().getProducts();
+        payload.putArray("products", NotificareUtils.mapProducts(list));
+        sendEvent("didLoadStore", payload, true);
+    }
+
+    @Override
+    public void onRefreshFailed(NotificareError notificareError) {
+        WritableMap payload = Arguments.createMap();
+        payload.putString("error", notificareError.getMessage());
+        sendEvent("didLoadStore", payload, true);
+    }
 }

@@ -1,5 +1,8 @@
 package re.notifica.reactnative;
 
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -7,7 +10,9 @@ import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -18,6 +23,7 @@ import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareContent;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
+import re.notifica.model.NotificareProduct;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.util.ISODateFormatter;
 
@@ -186,6 +192,35 @@ public class NotificareUtils {
         inboxItemMap.putString("time", ISODateFormatter.format(notificareInboxItem.getTimestamp()));
         inboxItemMap.putBoolean("opened", notificareInboxItem.getStatus());
         return inboxItemMap;
+    }
+
+    public static WritableArray mapProducts(List<NotificareProduct> products) {
+        WritableArray productList = Arguments.createArray();
+
+        for (NotificareProduct product : products){
+
+            WritableMap productItemMap = Arguments.createMap();
+            productItemMap.putString("type", product.getType());
+            productItemMap.putString("identifier", product.getIdentifier());
+            productItemMap.putString("name", product.getName());
+            productItemMap.putString("date", ISODateFormatter.format(product.getDate()));
+
+            WritableMap skuDetails = Arguments.createMap();
+            productItemMap.putString("type", product.getSkuDetails().getType());
+            productItemMap.putString("description", product.getSkuDetails().getDescription());
+            productItemMap.putString("price", product.getSkuDetails().getPrice());
+            productItemMap.putString("currencyCode", product.getSkuDetails().getPriceCurrencyCode());
+            productItemMap.putString("productId", product.getSkuDetails().getProductId());
+            productItemMap.putString("title", product.getSkuDetails().getTitle());
+            productItemMap.putDouble("priceAmount", product.getSkuDetails().getPriceAmount());
+            productItemMap.putDouble("priceAmountMicros", product.getSkuDetails().getPriceAmountMicros());
+            productItemMap.putMap("skuDetails", skuDetails);
+
+            productList.pushMap(productItemMap);
+        }
+
+
+        return productList;
     }
 
 }

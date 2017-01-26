@@ -15,15 +15,6 @@ public class NotificareReceiver extends DefaultIntentReceiver {
     private static final String TAG = NotificareReceiver.class.getSimpleName();
 
     @Override
-    public void onNotificationOpenRegistered(NotificareNotification notification, Boolean handled) {
-        WritableMap payload = Arguments.createMap();
-        WritableMap message = Arguments.createMap();
-        message.putString("id", notification.getNotificationId());
-        payload.putMap("notification", message);
-        NotificareEventEmitter.getInstance().sendEvent("didOpenNotification", payload, true);
-    }
-
-    @Override
     public void onUrlClicked(Uri urlClicked, Bundle extras) {
         WritableMap map = Arguments.fromBundle(extras);
         map.putString("url", urlClicked.toString());
