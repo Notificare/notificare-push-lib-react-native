@@ -19,13 +19,13 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 10000
-        versionName "1.0"
+        versionCode 10101
+        versionName "1.1.1"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -34,5 +34,5 @@ android {
 
 dependencies {
     compile "com.facebook.react:react-native:+"
-    compile "re.notifica:notificare-push-lib-android:1.9.2"
+    compile "re.notifica:notificare-push-lib-android:1.9.3"
 }
