@@ -24,6 +24,7 @@
 
 @interface NotificarePassbook : NSObject <NotificationType,PKAddPassesViewControllerDelegate, UIWebViewDelegate>
 
+
 @property (nonatomic, assign) id<NotificationDelegate> delegate;
 @property (nonatomic, strong) NotificareNotification * notification;
 @property (nonatomic, strong) NotificareActions * notificareActions;
@@ -32,8 +33,10 @@
 @property (strong, nonatomic) UINavigationController * navigationController;
 @property (strong, nonatomic) UIBarButtonItem * closeButton;
 @property (strong, nonatomic) UIBarButtonItem * actionsButton;
+
 @property (strong, nonatomic) PKPassLibrary * passLib;
 @property (strong, nonatomic) PKPass * pass;
+
 @property (strong, nonatomic) UIButton * button;
 @property (strong, nonatomic) UIViewController * originalView;
 @property (strong, nonatomic) UIWebView * webView;

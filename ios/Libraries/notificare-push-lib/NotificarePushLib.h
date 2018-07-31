@@ -11,7 +11,6 @@
 #import "Notificare.h"
 #import "NSData+Hex.h"
 #import "NotificareActions.h"
-#import "NotificareSRWebSocket.h"
 #import "NotificareNotification.h"
 #import <CoreLocation/CoreLocation.h>
 #import <StoreKit/StoreKit.h>
@@ -34,6 +33,7 @@
 #import "NotificareContent.h"
 #import "NotificareAction.h"
 #import "NotificareAsset.h"
+#import "NotificareScannable.h"
 #import "NotificareNetworkHost.h"
 
 /**
@@ -101,31 +101,15 @@ typedef enum  {
 @optional
 
 /*!
- * @brief Optional. This delegate method will be triggered after a register for websockets
- * @param uuid A NSString representing the device UUID
+ * @brief Optional. This delegate method will be triggered when a launch URL is detected.
+ * @param launchURL A NSURL object holding the launch URL
  */
-- (void)notificarePushLib:(NotificarePushLib *)library didRegisterForWebsocketsNotifications:(NSString *)uuid;
-/*!
- * @brief Optional. This delegate method will be triggered when a websocket notification is received.
- * @param info A NSDictionary containing notification received
- */
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveWebsocketNotification:(NSDictionary *)info;
-/*!
- * @brief Optional. This delegate method will be triggered whenever a websocket connection fails to register a device.
- * @param error A NSError object
- */
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToRegisterWebsocketNotifications:(NSError *)error;
-/*!
- * @brief Optional. This delegate method will be triggered when the websocket connection is closed.
- * @param reason A NSError object
- */
-- (void)notificarePushLib:(NotificarePushLib *)library didCloseWebsocketConnection:(NSString *)reason;
-
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLaunchURL:(NSURL *)launchURL;
 /*!
  * @brief Optional. This delegate method will be triggered when a user clicks a notification from the lock screen or notification center.
  * @param notification A UNNotification object holding the APNS payload
  */
-- (void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification;
+- (void)notificarePushLib:(NotificarePushLib *)library willHandleNotification:(UNNotification *)notification NS_AVAILABLE_IOS(10.0);
 
 /*!
  * @brief Optional. This delegate method will be triggered when a system (silent) remote notification is received.
@@ -330,6 +314,18 @@ typedef enum  {
  */
 - (void)notificarePushLib:(NotificarePushLib *)library didFinishDownloadContent:(SKDownload *)download;
 
+/*!
+ * @brief Optional. This delegate method will be triggered whenever a Scannable Session invalidates.
+ * @param error A NSError object
+ */
+- (void)notificarePushLib:(NotificarePushLib *)library didInvalidateScannableSessionWithError:(NSError *)error;
+
+/*!
+ * @brief Optional. This delegate method will be triggered whenever a Scannable Session detects an object.
+ * @param scannable A NotificareScannable object
+ */
+- (void)notificarePushLib:(NotificarePushLib *)library didDetectScannable:(NotificareScannable *)scannable;
+
 @required
 
 /*!
@@ -344,7 +340,7 @@ typedef enum  {
 @end
 
 
-@interface NotificarePushLib : NSObject <NotificareSRWebSocketDelegate,NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, UNUserNotificationCenterDelegate>
+@interface NotificarePushLib : NSObject <NotificareDelegate,NotificareActionsDelegate,CLLocationManagerDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, UNUserNotificationCenterDelegate>
 
 /*!
  *  @abstract Protocol of NotificarePushLib class that handles events
@@ -405,7 +401,7 @@ typedef enum  {
  *	A UNUserNotificationCenter object holds a reference to the device notification center.
  *
  */
-@property (strong, nonatomic) UNUserNotificationCenter * notificationCenter;
+@property (strong, nonatomic) UNUserNotificationCenter * notificationCenter NS_AVAILABLE_IOS(10.0);
 
 /*!
  *  @abstract The UNNotificationCategoryOptions constants
@@ -415,7 +411,7 @@ typedef enum  {
  *	A UNNotificationCategoryOptions holds constants indicating how to handle notifications for categories. Possible values are: UNNotificationCategoryOptionNone, UNNotificationCategoryOptionCustomDismissAction, UNNotificationCategoryOptionAllowInCarPlay. If none is provided it will default to UNNotificationCategoryOptionCustomDismissAction.
  *
  */
-@property (nonatomic,assign) UNNotificationCategoryOptions notificationCategoryOptions;
+@property (nonatomic,assign) UNNotificationCategoryOptions notificationCategoryOptions NS_AVAILABLE_IOS(10.0);
 
 /*!
  *  @abstract The UNNotificationPresentationOptions constants
@@ -425,7 +421,7 @@ typedef enum  {
  *	A UNNotificationPresentationOptions holds constants indicating how to handle notifications when app is active. Possible values are: UNNotificationPresentationOptionAlert, UNNotificationPresentationOptionBadge, UNNotificationPresentationOptionSound or UNNotificationPresentationOptionNone. If none is provided it will default to UNNotificationPresentationOptionNone.
  *
  */
-@property (nonatomic,assign) UNNotificationPresentationOptions notificationPresentationOptions;
+@property (nonatomic,assign) UNNotificationPresentationOptions notificationPresentationOptions NS_AVAILABLE_IOS(10.0);
 
 /*!
  *  @abstract the apiID key
@@ -539,7 +535,7 @@ typedef enum  {
  *  @abstract Boolean for checking if position is being currently being updated
  *
  */
-@property (assign) BOOL isFixingGPS;
+@property (assign) BOOL isFixingGPS __attribute__((deprecated("this property is not used anymore since 1.14.0.")));
 
 
 /*!
@@ -652,7 +648,7 @@ typedef enum  {
  *	A BOOL to flag when a location updates are being deferred
  */
 
-@property (nonatomic, assign) BOOL isDeferringUpdates;
+@property (nonatomic, assign) BOOL isDeferringUpdates __attribute__((deprecated("this property is not used anymore since 1.14.0.")));
 
 /*!
  *  @abstract Allow background location updates flag
@@ -660,7 +656,7 @@ typedef enum  {
  *	A BOOL to flag when a location manager should allow background updates (mandatory for background mode in iOS9 +)
  */
 
-@property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates;
+@property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates __attribute__((deprecated("this property is not used anymore since 1.14.0.")));
 
 /*!
  *  @abstract Activity type for location manager
@@ -668,7 +664,7 @@ typedef enum  {
  *	Activity type definition for location manager, by default it is set to CLActivityTypeOther
  */
 
-@property (nonatomic, assign) CLActivityType activityType;
+@property (nonatomic, assign) CLActivityType activityType __attribute__((deprecated("this property is not used anymore since 1.14.0.")));
 
 /*!
  *  @abstract Beacons
@@ -870,14 +866,14 @@ typedef enum  {
  *  @seealso
  *  unregisterForWebsockets:
  */
--(void)registerForWebsockets;
+-(void)registerForWebsockets __attribute__((deprecated("Websockets no longer supported, use APNS instead")));
 /*!
  *  @abstract Unregister for WebSockets Notifications
  *
  *  @discussion
  *  Closes the WebSockets channel
  */
--(void)unregisterForWebsockets;
+-(void)unregisterForWebsockets __attribute__((deprecated("Websockets no longer supported, use APNS instead")));
 
 /*!
  *  @abstract Register Device Anonymously for WebSockets
@@ -898,7 +894,7 @@ typedef enum  {
  } errorHandler:^(NSError *error) {
  }];
  */
-- (void)registerDeviceForWebsockets:(NSString *)uuid completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)registerDeviceForWebsockets:(NSString *)uuid completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error  __attribute__((deprecated("Websockets no longer supported, use APNS instead")));
 /*!
  *  @abstract Register Device with ID for WebSockets
  *
@@ -921,7 +917,7 @@ typedef enum  {
  } errorHandler:^(NSError *error) {
  }];
  */
-- (void)registerDeviceForWebsockets:(NSString *)uuid withUserID:(NSString *)userID completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)registerDeviceForWebsockets:(NSString *)uuid withUserID:(NSString *)userID completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error __attribute__((deprecated("Websockets no longer supported, use APNS instead")));
 /*!
  *  @abstract Register Device with ID
  *
@@ -945,7 +941,7 @@ typedef enum  {
  } errorHandler:^(NSError *error) {
  }];
  */
-- (void)registerDeviceForWebsockets:(NSString *)uuid withUserID:(NSString *)userID withUsername:(NSString *)username completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error;
+- (void)registerDeviceForWebsockets:(NSString *)uuid withUserID:(NSString *)userID withUsername:(NSString *)username completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)error __attribute__((deprecated("Websockets no longer supported, use APNS instead")));
 
 /*!
  *  @abstract Unregister Device
@@ -1205,7 +1201,7 @@ typedef enum  {
  *  This method will require the background mode in your project capabilities to be set to remote notifications.
  *  @param notification A UNNotification containing the notification object
  */
-- (void)handleNotification:(UNNotification *)notification completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
+- (void)handleNotification:(UNNotification *)notification completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock NS_AVAILABLE_IOS(10.0);
 
 /*!
  *  @abstract Handle Notification
@@ -1515,14 +1511,7 @@ typedef enum  {
  *  @return A NSString representing the path to the product's content
  */
 - (NSString *)sdkVersion;
-/*!
- *  @abstract Passes list
- *
- *  @discussion
- *  Retrieve a list of passes added to the Passbook app that this app can access
- *  @return A NSArray containing PKPasses objects
- */
--(NSArray *)myPasses;
+
 /*!
  *  @abstract Wallet Pass Object
  *
@@ -1594,6 +1583,21 @@ typedef enum  {
  * @return The NotificareNetworkOperation that is being executed
  */
 - (NotificareNetworkOperation *)doCloudHostOperation:(NSString *)HTTPMethod path:(NSString *)path URLParams:(NSDictionary<NSString *, NSString *> * _Nullable)URLParams bodyJSON:(id _Nullable)bodyJSON successHandler:(SuccessBlock)successHandler errorHandler:(OperationErrorBlock)errorHandler;
+/*!
+ * @abstract Basic request method for Cloud API
+ *
+ * @discussion
+ * Creates and executes a Cloud API request.
+ * @param HTTPMethod HTTP method, i.e. @"POST"
+ * @param path The relative path of the request, i.e. device
+ * @param URLParams URL encoded parameters that are added to the request's URL
+ * @param customHeaders Key/value pairs for optional custom HTTPS headers
+ * @param bodyJSON The JSON payload for the request's body
+ * @param successHandler SuccessBlock code block that is executed when the request completes successfully
+ * @param errorHandler OperationErrorBlock code block that is executed when the request fails
+ * @return The NotificareNetworkOperation that is being executed
+ */
+- (NotificareNetworkOperation *)doCloudHostOperation:(NSString *)HTTPMethod path:(NSString *)path URLParams:(NSDictionary<NSString *, NSString *> * _Nullable)URLParams customHeaders:(NSDictionary<NSString *, NSString *> * _Nullable)customHeaders bodyJSON:(id _Nullable)bodyJSON successHandler:(SuccessBlock)successHandler errorHandler:(OperationErrorBlock)errorHandler;
 
 /*!
  *  @abstract Fetch Rich Content Attachments
@@ -1620,6 +1624,35 @@ typedef enum  {
  *  @param data A NSDictionary holding the userDataFields to be updated
  */
 - (void)updateUserData:(NSDictionary *)data completionHandler:(SuccessBlock)info errorHandler:(ErrorBlock)errorBlock;
+
+/*!
+ *  @abstract Start a Scannable session with QRCode scanner built-in view
+ *
+ *  @discussion
+ *  Use this method to start a Scannable Session
+ *  When you implement this method it can/will trigger both - (void)notificarePushLib:(NotificarePushLib *)library didInvalidateScannableSessionWithError:(NSError *)error or - (void)notificarePushLib:(NotificarePushLib *)library didDetectScannable:(NSArray *)messages delegate methods.
+ */
+-(void)startScannableSessionWithQRCode;
+
+/*!
+ *  @abstract Fetch a scannable
+ *
+ *  @discussion
+ *  Use this method to manually fetch a scannable
+ *  This method will be useful if you are building your own custom scanning functionality and only require the API request
+ * @param message The string we should look for
+ *  When you implement this method it can/will trigger both - (void)notificarePushLib:(NotificarePushLib *)library didInvalidateScannableSessionWithError:(NSError *)error or - (void)notificarePushLib:(NotificarePushLib *)library didDetectScannable:(NSArray *)messages delegate methods.
+ */
+-(void)fetchScannable:(NSString *)message;
+
+/*!
+ *  @abstract Parse URI Payload
+ *
+ *  @discussion
+ *  This is a helper method to parse a payload of a tag and retrieve it's encoded URL
+ *  @param data A NSData object from a tag payload
+ */
+- (nullable NSString *)parseURIPayload:(NSData*)data;
 
 @end
 
