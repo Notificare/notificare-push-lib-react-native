@@ -8,7 +8,7 @@ Once you have met all the requirements and you have prepared your machine for Re
 ### Install the module 
 
 ```sh
-react-native install notificare-push-lib-react-native --save
+react-native install notificare-push-lib-react-native
 ```
 
 ### Android
@@ -24,7 +24,7 @@ Add the following as a dependency in the android/app/build.gradle file
 ```gradle
 dependencies {
     ...
-    compile project(':notificare-push-lib-react-native')
+    implementation project(':notificare-push-lib-react-native')
     ...
 }
 ```
