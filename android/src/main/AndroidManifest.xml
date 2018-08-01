@@ -26,16 +26,6 @@
             </intent-filter>
         </service>
 
-        <service android:name="re.notifica.push.fcm.RegistrationService" android:exported="false" />
-
-        <service android:name="re.notifica.push.gcm.TaskService"
-            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
-            </intent-filter>
-        </service>
-
         <receiver android:name="re.notifica.reactnative.NotificareReceiver" />
 
     </application>

@@ -142,13 +142,11 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingLeft: 10,
     paddingRight: 5,
-    backgroundColor: '#F6F6F6',
+    backgroundColor: '#F6F6F6'
   },
   text: {
     flex: 1,
     fontSize: 12,
   }
 });
-
-AppRegistry.registerComponent('AwesomeProject', () => AwesomeProject);
 
