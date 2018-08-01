@@ -8,11 +8,11 @@ Once you have met all the requirements and you have prepared your machine for Re
 ### Install the module 
 
 ```sh
-npm install notificare-push-lib-react-native --save
+react-native install notificare-push-lib-react-native --save
 ```
 
 ### Android
-Edit the android/settings.gradle file
+The above step should do this for you, but it's good to check if it did change the android/settings.gradle file:
 
 ```gradle
 include ':notificare-push-lib-react-native'
@@ -31,7 +31,7 @@ dependencies {
 Follow the rest of the implementation on the [Notificare Documentation](https://docs.notifica.re/sdk/implementation/)
 
 ### iOS
-Make sure our native library is linked to your project
+The install step should do this for you, but if you want to make sure our native library is linked to your project, use:
 
 ```sh
 react-native link
