@@ -12,12 +12,6 @@ react-native install notificare-push-lib-react-native
 ```
 
 ### Android
-The above step should do this for you, but it's good to check if it did change the android/settings.gradle file:
-
-```gradle
-include ':notificare-push-lib-react-native'
-project(':notificare-push-lib-react-native').projectDir = file('../node_modules/notificare-push-lib-react-native/android')
-```
 
 Add the following as a dependency in the android/app/build.gradle file
 
@@ -28,17 +22,10 @@ dependencies {
     ...
 }
 ```
-Follow the rest of the implementation on the [Notificare Documentation](https://docs.notifica.re/sdk/implementation/)
+Follow the rest of the implementation on the [Notificare Documentation](https://docs.notifica.re/sdk/v1/react-native/android/implementation/)
 
 ### iOS
-The install step should do this for you, but if you want to make sure our native library is linked to your project, use:
 
-```sh
-react-native link
-```
-
-
-
-Follow the rest of the implementation on the [Notificare Documentation](https://docs.notifica.re/sdk/implementation/)
+Follow the rest of the implementation on the [Notificare Documentation](https://docs.notifica.re/sdk/v1/react-native/ios/implementation/)
 
 
