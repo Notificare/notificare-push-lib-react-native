@@ -12,6 +12,7 @@
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>
   +(void)launch:(NSDictionary *)launchOptions;
+  +(void)setPresentationOptions:(UNNotificationPresentationOptions)options NS_AVAILABLE_IOS(10.0);
   +(void)registerDevice:(NSData *)deviceToken completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
   +(void)handleNotification:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
   + (void)handleAction:(NSString *)identifier forNotification:(NSDictionary *)userInfo withData:(NSDictionary *)data completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;

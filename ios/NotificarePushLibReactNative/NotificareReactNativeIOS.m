@@ -16,6 +16,7 @@
 
 static NotificareReactNativeIOS *instance = nil;
 static PushHandler *pushHandler = nil;
+static UNNotificationPresentationOptions presentationOptions = UNNotificationPresentationOptionNone;
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v) ([[[UIDevice currentDevice] systemVersion] compare:(v) options:NSNumericSearch] != NSOrderedAscending)
 
@@ -33,6 +34,17 @@ static PushHandler *pushHandler = nil;
   [defaults setObject:launchOptions forKey:@"notificareLaunchOptions"];
   [defaults synchronize];
 
+}
+
++ (void)setPresentationOptions:(UNNotificationPresentationOptions)options {
+    
+    if (options){
+        presentationOptions = options;
+        if ([NotificarePushLib shared]) {
+            [[NotificarePushLib shared] setNotificationPresentationOptions:options];
+        }
+    }
+    
 }
 
 + (void)handleNotification:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock{
@@ -152,6 +164,10 @@ RCT_EXPORT_METHOD(launch){
   [[NotificarePushLib shared] handleOptions:[defaults objectForKey:@"notificareLaunchOptions"]];
   [defaults setObject:nil forKey:@"notificareLaunchOptions"];
   [defaults synchronize];
+    
+  if (presentationOptions) {
+    [[NotificarePushLib shared] setNotificationPresentationOptions:presentationOptions];
+  }
 }
 
 RCT_EXPORT_METHOD(registerForNotifications) {
