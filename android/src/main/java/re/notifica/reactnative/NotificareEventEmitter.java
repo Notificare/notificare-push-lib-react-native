@@ -16,6 +16,8 @@ public class NotificareEventEmitter {
 
     private static NotificareEventEmitter INSTANCE = null;
 
+    private static final Object lock = new Object();
+
     private ReactContext context;
     private Boolean mounted = false;
     private List<String> eventQueue;
@@ -68,8 +70,8 @@ public class NotificareEventEmitter {
      */
     public void sendEvent(String eventName, @Nullable ReadableMap params, Boolean queue) {
         Log.i(TAG, "send event " + eventName);
-        if (context.hasActiveCatalystInstance() && this.context.hasCurrentActivity() && mounted) {
-            Log.i(TAG, "sent event to " + this.context.getCurrentActivity());
+        if (context != null && context.hasActiveCatalystInstance() && context.hasCurrentActivity() && mounted) {
+            Log.i(TAG, "sent event to " + context.getCurrentActivity());
             context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(
                     eventName, params
             );
@@ -92,17 +94,28 @@ public class NotificareEventEmitter {
     }
 
     public static void setup(ReactContext reactContext) {
-        if (NotificareEventEmitter.INSTANCE == null) {
-            NotificareEventEmitter.INSTANCE = new NotificareEventEmitter(reactContext);
-        } else {
-            Log.w(TAG, "Event Emitter initialized more than once");
-            if (NotificareEventEmitter.INSTANCE.context.getCatalystInstance().isDestroyed()) {
-                NotificareEventEmitter.INSTANCE = new NotificareEventEmitter(reactContext);
+        Log.i(TAG, "notificare event emitter setup");
+        synchronized (lock) {
+            if (INSTANCE == null) {
+                INSTANCE = new NotificareEventEmitter(reactContext);
+            } else {
+                Log.w(TAG, "Event Emitter initialized more than once");
+                if (INSTANCE.context != null && INSTANCE.context.getCatalystInstance().isDestroyed()) {
+                    INSTANCE = new NotificareEventEmitter(reactContext);
+                } else {
+                    INSTANCE.context = reactContext;
+                }
             }
         }
     }
 
     public static NotificareEventEmitter getInstance() {
-        return NotificareEventEmitter.INSTANCE;
+
+        synchronized (lock) {
+            if (INSTANCE == null) {
+                INSTANCE = new NotificareEventEmitter(null);
+            }
+            return INSTANCE;
+        }
     }
 }
