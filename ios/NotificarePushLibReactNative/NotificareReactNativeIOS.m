@@ -1139,7 +1139,11 @@ RCT_EXPORT_METHOD(logCustomEvent:(NSString *)name andData:(NSDictionary *)data  
     for (NotificareContent * c in [notification notificationContent]) {
         NSMutableDictionary * cont = [NSMutableDictionary dictionary];
         [cont setObject:[c type] forKey:@"type"];
-        [cont setObject:[c data] forKey:@"data"];
+        if ([c dataDictionary]) {
+            [cont setObject:[c dataDictionary] forKey:@"data"];
+        } else {
+            [cont setObject:[c data] forKey:@"data"];
+        }
         [content addObject:cont];
     }
     [trans setObject:content forKey:@"content"];
