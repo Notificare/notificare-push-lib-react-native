@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import {
   AppRegistry,
-  ListView,
+  FlatList,
   StyleSheet,
   Text,
   NativeModules,
@@ -23,16 +23,14 @@ export default class AwesomeProject extends Component {
   
   constructor(props) {
     super(props);
-    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     this.state = {
-      dataSource: ds.cloneWithRows([])
+      dataSource: []
     };
     this._reloadInbox();
   }
 
   componentDidMount() {
     console.log('componentDidMount');
-    this.setState({mounts: this.state.mounts + 1});
 
     Notificare.mount();
 
@@ -97,7 +95,7 @@ export default class AwesomeProject extends Component {
             if (!error) {
               console.log(data);
               this.setState({
-                dataSource : this.state.dataSource.cloneWithRows(data.inbox)
+                dataSource : data.inbox
               });
             }
         });
@@ -106,25 +104,25 @@ export default class AwesomeProject extends Component {
   render() {
     return (
         <View style={styles.view}>
-        <ListView
-          enableEmptySections={true}
-          dataSource={this.state.dataSource}
-          renderRow={this.renderRow}
+          <FlatList
+              data={this.state.dataSource}
+              renderItem={this.renderRow}
+              keyExtractor={(item, index) => index.toString()}
           />
         </View>
     );
   }
 
-  renderRow (rowData) {
+  renderRow ({item}) {
         return (
           <TouchableHighlight>
           <View>
             <View style={styles.row}>
                 <Text style={styles.text}>
-                {rowData.message}
+                {item.message}
                 </Text>
                 <Text style={styles.text}>
-                  {rowData.time}
+                  {item.time}
                 </Text>
             </View>
           </View>

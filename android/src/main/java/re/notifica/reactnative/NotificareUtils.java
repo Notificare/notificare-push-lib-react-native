@@ -4,11 +4,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,16 +25,19 @@ import javax.annotation.Nullable;
 import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
+import re.notifica.model.NotificareAttachment;
 import re.notifica.model.NotificareContent;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareProduct;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.util.ISODateFormatter;
+import re.notifica.util.Log;
 
 
 public class NotificareUtils {
 
+    public static final String TAG = NotificareUtils.class.getSimpleName();
     /**
      * Create a Map from ReadableMap
      * @param data
@@ -78,7 +86,7 @@ public class NotificareUtils {
         infoMap.putString("name", notificareApplicationInfo.getName());
 
         WritableMap servicesMap = Arguments.createMap();
-        for (String key : notificareApplicationInfo.getServices().keySet()){
+        for (String key : notificareApplicationInfo.getServices().keySet()) {
             servicesMap.putBoolean(key, notificareApplicationInfo.getServices().get(key));
         }
         infoMap.putMap("services", servicesMap);
@@ -137,6 +145,17 @@ public class NotificareUtils {
             notificationMap.putArray("content", contentArray);
         }
 
+        if (notification.getAttachments().size() > 0) {
+            WritableArray attachmentsArray = Arguments.createArray();
+            for (NotificareAttachment a : notification.getAttachments()) {
+                WritableMap attachmentsMap = Arguments.createMap();
+                attachmentsMap.putString("mimeType", a.getMimeType());
+                attachmentsMap.putString("uri", a.getUri());
+                attachmentsArray.pushMap(attachmentsMap);
+            }
+            notificationMap.putArray("attachments", attachmentsArray);
+        }
+
         if (notification.getActions().size() > 0) {
             WritableArray actionsArray = Arguments.createArray();
             for (NotificareAction a : notification.getActions()) {
@@ -151,8 +170,114 @@ public class NotificareUtils {
             notificationMap.putArray("actions", actionsArray);
         }
 
+        notificationMap.putBoolean("partial", notification.isPartial());
         return notificationMap;
 
+    }
+
+    public static NotificareNotification createNotification(ReadableMap notificationMap) {
+        if (notificationMap.getBoolean("partial")) {
+            return null;
+        } else {
+            try {
+                JSONObject json = new JSONObject(notificationMap.toHashMap());
+                if (notificationMap.hasKey("id")) {
+                    json.put("_id", notificationMap.getString("id"));
+                }
+//                if (notificationMap.hasKey("message")) {
+//                    json.put("message", notificationMap.getString("message"));
+//                }
+//                if (notificationMap.hasKey("title")) {
+//                    json.put("title", notificationMap.getString("title"));
+//                }
+//                if (notificationMap.hasKey("subtitle")) {
+//                    json.put("subtitle", notificationMap.getString("subtitle"));
+//                }
+//                if (notificationMap.hasKey("type")) {
+//                    json.put("type", notificationMap.getString("type"));
+//                }
+//                if (notificationMap.hasKey("time")) {
+//                    json.put("time", notificationMap.getString("time"));
+//                }
+//                if (notificationMap.hasKey("partial")) {
+//                    json.put("partial", notificationMap.getBoolean("partial"));
+//                }
+//                if (notificationMap.hasKey("extra")) {
+//                    ReadableMap extra = notificationMap.getMap("extra");
+//                    JSONObject extraJson = new JSONObject();
+//                    while (extra.keySetIterator().hasNextKey()) {
+//                        String key = extra.keySetIterator().nextKey();
+//                        extraJson.put(key, extra.getString(key));
+//                    }
+//                    json.put("extra", extraJson);
+//                }
+//                if (notificationMap.hasKey("attachments")) {
+//                    ReadableArray attachments = notificationMap.getArray("attachments");
+//                    if (attachments != null) {
+//                        JSONArray attachmentsJson = new JSONArray();
+//                        for (int i = 0; i < attachments.size(); i++) {
+//                            ReadableMap attachment = attachments.getMap(i);
+//                            if (attachment != null && attachment.hasKey("mimeType") && attachment.hasKey("uri")) {
+//                                JSONObject attachmentJson = new JSONObject();
+//                                attachmentJson.put("mimeType", attachment.getString("mimeType"));
+//                                attachmentJson.put("uri", attachment.getString("uri"));
+//                                attachmentsJson.put(attachmentJson);
+//                            }
+//                        }
+//                        json.put("attachments", attachmentsJson);
+//                    }
+//                }
+//                if (notificationMap.hasKey("content")) {
+//                    ReadableArray content = notificationMap.getArray("content");
+//                    if (content != null) {
+//                        JSONArray contentJson = new JSONArray();
+//                        for (int i = 0; i < content.size(); i++) {
+//                            ReadableMap contentItem = content.getMap(i);
+//                            if (contentItem != null && contentItem.hasKey("type") && contentItem.hasKey("data")) {
+//                                JSONObject contentItemJson = new JSONObject();
+//                                contentItemJson.put("type", contentItem.getString("type"));
+//                                try {
+//                                    contentItemJson.put("data", new JSONObject(contentItem.getString("data")));
+//                                } catch (JSONException e) {
+//                                    contentItemJson.put("data", contentItem.getString("data"));
+//                                }
+//                                contentJson.put(contentItemJson);
+//                            }
+//                        }
+//                        json.put("content", contentJson);
+//                    }
+//                }
+//                if (notificationMap.hasKey("actions")) {
+//                    ReadableArray actions = notificationMap.getArray("actions");
+//                    if (actions != null) {
+//                        JSONArray actionsJson = new JSONArray();
+//                        for (int i = 0; i < actions.size(); i++) {
+//                            ReadableMap action = actions.getMap(i);
+//                            if (action != null && action.hasKey("label") && action.hasKey("type")) {
+//                                JSONObject actionJson = new JSONObject();
+//                                actionJson.put("label", action.getString("label"));
+//                                actionJson.put("type", action.getString("type"));
+//                                if (action.hasKey("target")) {
+//                                    actionJson.put("target", action.getString("target"));
+//                                }
+//                                if (action.hasKey("camera")) {
+//                                    actionJson.put("camera", action.getBoolean("camera"));
+//                                }
+//                                if (action.hasKey("keyboard")) {
+//                                    actionJson.put("keyboard", action.getBoolean("keyboard"));
+//                                }
+//                                actionsJson.put(actionJson);
+//                            }
+//                        }
+//                        json.put("actions", actionsJson);
+//                    }
+//                }
+                return new NotificareNotification(json);
+            } catch (JSONException e) {
+                Log.e(TAG,e.getMessage());
+                return null;
+            }
+        }
     }
 
     public static WritableMap mapAsset(NotificareAsset asset) {
@@ -206,14 +331,14 @@ public class NotificareUtils {
             productItemMap.putString("date", ISODateFormatter.format(product.getDate()));
 
             WritableMap skuDetails = Arguments.createMap();
-            productItemMap.putString("type", product.getSkuDetails().getType());
-            productItemMap.putString("description", product.getSkuDetails().getDescription());
-            productItemMap.putString("price", product.getSkuDetails().getPrice());
-            productItemMap.putString("currencyCode", product.getSkuDetails().getPriceCurrencyCode());
-            productItemMap.putString("productId", product.getSkuDetails().getProductId());
-            productItemMap.putString("title", product.getSkuDetails().getTitle());
-            productItemMap.putDouble("priceAmount", product.getSkuDetails().getPriceAmount());
-            productItemMap.putDouble("priceAmountMicros", product.getSkuDetails().getPriceAmountMicros());
+            skuDetails.putString("type", product.getSkuDetails().getType());
+            skuDetails.putString("description", product.getSkuDetails().getDescription());
+            skuDetails.putString("price", product.getSkuDetails().getPrice());
+            skuDetails.putString("currencyCode", product.getSkuDetails().getPriceCurrencyCode());
+            skuDetails.putString("productId", product.getSkuDetails().getProductId());
+            skuDetails.putString("title", product.getSkuDetails().getTitle());
+            skuDetails.putDouble("priceAmount", product.getSkuDetails().getPriceAmount());
+            skuDetails.putDouble("priceAmountMicros", product.getSkuDetails().getPriceAmountMicros());
             productItemMap.putMap("skuDetails", skuDetails);
 
             productList.pushMap(productItemMap);

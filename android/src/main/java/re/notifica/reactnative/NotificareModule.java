@@ -2,8 +2,6 @@ package re.notifica.reactnative;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -16,6 +14,8 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     private static final String TAG = NotificareModule.class.getSimpleName();
     private static final int DEFAULT_LIST_SIZE = 25;
 
-    private Map<String,NotificareNotification> notificationCache = new HashMap<>();
     private Boolean mounted = false;
     private Boolean isBillingReady = false;
 
@@ -223,24 +222,44 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      */
     @ReactMethod
     public void openNotification(ReadableMap notification) {
-        String notificationId = notification.getString("id");
-        if (notificationId != null && !notificationId.isEmpty()) {
-            if (notificationCache.containsKey(notificationId)) {
-                Notificare.shared().openNotification(getCurrentActivity(), notificationCache.get(notificationId));
-                notificationCache.remove(notificationCache.get(notificationId));
-            } else {
-                Notificare.shared().fetchNotification(notificationId, new NotificareCallback<NotificareNotification>() {
-                    @Override
-                    public void onSuccess(NotificareNotification notificareNotification) {
-                        Notificare.shared().openNotification(getCurrentActivity(), notificareNotification);
-                    }
+        Log.i(TAG, "trying to open notification");
+        if (notification.hasKey("id")) {
+            String notificationId = notification.getString("id");
+            if (notification.hasKey("inboxItemId") && notification.getString("inboxItemId") != null && !notification.getString("inboxItemId").isEmpty() && Notificare.shared().getInboxManager() != null) {
+                Log.i(TAG, "open with inbox id");
+                // This is an item opened with inboxItemId, so coming from NotificationManager open
+                NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(notification.getString("inboxItemId"));
+                if (notificareInboxItem != null) {
+                    Notificare.shared().openInboxItem(getCurrentActivity(), notificareInboxItem);
+                    Notificare.shared().getInboxManager().markItem(notificareInboxItem);
+                }
+            } else if (notificationId != null && !notificationId.isEmpty()) {
+                Log.i(TAG, "try open as is");
+                // We have a notificationId, let's see if we can create a notification from the payload, otherwise fetch from API
+                NotificareNotification notificareNotification = NotificareUtils.createNotification(notification);
+                if (notificareNotification != null) {
+                    try {
+                        Log.i(TAG, notificareNotification.toJSONObject().toString());
+                    } catch (JSONException e) {
 
-                    @Override
-                    public void onError(NotificareError notificareError) {
-                        Log.e(TAG, "error fetching notification: " + notificareError.getMessage());
                     }
-                });
+                    Notificare.shared().openNotification(getCurrentActivity(), notificareNotification);
+                } else {
+                    Notificare.shared().fetchNotification(notificationId, new NotificareCallback<NotificareNotification>() {
+                        @Override
+                        public void onSuccess(NotificareNotification notificareNotification) {
+                            Notificare.shared().openNotification(getCurrentActivity(), notificareNotification);
+                        }
+
+                        @Override
+                        public void onError(NotificareError notificareError) {
+                            Log.e(TAG, "error fetching notification: " + notificareError.getMessage());
+                        }
+                    });
+                }
             }
+        } else {
+            Log.i(TAG, "no id");
         }
     }
 
@@ -289,33 +308,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
             NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
             if (notificareInboxItem != null) {
                 Notificare.shared().openInboxItem(getCurrentActivity(), notificareInboxItem);
-            } else {
-                callback.invoke("inbox item not found", null);
-            }
-        } else {
-            callback.invoke("inbox not enabled", null);
-        }
-    }
-
-    @ReactMethod
-    public void removeFromInbox(ReadableMap inboxItem, Callback callback) {
-        if (Notificare.shared().getInboxManager() != null) {
-            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
-            if (notificareInboxItem != null) {
-                Notificare.shared().getInboxManager().removeItem(notificareInboxItem);
-            } else {
-                callback.invoke("inbox item not found", null);
-            }
-        } else {
-            callback.invoke("inbox not enabled", null);
-        }
-    }
-
-    @ReactMethod
-    public void markAsRead(ReadableMap inboxItem, Callback callback) {
-        if (Notificare.shared().getInboxManager() != null) {
-            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
-            if (notificareInboxItem != null) {
                 Notificare.shared().getInboxManager().markItem(notificareInboxItem);
             } else {
                 callback.invoke("inbox item not found", null);
@@ -326,17 +318,67 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
-    public void clearInbox(Callback callback) {
+    public void removeFromInbox(ReadableMap inboxItem, final Callback callback) {
         if (Notificare.shared().getInboxManager() != null) {
-            Notificare.shared().getInboxManager().clearInbox();
-            callback.invoke(null, "inbox cleared");
+            final NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                Notificare.shared().deleteInboxItem(notificareInboxItem.getItemId(), new NotificareCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        Notificare.shared().getInboxManager().removeItem(notificareInboxItem);
+                    }
+
+                    @Override
+                    public void onError(NotificareError error) {
+                        callback.invoke("error removing inbox item");
+                    }
+                });
+            } else {
+                callback.invoke("inbox item not found", null);
+            }
         } else {
             callback.invoke("inbox not enabled", null);
         }
     }
 
     @ReactMethod
-    public void fetchTags( final Callback callback ) {
+    public void markAsRead(ReadableMap inboxItem, final Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            final NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                Notificare.shared().getEventLogger().logOpenNotification(notificareInboxItem.getNotification().getNotificationId());
+                Notificare.shared().getInboxManager().markItem(notificareInboxItem);
+                callback.invoke(null, "inbox item marked as read");
+            } else {
+                callback.invoke("inbox item not found", null);
+            }
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
+    }
+
+    @ReactMethod
+    public void clearInbox(final Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().clearInbox(new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    Notificare.shared().getInboxManager().clearInbox();
+                    callback.invoke(null, "inbox cleared");
+                }
+
+                @Override
+                public void onError(NotificareError error) {
+                    callback.invoke("error clearing inbox");
+                }
+            });
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
+    }
+
+    @ReactMethod
+    public void fetchTags(final Callback callback) {
         Notificare.shared().fetchDeviceTags(new NotificareCallback<List<String>>() {
             @Override
             public void onError(NotificareError notificareError) {
@@ -472,8 +514,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void updateUserData(ReadableMap userData, final Callback callback) {
 
         Map<String, Object> fields = NotificareUtils.createMap(userData);
-
-        userData.keySetIterator();
         NotificareUserData data = new NotificareUserData();
         for (String key : fields.keySet()) {
             data.setValue(key, fields.get(key).toString());

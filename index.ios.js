@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import {
     AppRegistry,
-    ListView,
+    FlatList,
     StyleSheet,
     Text,
     NativeModules,
@@ -24,9 +24,8 @@ export default class App extends Component {
     constructor(props){
         super(props);
         this.eventEmitter = new NativeEventEmitter(Notificare);
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.state = {
-            dataSource: ds.cloneWithRows([])
+            dataSource: []
         };
 
         this._reloadInbox();
@@ -244,7 +243,7 @@ export default class App extends Component {
             if (!error) {
             console.log(data);
             this.setState({
-                dataSource : this.state.dataSource.cloneWithRows(data.inbox)
+                dataSource : data.inbox
             });
         }
     });
@@ -254,29 +253,29 @@ export default class App extends Component {
     render() {
         return (
             <View style={styles.view}>
-    <ListView
-        enableEmptySections={true}
-        dataSource={this.state.dataSource}
-        renderRow={this.renderRow}
-        />
-        </View>
-    );
+                <FlatList
+                    data={this.state.dataSource}
+                    renderItem={this.renderRow}
+                    keyExtractor={(item, index) => index.toString()}
+                />
+            </View>
+        );
     }
 
-    renderRow (rowData) {
+    renderRow ({item}) {
         return (
             <TouchableHighlight>
-            <View>
-            <View style={styles.row}>
-    <Text style={styles.text}>
-        {rowData.message}
-    </Text>
-        <Text style={styles.text}>
-        {rowData.time}
-    </Text>
-        </View>
-        </View>
-        </TouchableHighlight>
+                <View>
+                    <View style={styles.row}>
+                        <Text style={styles.text}>
+                            {item.message}
+                        </Text>
+                            <Text style={styles.text}>
+                            {item.time}
+                        </Text>
+                    </View>
+                </View>
+            </TouchableHighlight>
     );
     }
 }

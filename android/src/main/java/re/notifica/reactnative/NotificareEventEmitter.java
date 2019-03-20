@@ -71,7 +71,7 @@ public class NotificareEventEmitter {
     public void sendEvent(String eventName, @Nullable ReadableMap params, Boolean queue) {
         Log.i(TAG, "send event " + eventName);
         if (context != null && context.hasActiveCatalystInstance() && context.hasCurrentActivity() && mounted) {
-            Log.i(TAG, "sent event to " + context.getCurrentActivity());
+            Log.i(TAG, "sent event to current activity");
             context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(
                     eventName, params
             );
