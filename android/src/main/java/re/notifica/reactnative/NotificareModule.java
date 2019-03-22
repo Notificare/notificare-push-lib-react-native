@@ -217,6 +217,19 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     /**
+     * Get device info
+     * @param callback
+     */
+    @ReactMethod
+    public void fetchDevice(Callback callback) {
+        WritableMap map = Arguments.createMap();
+        map.putString("deviceID", Notificare.shared().getDeviceId());
+        map.putString("username", Notificare.shared().getUserName());
+        map.putString("userID", Notificare.shared().getUserId());
+        callback.invoke(null, map);
+    }
+
+    /**
      * Open notification in a NotificationActivity
      * @param notification
      */
@@ -309,6 +322,20 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
             if (notificareInboxItem != null) {
                 Notificare.shared().openInboxItem(getCurrentActivity(), notificareInboxItem);
                 Notificare.shared().getInboxManager().markItem(notificareInboxItem);
+            } else {
+                callback.invoke("inbox item not found", null);
+            }
+        } else {
+            callback.invoke("inbox not enabled", null);
+        }
+    }
+
+    @ReactMethod
+    public void fetchNotificationForInboxItem(ReadableMap inboxItem, final Callback callback) {
+        if (Notificare.shared().getInboxManager() != null) {
+            NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
+            if (notificareInboxItem != null) {
+                callback.invoke(null, NotificareUtils.mapNotification(notificareInboxItem.getNotification()));
             } else {
                 callback.invoke("inbox item not found", null);
             }

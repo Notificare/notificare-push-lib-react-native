@@ -34,15 +34,15 @@ export default class AwesomeProject extends Component {
 
     Notificare.mount();
 
-    DeviceEventEmitter.addListener('ready', function(e: Event) {
-        console.log(e);
+    DeviceEventEmitter.addListener('ready', function(data) {
+        console.log(data);
         Notificare.enableNotifications();
     });
 
-    DeviceEventEmitter.addListener('didReceiveDeviceToken', function(e: Event) {
-        console.log(e);
+    DeviceEventEmitter.addListener('didReceiveDeviceToken', function(data) {
+        console.log(data);
 
-        Notificare.registerDevice(e.device, null, null, (error, msg) => {
+        Notificare.registerDevice(data.device, null, null, (error, msg) => {
           if (!error) {
             Notificare.fetchTags((error, data) => {
               if (!error) {
@@ -72,15 +72,14 @@ export default class AwesomeProject extends Component {
 
     });
 
-
-    DeviceEventEmitter.addListener('notificationReceived', (e: Event) => {
-      console.log(e);
+    DeviceEventEmitter.addListener('notificationReceived', (data) => {
+      console.log(data);
       this._reloadInbox();
     });
 
-    DeviceEventEmitter.addListener('notificationOpened', (e: Event) => {
-      console.log(e);
-      Notificare.openNotification(e.notification);
+    DeviceEventEmitter.addListener('notificationOpened', (data) => {
+      console.log(data);
+      Notificare.openNotification(data.notification);
     });
   }
 

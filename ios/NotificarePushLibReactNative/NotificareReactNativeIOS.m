@@ -232,10 +232,21 @@ RCT_EXPORT_METHOD(registerDevice:(NSString *)deviceToken userID:(NSString *)user
 RCT_EXPORT_METHOD(fetchDevice:(RCTResponseSenderBlock)callback) {
   NotificareDevice * device = [[NotificarePushLib shared] myDevice];
   NSMutableDictionary * info = [NSMutableDictionary new];
-  [info setObject:[device deviceID] forKey:@"deviceID"];
-  [info setObject:[device username] forKey:@"username"];
-  [info setObject:[device userID] forKey:@"userID"];
-  [info setObject:[device userData] forKey:@"userData"];
+  if ([device deviceID]) {
+      [info setObject:[device deviceID] forKey:@"deviceID"];
+  } else {
+      [info setObject:[NSNull null] forKey:@"deviceID"];
+  }
+  if ([device username]) {
+      [info setObject:[device username] forKey:@"username"];
+  } else {
+      [info setObject:[NSNull null] forKey:@"username"];
+  }
+  if ([device userID]) {
+      [info setObject:[device userID] forKey:@"userID"];
+  } else {
+      [info setObject:[NSNull null] forKey:@"userID"];
+  }
   callback(@[[NSNull null], info]);
 }
 
@@ -575,6 +586,16 @@ RCT_EXPORT_METHOD(fetchNotification:(NSDictionary *)notification callback:(RCTRe
         callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
     }];
     
+}
+
+RCT_EXPORT_METHOD(fetchNotificationForInboxItem:(NSDictionary *)inboxItem callback:(RCTResponseSenderBlock)callback) {
+
+    [[NotificarePushLib shared] getNotification:[inboxItem objectForKey:@"inboxId"] completionHandler:^(NSDictionary * _Nonnull info) {
+        callback(@[[NSNull null], info]);
+    } errorHandler:^(NSError * _Nonnull error) {
+        callback(@[RCTJSErrorFromNSError(error), [NSNull null]]);
+    }];
+
 }
 
 RCT_EXPORT_METHOD(clearNotification:(NSDictionary *)notification) {
