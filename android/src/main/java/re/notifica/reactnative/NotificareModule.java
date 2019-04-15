@@ -194,6 +194,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         callback.invoke(Notificare.shared().isLocationUpdatesEnabled());
     }
 
+    @ReactMethod
+    public void fetchNotificationSettings(Callback callback) {
+        callback.invoke(Notificare.shared().checkAllowedUI());
+    }
+
     /**
      * Register device with Notificare API
      * @param deviceId
