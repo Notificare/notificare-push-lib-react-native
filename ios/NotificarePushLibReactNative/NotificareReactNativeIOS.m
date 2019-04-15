@@ -176,6 +176,18 @@ RCT_EXPORT_METHOD(registerForNotifications) {
   
 }
 
+RCT_EXPORT_METHOD(fetchNotificationSettings:(RCTResponseSenderBlock)callback) {
+    [[[NotificarePushLib shared] notificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        BOOL status = NO;
+        if ([settings authorizationStatus] == UNAuthorizationStatusAuthorized) {
+           status = YES;
+        }
+        [payload setObject:[NSNumber numberWithBool:status] forKey:@"granted"];
+        callback(@[[NSNull null], payload]);
+    }];
+}
+
 RCT_EXPORT_METHOD(startLocationUpdates) {
   
   [[NotificarePushLib shared] startLocationUpdates];
