@@ -8,15 +8,17 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import "../Libraries/notificare-push-lib/NotificarePushLib.h"
+#import "../Libraries/NotificarePushLib/NotificarePushLib.h"
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>
-  +(void)launch:(NSDictionary *)launchOptions;
-  +(void)setPresentationOptions:(UNNotificationPresentationOptions)options NS_AVAILABLE_IOS(10.0);
-  +(void)registerDevice:(NSData *)deviceToken completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
-  +(void)handleNotification:(NSDictionary *)notification forApplication:(UIApplication *)application completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
-  + (void)handleAction:(NSString *)identifier forNotification:(NSDictionary *)userInfo withData:(NSDictionary *)data completionHandler:(SuccessBlock)result errorHandler:(ErrorBlock)errorBlock;
-  + (void)handleOpenURL:(NSURL *)url;
+  +(void)launch:(NSDictionary * _Nullable)launchOptions;
+  +(void)setAuthorizationOptions:(nonnull UNAuthorizationOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)setPresentationOptions:(nonnull UNNotificationPresentationOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)setCategoryOptions:(nonnull UNNotificationCategoryOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)didRegisterForRemoteNotificationsWithDeviceToken:(nonnull NSData *)deviceToken;
+  +(void)didReceiveRemoteNotification:(nonnull NSDictionary *)userInfo completionHandler:(NotificareCompletionBlock)completionBlock;
+  +(void)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo withResponseInfo:(nullable NSDictionary *)responseInfo completionHandler:(NotificareCompletionBlock)completionBlock;
+  +(void)handleOpenURL:(nonnull NSURL *)url withOptions:(NSDictionary * _Nullable)options;
 @end
 
 @interface PushHandler : NSObject <NotificarePushLibDelegate>
