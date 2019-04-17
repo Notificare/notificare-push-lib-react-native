@@ -193,7 +193,7 @@ static NotificareReactNativeIOSUtils *utils;
     }
     
     NSMutableArray * content = [NSMutableArray array];
-    if ([dictionary objectForKey:@"content"] && [[dictionary objectForKey:@"content"] length] > 0) {
+    if ([dictionary objectForKey:@"content"] && [[dictionary objectForKey:@"content"] count] > 0) {
         for (NSDictionary *c in [dictionary objectForKey:@"content"]) {
             NotificareContent * cnt = [NotificareContent new];
             [cnt setType:[c objectForKey:@"type"]];
@@ -208,7 +208,7 @@ static NotificareReactNativeIOSUtils *utils;
     [notification setNotificationContent:content];
     
     NSMutableArray * actions = [NSMutableArray array];
-    if ([dictionary objectForKey:@"actions"] && [[dictionary objectForKey:@"actions"] length] > 0) {
+    if ([dictionary objectForKey:@"actions"] && [[dictionary objectForKey:@"actions"] count] > 0) {
         for (NSDictionary *a in [dictionary objectForKey:@"actions"]) {
             NotificareAction * act = [NotificareAction new];
             [act setActionLabel:[a objectForKey:@"label"]];
@@ -222,7 +222,7 @@ static NotificareReactNativeIOSUtils *utils;
     [notification setNotificationActions:actions];
     
     NSMutableArray * attachments = [NSMutableArray array];
-    if ([dictionary objectForKey:@"attachments"] && [[dictionary objectForKey:@"attachments"] length] > 0) {
+    if ([dictionary objectForKey:@"attachments"] && [[dictionary objectForKey:@"attachments"] count] > 0) {
         for (NSDictionary *at in [dictionary objectForKey:@"actions"]) {
             NotificareAttachment * att = [NotificareAttachment new];
             [att setAttachmentURI:[at objectForKey:@"uri"]];
@@ -233,6 +233,14 @@ static NotificareReactNativeIOSUtils *utils;
     [notification setNotificationAttachments:attachments];
     
     return notification;
+}
+
+-(NSDictionary *)dictionaryFromSystemNotification:(NotificareSystemNotification *)notification{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[notification notificationID] forKey:@"notificationID"];
+    [data setValue:[notification type] forKey:@"type"];
+    [data setValue:[notification extra] forKey:@"extra"];
+    return data;
 }
 
 -(NSDictionary *)dictionaryFromAction:(NotificareAction *)action{
@@ -416,6 +424,54 @@ static NotificareReactNativeIOSUtils *utils;
     [segment setSegmentId:[dictionary objectForKey:@"segmentId"]];
     [segment setSelected:[[dictionary objectForKey:@"selected"] boolValue]];
     return segment;
+}
+
+-(NSDictionary *)dictionaryFromLocation:(NotificareLocation *)location{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[location latitude] forKey:@"latitude"];
+    [data setValue:[location longitude] forKey:@"longitude"];
+    [data setValue:[location altitude] forKey:@"altitude"];
+    [data setValue:[location horizontalAccuracy] forKey:@"horizontalAccuracy"];
+    [data setValue:[location verticalAccuracy] forKey:@"verticalAccuracy"];
+    [data setValue:[location floor] forKey:@"floor"];
+    [data setValue:[location speed] forKey:@"speed"];
+    [data setValue:[location course] forKey:@"course"];
+    [data setValue:[location timestamp] forKey:@"timestamp"];
+    return data;
+}
+
+-(NSDictionary *)dictionaryFromBeacon:(NotificareBeacon *)beacon{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[beacon application] forKey:@"application"];
+    [data setValue:[beacon beaconId] forKey:@"beaconId"];
+    [data setValue:[beacon beaconName] forKey:@"beaconName"];
+    [data setValue:[beacon beaconRegion] forKey:@"beaconRegion"];
+    [data setValue:[[beacon beaconUUID] UUIDString] forKey:@"beaconUUID"];
+    [data setValue:[beacon beaconRegion] forKey:@"beaconMajor"];
+    [data setValue:[beacon beaconRegion] forKey:@"beaconMinor"];
+    //[data setValue:[beacon beacon] forKey:@"beacon"];
+    [data setObject:[NSNumber numberWithBool:[beacon beaconTriggers]] forKey:@"beaconTriggers"];
+    return data;
+}
+
+-(NSDictionary *)dictionaryFromRegion:(NotificareRegion *)region{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[region application] forKey:@"application"];
+    [data setValue:[region regionId] forKey:@"regionId"];
+    [data setValue:[region regionName] forKey:@"regionName"];
+    [data setValue:[region regionDescription] forKey:@"regionDescription"];
+    [data setValue:[region regionReferenceKey] forKey:@"regionReferenceKey"];
+    [data setValue:[region regionMajor] forKey:@"regionMajor"];
+    [data setValue:[region regionAddress] forKey:@"regionAddress"];
+    [data setValue:[region regionCountry] forKey:@"regionCountry"];
+    [data setValue:[region regionTags] forKey:@"regionTags"];
+    [data setValue:[region regionGeometry] forKey:@"regionGeometry"];
+    [data setValue:[region regionAdvancedGeometry] forKey:@"regionAdvancedGeometry"];
+    [data setValue:[region regionDistance] forKey:@"regionDistance"];
+    [data setValue:[region regionTimezone] forKey:@"regionTimezone"];
+    [data setValue:[region regionTimeZoneOffset] forKey:@"regionTimeZoneOffset"];
+    [data setValue:[region regionWeather] forKey:@"regionWeather"];
+    return data;
 }
 
 @end

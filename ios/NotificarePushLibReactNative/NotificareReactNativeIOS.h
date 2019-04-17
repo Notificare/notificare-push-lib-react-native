@@ -12,9 +12,9 @@
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>
   +(void)launch:(NSDictionary * _Nullable)launchOptions;
-  +(void)setAuthorizationOptions:(nonnull UNAuthorizationOptions)options NS_AVAILABLE_IOS(10.0);
-  +(void)setPresentationOptions:(nonnull UNNotificationPresentationOptions)options NS_AVAILABLE_IOS(10.0);
-  +(void)setCategoryOptions:(nonnull UNNotificationCategoryOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)setAuthorizationOptions:(UNAuthorizationOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)setPresentationOptions:(UNNotificationPresentationOptions)options NS_AVAILABLE_IOS(10.0);
+  +(void)setCategoryOptions:(UNNotificationCategoryOptions)options NS_AVAILABLE_IOS(10.0);
   +(void)didRegisterForRemoteNotificationsWithDeviceToken:(nonnull NSData *)deviceToken;
   +(void)didReceiveRemoteNotification:(nonnull NSDictionary *)userInfo completionHandler:(NotificareCompletionBlock)completionBlock;
   +(void)handleActionWithIdentifier:(nullable NSString *)identifier forRemoteNotification:(nonnull NSDictionary *)userInfo withResponseInfo:(nullable NSDictionary *)responseInfo completionHandler:(NotificareCompletionBlock)completionBlock;

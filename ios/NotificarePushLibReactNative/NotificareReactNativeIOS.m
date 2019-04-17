@@ -10,6 +10,7 @@
 #import <React/RCTLog.h>
 #import <React/RCTUtils.h>
 #import "NotificareReactNativeIOSUtils.h"
+#import "../Libraries/NotificarePushLib/UIImage+FromBundle.h"
 
 @implementation NotificareReactNativeIOS
 
@@ -77,10 +78,37 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
              @"urlOpened",
              @"deviceRegistered",
              @"notificationSettingsChanged",
-             @"launchUrlReceived"
+             @"launchUrlReceived",
+             @"inboxLoaded",
+             @"badgeUpdated",
+             @"remoteNotificationReceivedInBackground",
+             @"remoteNotificationReceivedInForeground",
+             @"systemNotificationReceivedInBackground",
+             @"systemNotificationReceivedInForeground",
+             @"unknownNotificationReceived",
+             @"unknownActionForNotificationReceived",
+             @"notificationWillOpen",
+             @"notificationOpened",
+             @"notificationClosed",
+             @"notificationFailedToOpen",
+             @"urlClickedInNotification",
+             @"actionWillExecute",
+             @"actionExecuted",
+             @"shouldPerformSelectorWithUrl",
+             @"actionNotExecuted",
+             @"actionFailedToExecute",
+             @"shouldOpenSettings",
+             @"locationServiceFailedToStart",
+             @"locationsUpdated",
+             @"monitoringForRegionFailed",
+             @"monitoringForRegionStarted",
+             @"stateForRegionChanged",
+             @"regionEntered",
+             @"regionExited",
+             @"rangingBeaconsFailed",
+             @"beaconsInRangeForRegion"
             ];
 }
-
 
 //- (NSArray<NSString*> *)supportedEvents {
 //    return @[@"notificationReceived", @"notificationOpened", @"ready", @"badge", @"systemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenURL", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent", @"didChangeAccountNotification", @"didFailToRequestAccessNotification", @"didValidateAccount", @"didFailToValidateAccount", @"didReceiveResetPasswordToken"];
@@ -92,14 +120,41 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
   return dispatch_get_main_queue();
 }
 
-- (void)dispatchEvent:(NSString *)event body:(NSDictionary *)notification {
+- (void)dispatchEvent:(NSString *)event body:(id)notification {
   [self sendEventWithName:event body:notification];
 }
 
+-(void)close{
+    [[[[UIApplication sharedApplication] keyWindow] rootViewController] dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+}
+
+-(UINavigationController*)navigationControllerForViewControllers:(id)object{
+    UINavigationController *navController = [UINavigationController new];
+    [[(UIViewController *)object navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithImage:[UIImage imageFromBundle:@"closeIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(close)]];
+    return navController;
+}
+
+-(UINavigationController*)navigationControllerForRootViewController{
+    UINavigationController * navController = (UINavigationController*)[[[UIApplication sharedApplication] keyWindow] rootViewController];
+    return navController;
+}
+
+-(BOOL)isViewController:(id)controller{
+    BOOL result = YES;
+    if ([[controller class] isEqual:[UIAlertController class]] ||
+        [[controller class] isEqual:[SKStoreProductViewController class]] ||
+        [[controller class] isEqual:[NSObject class]] ||
+        controller == nil) {
+        result = NO;
+    }
+    return result;
+}
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(initializeWithKey:(NSString * _Nullable)key andSecret:(NSString * _Nullable)secret){
+RCT_EXPORT_METHOD(initializeWithKeyAndSecret:(NSString * _Nullable)key secret:(NSString * _Nullable)secret){
     pushHandler = [[PushHandler alloc] init];
     [[NotificarePushLib shared] initializeWithKey:key andSecret:secret];
     [[NotificarePushLib shared] setDelegate:pushHandler];
@@ -370,6 +425,20 @@ RCT_REMAP_METHOD(clearPrivateNotification, notification:(nonnull NSDictionary *)
     
 }
 
+RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
+    
+    NotificareNotification * item = [[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification];
+    id controller = [[NotificarePushLib shared] controllerForNotification:item];
+    if ([self isViewController:controller]) {
+        UINavigationController *navController = [self navigationControllerForViewControllers:controller];
+        [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+            [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
+        }];
+    } else {
+        [[NotificarePushLib shared] presentNotification:item inNavigationController:[self navigationControllerForRootViewController] withController:controller];
+    }
+}
+
 RCT_REMAP_METHOD(reply, notification:(nonnull NSDictionary *)notification action:(nonnull NSDictionary *)action data:(nonnull NSDictionary *)data replyWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[NotificarePushLib shared] reply:[[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification] forAction:[[NotificareReactNativeIOSUtils shared] actionFromDictionary:action]  andData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
@@ -398,12 +467,18 @@ RCT_REMAP_METHOD(fetchInbox, fetchInboxWithResolver:(RCTPromiseResolveBlock)reso
     
 }
 
-RCT_EXPORT_METHOD(openInboxItem:(nonnull NSDictionary*)inboxItem) {
+RCT_EXPORT_METHOD(presentInboxItem:(nonnull NSDictionary*)inboxItem) {
     NotificareDeviceInbox * item = [[NotificareReactNativeIOSUtils shared] deviceInboxFromDictionary:inboxItem];
     [[[NotificarePushLib shared] inboxManager] openInboxItem:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            UINavigationController *navController = (UINavigationController *)[[[UIApplication sharedApplication] keyWindow] rootViewController];
-            [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
+            if ([self isViewController:response]) {
+                UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                    [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
+                }];
+            } else {
+                [[NotificarePushLib shared] presentInboxItem:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+            }
         }
     }];
 }
@@ -753,7 +828,6 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
     
 }
 
-//@TODO: Scannables and presentation methods
 
 @end
 
@@ -785,79 +859,224 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveRemoteNotificationInBackground:(NotificareNotification *)notification withController:(id _Nullable)controller{
-    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"remoteNotificationReceivedInBackground" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveRemoteNotificationInForeground:(NotificareNotification *)notification withController:(id _Nullable)controller{
-    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"remoteNotificationReceivedInForeground" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveSystemNotificationInBackground:(NotificareSystemNotification *)notification{
-    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"systemNotificationReceivedInBackground" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromSystemNotification:notification]];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveSystemNotificationInForeground:(NotificareSystemNotification *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"systemNotificationReceivedInForeground" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromSystemNotification:notification]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownNotification:(NSDictionary *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"unknownNotificationReceived" body:notification];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownAction:(NSDictionary *)action forNotification:(NSDictionary *)notification{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:action forKey:@"action"];
+    [payload setObject:notification forKey:@"notification"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"unknownActionForNotificationReceived" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library willOpenNotification:(NotificareNotification *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationWillOpen" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didOpenNotification:(NotificareNotification *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationOpened" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didCloseNotification:(NotificareNotification *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationClosed" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(NotificareNotification *)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"notificationFailedToOpen" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didClickURL:(NSURL *)url inNotification:(NotificareNotification *)notification{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[url absoluteString] forKey:@"url"];
+    [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification] forKey:@"notification"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"urlClickedInNotification" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library willExecuteAction:(NotificareAction *)action{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"actionWillExecute" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromAction:action]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didExecuteAction:(NotificareAction *)action{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"actionExecuted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromAction:action]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelectorWithURL:(NSURL *)url inAction:(NotificareAction *)action{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[url absoluteString] forKey:@"url"];
+    [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromAction:action] forKey:@"action"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"shouldPerformSelectorWithUrl" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didNotExecuteAction:(NotificareAction *)action{
+     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"actionNotExecuted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromAction:action]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToExecuteAction:(NotificareAction *)action withError:(NSError *)error{
+     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"actionFailedToExecute" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromAction:action]];
+}
+
+/*
+ * Uncomment this code and implement PKAddPassesViewController
+- (void)notificarePushLib:(NotificarePushLib *)library didReceivePass:(NSURL *)pass inNotification:(NotificareNotification*)notification{
+    
+    NSData *data = [[NSData alloc] initWithContentsOfURL:pass];
+    NSError *error;
+    
+    //init a pass object with the data
+    PKPass * pkPass = [[PKPass alloc] initWithData:data error:&error];
+    
+    if(!error){
+        //present view controller to add the pass to the library
+        PKAddPassesViewController * vc = [[PKAddPassesViewController alloc] initWithPass:pkPass];
+        [vc setDelegate:self];
+ 
+        [[NotificarePushLib shared] presentWalletPass:notification inNavigationController:[[NotificareReactNativeIOS getInstance] navigationControllerForRootViewController] withController:vc];
+        
+    }
+    
+}
+ */
+
+- (void)notificarePushLib:(NotificarePushLib *)library shouldOpenSettings:(NotificareNotification* _Nullable)notification{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"shouldOpenSettings" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didLoadInbox:(NSArray<NotificareDeviceInbox*>*)items{
+    NSMutableArray * inboxItems = [NSMutableArray array];
+    for (NotificareDeviceInbox * inboxItem in items) {
+        [inboxItems addObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceInbox:inboxItem]];
+    }
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"inboxLoaded" body:inboxItems];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didUpdateBadge:(int)badge{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"badgeUpdated" body:[NSNumber numberWithInt:badge]];
+}
+
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToStartLocationServiceWithError:(NSError *)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"locationServiceFailedToStart" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLocationServiceAuthorizationStatus:(NotificareGeoAuthorizationStatus)status{
     
 }
 
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownNotification:(NSDictionary *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library didUpdateLocations:(NSArray<NotificareLocation*> *)locations{
+    NSMutableArray * payload = [NSMutableArray new];
+    for (NotificareLocation * location in locations) {
+        [payload addObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromLocation:location]];
+    }
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"locationsUpdated" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveUnknownAction:(NSDictionary *)action forNotification:(NSDictionary *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library monitoringDidFailForRegion:(id)region withError:(NSError *)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"monitoringForRegionFailed" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library willOpenNotification:(NotificareNotification *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library didStartMonitoringForRegion:(id)region{
+    
+    if([region isKindOfClass:[NotificareRegion class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"monitoringForRegionStarted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region]];
+    }
+    
+    if([region isKindOfClass:[NotificareBeacon class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"monitoringForRegionStarted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region]];
+    }
+}
 
+- (void)notificarePushLib:(NotificarePushLib *)library didDetermineState:(NotificareRegionState)state forRegion:(id)region{
+    
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    
+    if (state == NotificareRegionStateInside) {
+        [payload setObject:@"inside" forKey:@"state"];
+    } else if (state == NotificareRegionStateOutside) {
+        [payload setObject:@"outside" forKey:@"state"];
+    } else if (state == NotificareRegionStateUnknown) {
+        [payload setObject:@"unknown" forKey:@"state"];
+    }
+    
+    if([region isKindOfClass:[NotificareRegion class]]){
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region] forKey:@"region"];
+    }
+    
+    if([region isKindOfClass:[NotificareBeacon class]]){
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region] forKey:@"region"];
+    }
+    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"stateForRegionChanged" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didOpenNotification:(NotificareNotification *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library didEnterRegion:(id)region{
+    
+    if([region isKindOfClass:[NotificareRegion class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"regionEntered" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region]];
+    }
+    
+    if([region isKindOfClass:[NotificareBeacon class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"regionEntered" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region]];
+    }
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didCloseNotification:(NotificareNotification *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library didExitRegion:(id)region{
+    
+    if([region isKindOfClass:[NotificareRegion class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"regionExited" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region]];
+    }
+    
+    if([region isKindOfClass:[NotificareBeacon class]]){
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"regionExited" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region]];
+    }
+    
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToOpenNotification:(NotificareNotification *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library rangingBeaconsDidFailForRegion:(NotificareBeacon *)region withError:(NSError *)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region] forKey:@"region"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"rangingBeaconsFailed" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didClickURL:(NSURL *)url inNotification:(NotificareNotification *)notification{}
+- (void)notificarePushLib:(NotificarePushLib *)library didRangeBeacons:(NSArray<NotificareBeacon *> *)beacons inRegion:(NotificareBeacon *)region{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    NSMutableArray * beaconsList = [NSMutableArray new];
+    for (NotificareBeacon * beacon in beacons) {
+        [beaconsList addObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:beacon]];
+    }
+    [payload setObject:beaconsList forKey:@"beacons"];
+    [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region] forKey:@"region"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"beaconsInRangeForRegion" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library willExecuteAction:(NotificareAction *)action{}
+- (void)notificarePushLib:(NotificarePushLib *)library didUpdateHeading:(NotificareHeading*)heading{
+    
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didExecuteAction:(NotificareAction *)action{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library shouldPerformSelectorWithURL:(NSURL *)url inAction:(NotificareAction *)action{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didNotExecuteAction:(NotificareAction *)action{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToExecuteAction:(NotificareAction *)action withError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didReceivePass:(NSURL *)pass inNotification:(NotificareNotification*)notification{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library shouldOpenSettings:(NotificareNotification* _Nullable)notification{}
-
-
-- (void)notificarePushLib:(NotificarePushLib *)library didLoadInbox:(NSArray<NotificareDeviceInbox*>*)items{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didUpdateBadge:(int)badge{}
-
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToStartLocationServiceWithError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLocationServiceAuthorizationStatus:(NotificareGeoAuthorizationStatus)status{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didUpdateLocations:(NSArray<NotificareLocation*> *)locations{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library monitoringDidFailForRegion:(id)region withError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didStartMonitoringForRegion:(id)region{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didDetermineState:(NotificareRegionState)state forRegion:(id)region{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didEnterRegion:(id)region{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didExitRegion:(id)region{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library rangingBeaconsDidFailForRegion:(NotificareBeacon *)region withError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didRangeBeacons:(NSArray<NotificareBeacon *> *)beacons inRegion:(NotificareBeacon *)region{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didUpdateHeading:(NotificareHeading*)heading{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didVisit:(NotificareVisit*)visit{}
+- (void)notificarePushLib:(NotificarePushLib *)library didVisit:(NotificareVisit*)visit{
+    
+}
 
 
 - (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountState:(NSDictionary *)info{}

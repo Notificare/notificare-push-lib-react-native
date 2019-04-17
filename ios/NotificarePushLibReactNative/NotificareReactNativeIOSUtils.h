@@ -28,6 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSDictionary *)dictionaryFromNotification:(NotificareNotification *)notification;
 -(NotificareNotification *)notificationFromDictionary:(NSDictionary *)dictionary;
 
+-(NSDictionary *)dictionaryFromSystemNotification:(NotificareSystemNotification *)notification;
+
 -(NSDictionary *)dictionaryFromAction:(NotificareAction *)action;
 -(NotificareAction *)actionFromDictionary:(NSDictionary *)dictionary;
 
@@ -43,10 +45,16 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSDictionary *)dictionaryFromUser:(NotificareUser *)user;
 
 -(NSDictionary *)dictionaryFromUserPreference:(NotificareUserPreference *)preference;
--(NotificareUserPreference *)userPreferenceFromDictionary:(NSDictionary *)dictionary
+-(NotificareUserPreference *)userPreferenceFromDictionary:(NSDictionary *)dictionary;
 
 -(NSDictionary *)dictionaryFromSegment:(NotificareSegment *)segment;
 -(NotificareSegment *)segmentFromDictionary:(NSDictionary *)dictionary;
+
+-(NSDictionary *)dictionaryFromLocation:(NotificareLocation *)location;
+
+-(NSDictionary *)dictionaryFromBeacon:(NotificareBeacon *)beacon;
+
+-(NSDictionary *)dictionaryFromRegion:(NotificareRegion *)region;
 
 @end
 
