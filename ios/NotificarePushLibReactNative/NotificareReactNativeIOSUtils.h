@@ -36,6 +36,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(NSDictionary *)dictionaryFromAsset:(NotificareAsset *)asset;
 
+-(NSDictionary *)dictionaryFromPass:(NotificarePass *)pass;
+
+-(NSDictionary *)dictionaryFromProduct:(NotificareProduct *)product;
+
+-(NSDictionary *)dictionaryFromUser:(NotificareUser *)user;
+
+-(NSDictionary *)dictionaryFromUserPreference:(NotificareUserPreference *)preference;
+-(NotificareUserPreference *)userPreferenceFromDictionary:(NSDictionary *)dictionary
+
+-(NSDictionary *)dictionaryFromSegment:(NotificareSegment *)segment;
+-(NotificareSegment *)segmentFromDictionary:(NSDictionary *)dictionary;
+
 @end
 
 NS_ASSUME_NONNULL_END
