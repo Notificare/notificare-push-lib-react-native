@@ -227,13 +227,7 @@ RCT_REMAP_METHOD(isNotificationFromNotificare, userInfo:(nonnull NSDictionary *)
 RCT_REMAP_METHOD(fetchNotificationSettings, fetchNotificationSettingsWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[[NotificarePushLib shared] userNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
-        NSMutableDictionary * payload = [NSMutableDictionary new];
-        BOOL status = NO;
-        if ([settings authorizationStatus] == UNAuthorizationStatusAuthorized) {
-            status = YES;
-        }
-        [payload setObject:[NSNumber numberWithBool:status] forKey:@"granted"];
-        resolve(payload);
+        resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotificationSettings:settings]);
     }];
 }
 

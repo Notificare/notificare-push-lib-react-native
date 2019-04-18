@@ -65,6 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSDictionary *)dictionaryFromScannable:(NotificareScannable *)scannable;
 -(NotificareScannable *)scannableFromDictionary:(NSDictionary *)dictionary;
 
+-(NSDictionary *)dictionaryFromNotificationSettings:(UNNotificationSettings *)settings;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -542,4 +542,153 @@ static NotificareReactNativeIOSUtils *utils;
     return scannable;
 }
 
+-(NSDictionary *)dictionaryFromNotificationSettings:(UNNotificationSettings *)settings{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    
+    NSString * authorizationStatus = @"notDetermined";
+    switch ([settings authorizationStatus]) {
+        case UNAuthorizationStatusAuthorized:
+            authorizationStatus = @"authorized";
+            break;
+        case UNAuthorizationStatusProvisional:
+            authorizationStatus = @"provisional";
+            break;
+        case UNAuthorizationStatusDenied:
+            authorizationStatus = @"denied";
+            break;
+        default:
+            break;
+    }
+
+    [data setObject:authorizationStatus forKey:@"authorizationStatus"];
+    
+    
+    NSString * alertSetting = @"notSupported";
+    switch ([settings alertSetting]) {
+        case UNNotificationSettingEnabled:
+            alertSetting = @"enabled";
+            break;
+        case UNNotificationSettingDisabled:
+            alertSetting = @"disabled";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:alertSetting forKey:@"alertSetting"];
+    
+    NSString * badgeSetting = @"notSupported";
+    switch ([settings badgeSetting]) {
+        case UNNotificationSettingEnabled:
+            badgeSetting = @"enabled";
+            break;
+        case UNNotificationSettingDisabled:
+            badgeSetting = @"disabled";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:badgeSetting forKey:@"badgeSetting"];
+    
+    NSString * soundSetting = @"notSupported";
+    switch ([settings soundSetting]) {
+        case UNNotificationSettingEnabled:
+            soundSetting = @"enabled";
+            break;
+        case UNNotificationSettingDisabled:
+            soundSetting = @"disabled";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:soundSetting forKey:@"soundSetting"];
+    
+    NSString * notificationCenterSetting = @"notSupported";
+    switch ([settings notificationCenterSetting]) {
+        case UNNotificationSettingEnabled:
+            notificationCenterSetting = @"enabled";
+            break;
+        case UNNotificationSettingDisabled:
+            notificationCenterSetting = @"disabled";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:notificationCenterSetting forKey:@"notificationCenterSetting"];
+    
+    NSString * lockScreenSetting = @"notSupported";
+    switch ([settings lockScreenSetting]) {
+        case UNNotificationSettingEnabled:
+            lockScreenSetting = @"enabled";
+            break;
+        case UNNotificationSettingDisabled:
+            lockScreenSetting = @"disabled";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:lockScreenSetting forKey:@"lockScreenSetting"];
+    
+    NSString * criticalAlertSetting = @"notSupported";
+    if (@available(iOS 12.0, *)) {
+        switch ([settings criticalAlertSetting]) {
+            case UNNotificationSettingEnabled:
+                criticalAlertSetting = @"enabled";
+                break;
+            case UNNotificationSettingDisabled:
+                criticalAlertSetting = @"disabled";
+                break;
+            default:
+                break;
+        }
+    }
+    
+    [data setObject:criticalAlertSetting forKey:@"criticalAlertSetting"];
+
+    NSString * alertStyle = @"none";
+    switch ([settings alertStyle]) {
+        case UNAlertStyleBanner:
+            alertStyle = @"banner";
+            break;
+        case UNAlertStyleAlert:
+            alertStyle = @"alert";
+            break;
+        default:
+            break;
+    }
+    
+    [data setObject:alertStyle forKey:@"alertStyle"];
+    
+    NSString * showPreviewsSetting = @"notSupported";
+    if (@available(iOS 11.0, *)) {
+        switch ([settings showPreviewsSetting]) {
+            case UNShowPreviewsSettingAlways:
+                showPreviewsSetting = @"banner";
+                break;
+            case UNShowPreviewsSettingNever:
+                showPreviewsSetting = @"alert";
+                break;
+            case UNShowPreviewsSettingWhenAuthenticated:
+                showPreviewsSetting = @"whenAuthenticated";
+                break;
+            default:
+                break;
+        }
+    }
+    
+    [data setObject:showPreviewsSetting forKey:@"showPreviewsSetting"];
+    
+    BOOL providesAppNotificationSettings = NO;
+    if (@available(iOS 12.0, *)) {
+        providesAppNotificationSettings = [settings providesAppNotificationSettings];
+    }
+    [data setObject:[NSNumber numberWithBool:providesAppNotificationSettings] forKey:@"providesAppNotificationSettings"];
+    
+    return data;
+}
+
 @end
