@@ -474,4 +474,72 @@ static NotificareReactNativeIOSUtils *utils;
     return data;
 }
 
+-(NSDictionary *)dictionaryFromHeading:(NotificareHeading *)heading{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[heading magneticHeading] forKey:@"magneticHeading"];
+    [data setValue:[heading trueHeading] forKey:@"trueHeading"];
+    [data setValue:[heading headingAccuracy] forKey:@"headingAccuracy"];
+    [data setValue:[heading headingX] forKey:@"headingX"];
+    [data setValue:[heading headingY] forKey:@"headingY"];
+    [data setValue:[heading headingZ] forKey:@"headingZ"];
+    return data;
+}
+
+-(NSDictionary *)dictionaryFromVisit:(NotificareVisit *)visit{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setValue:[visit latitude] forKey:@"latitude"];
+    [data setValue:[visit longitude] forKey:@"longitude"];
+    [data setValue:[visit departureDate] forKey:@"departureDate"];
+    [data setValue:[visit arrivalDate] forKey:@"arrivalDate"];
+    return data;
+}
+
+-(NSDictionary *)dictionaryFromSKDownload:(SKDownload *)download{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setObject:[download contentIdentifier] forKey:@"contentIdentifier"];
+    [data setObject:[download contentURL] forKey:@"contentURL"];
+    [data setObject:[NSNumber numberWithLongLong:[download contentLength]] forKey:@"contentLength"];
+    [data setObject:[download contentVersion] forKey:@"contentVersion"];
+    [data setObject:[NSNumber numberWithFloat:[download progress]] forKey:@"progress"];
+    [data setObject:[NSNumber numberWithDouble:[download timeRemaining]] forKey:@"timeRemaining"];
+    
+    if ([download downloadState] == SKDownloadStateActive) {
+        [data setObject:@"active" forKey:@"downloadState"];
+    } else if ([download downloadState] == SKDownloadStateFailed) {
+        [data setObject:@"failed" forKey:@"downloadState"];
+    } else if ([download downloadState] == SKDownloadStatePaused) {
+        [data setObject:@"paused" forKey:@"downloadState"];
+    } else if ([download downloadState] == SKDownloadStateWaiting) {
+        [data setObject:@"waiting" forKey:@"downloadState"];
+    } else if ([download downloadState] == SKDownloadStateFinished) {
+        [data setObject:@"finished" forKey:@"downloadState"];
+    } else if ([download downloadState] == SKDownloadStateCancelled) {
+        [data setObject:@"cancelled" forKey:@"downloadState"];
+    }
+    
+    return data;
+}
+
+-(NSDictionary *)dictionaryFromScannable:(NotificareScannable *)scannable{
+    NSMutableDictionary * data = [NSMutableDictionary dictionary];
+    [data setObject:[scannable scannableId] forKey:@"scannableId"];
+    [data setObject:[scannable name] forKey:@"name"];
+    [data setObject:[scannable tag] forKey:@"tag"];
+    [data setObject:[scannable type] forKey:@"type"];
+    [data setObject:[scannable data] forKey:@"data"];
+    [data setObject:[self dictionaryFromNotification:[scannable notification]] forKey:@"notification"];
+    return data;
+}
+
+-(NotificareScannable *)scannableFromDictionary:(NSDictionary *)dictionary{
+    NotificareScannable * scannable = [NotificareScannable new];
+    [scannable setScannableId:[dictionary objectForKey:@"scannableId"]];
+    [scannable setName:[dictionary objectForKey:@"name"]];
+    [scannable setTag:[dictionary objectForKey:@"tag"]];
+    [scannable setType:[dictionary objectForKey:@"type"]];
+    [scannable setData:[dictionary objectForKey:@"data"]];
+    [scannable setNotification:[self notificationFromDictionary:[dictionary objectForKey:@"notification"]]];
+    return scannable;
+}
+
 @end

@@ -72,6 +72,10 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"urlOpened" body:payload];
 }
 
++ (nullable NSString *)parseURIPayload:(NSData*)data{
+    return [[NotificarePushLib shared] parseURIPayload:data];
+}
+
 - (NSArray<NSString*> *)supportedEvents {
     return @[
              @"ready",
@@ -106,7 +110,27 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
              @"regionEntered",
              @"regionExited",
              @"rangingBeaconsFailed",
-             @"beaconsInRangeForRegion"
+             @"beaconsInRangeForRegion",
+             @"headingUpdated",
+             @"visitReceived",
+             @"accountStateChanged",
+             @"accountSessionFailedToRenewWithError",
+             @"activationTokenReceived",
+             @"resetPasswordTokenReceived",
+             @"storeLoaded",
+             @"storeFailedToLoad",
+             @"productTransactionCompleted",
+             @"productTransactionRestored",
+             @"productTransactionFailed",
+             @"productContentDownloadStarted",
+             @"productContentDownloadPaused",
+             @"productContentDownloadCancelled",
+             @"productContentDownloadProgress",
+             @"productContentDownloadFailed",
+             @"productContentDownloadFinished",
+             @"qrCodeScannerStarted",
+             @"scannableSessionInvalidatedWithError",
+             @"scannableDetected"
             ];
 }
 
@@ -404,6 +428,18 @@ RCT_REMAP_METHOD(clearDoNotDisturb, clearDoNotDisturbWithResolver:(RCTPromiseRes
 RCT_REMAP_METHOD(fetchNotification, notification:(nonnull NSDictionary *)notification fetchNotificationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[NotificarePushLib shared] fetchNotification:notification completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
+        } else {
+            reject(@"error", [error description], error);
+        }
+    }];
+    
+}
+
+RCT_REMAP_METHOD(fetchNotificationForInboxItem, inboxItem:(nonnull NSDictionary *)inboxItem fetchNotificationForInboxItemWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    
+    [[NotificarePushLib shared] fetchNotification:[inboxItem objectForKey:@"inboxId"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
         } else {
@@ -828,6 +864,27 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
     
 }
 
+RCT_EXPORT_METHOD(startScannableSessionWithQRCode){
+    [[NotificarePushLib shared] startScannableSessionWithQRCode:[self navigationControllerForRootViewController] asModal:YES];
+}
+
+RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
+    
+    NotificareScannable * item = [[NotificareReactNativeIOSUtils shared] scannableFromDictionary:scannable];
+    [[NotificarePushLib shared] openScannable:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            if ([self isViewController:response]) {
+                UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                    [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
+                }];
+            } else {
+                 [[NotificarePushLib shared] presentScannable:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+            }
+        }
+    }];
+    
+}
 
 @end
 
@@ -932,7 +989,9 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
 }
 
 /*
- * Uncomment this code and implement PKAddPassesViewController
+ * Uncomment this code to implement native PKPasses
+ * Additionally you must import PassKit framework in the NotificareReactNativeIOS.h and implement PKAddPassesViewControllerDelegate in the PushHandler interface
+ *
 - (void)notificarePushLib:(NotificarePushLib *)library didReceivePass:(NSURL *)pass inNotification:(NotificareNotification*)notification{
     
     NSData *data = [[NSData alloc] initWithContentsOfURL:pass];
@@ -951,7 +1010,7 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
     }
     
 }
- */
+*/
 
 - (void)notificarePushLib:(NotificarePushLib *)library shouldOpenSettings:(NotificareNotification* _Nullable)notification{
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"shouldOpenSettings" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:notification]];
@@ -1071,50 +1130,134 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didUpdateHeading:(NotificareHeading*)heading{
-    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"headingUpdated" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromHeading:heading]];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didVisit:(NotificareVisit*)visit{
-    
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"visitReceived" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromVisit:visit]];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountState:(NSDictionary *)info{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"accountStateChanged" body:info];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToRenewAccountSessionWithError:(NSError * _Nullable)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"accountSessionFailedToRenewWithError" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:token forKey:@"token"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"activationTokenReceived" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:token forKey:@"token"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"resetPasswordTokenReceived" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray<NotificareProduct *> *)products{
+    NSMutableArray * payload = [NSMutableArray array];
+    for (NotificareProduct * product in products) {
+        [payload addObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:product]];
+    }
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"storeLoaded" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailToLoadStore:(NSError *)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"storeFailedToLoad" body:payload];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didCompleteProductTransaction:(SKPaymentTransaction *)transaction{
+    [[NotificarePushLib shared] fetchProduct:[[transaction payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productTransactionCompleted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response]];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didRestoreProductTransaction:(SKPaymentTransaction *)transaction{
+    [[NotificarePushLib shared] fetchProduct:[[transaction payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productTransactionRestored" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response]];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailProductTransaction:(SKPaymentTransaction *)transaction withError:(NSError *)error{
+    [[NotificarePushLib shared] fetchProduct:[[transaction payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[error localizedDescription] forKey:@"error"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productTransactionFailed" body:payload];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didStartDownloadContent:(SKPaymentTransaction *)transaction{
+    [[NotificarePushLib shared] fetchProduct:[[transaction payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadStarted" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response]];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didPauseDownloadContent:(SKDownload *)download{
+    [[NotificarePushLib shared] fetchProduct:[[[download transaction] payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromSKDownload:download] forKey:@"download"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadPaused" body:payload];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didCancelDownloadContent:(SKDownload *)download{
+    [[NotificarePushLib shared] fetchProduct:[[[download transaction] payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromSKDownload:download] forKey:@"download"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadCancelled" body:payload];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveProgressDownloadContent:(SKDownload *)download{
+    [[NotificarePushLib shared] fetchProduct:[[[download transaction] payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromSKDownload:download] forKey:@"download"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadProgress" body:payload];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFailDownloadContent:(SKDownload *)download{
+    [[NotificarePushLib shared] fetchProduct:[[[download transaction] payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromSKDownload:download] forKey:@"download"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadFailed" body:payload];
+    }];
+}
+
+- (void)notificarePushLib:(NotificarePushLib *)library didFinishDownloadContent:(SKDownload *)download{
+    [[NotificarePushLib shared] fetchProduct:[[[download transaction] payment] productIdentifier] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        NSMutableDictionary * payload = [NSMutableDictionary new];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromSKDownload:download]forKey:@"download"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response] forKey:@"product"];
+        [[NotificareReactNativeIOS getInstance] dispatchEvent:@"productContentDownloadFinished" body:payload];
+    }];
 }
 
 
-- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountState:(NSDictionary *)info{}
+- (void)notificarePushLib:(NotificarePushLib *)library didStartQRCodeScanner:(UIViewController*)scanner{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"qrCodeScannerStarted" body:[NSNull null]];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToRenewAccountSessionWithError:(NSError * _Nullable)error{}
+- (void)notificarePushLib:(NotificarePushLib *)library didInvalidateScannableSessionWithError:(NSError *)error{
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    [payload setObject:[error localizedDescription] forKey:@"error"];
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"scannableSessionInvalidatedWithError" body:payload];
+}
 
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveResetPasswordToken:(NSString *)token{}
-
-
-- (void)notificarePushLib:(NotificarePushLib *)library didLoadStore:(NSArray<NotificareProduct *> *)products{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToLoadStore:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didCompleteProductTransaction:(SKPaymentTransaction *)transaction{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didRestoreProductTransaction:(SKPaymentTransaction *)transaction{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailProductTransaction:(SKPaymentTransaction *)transaction withError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didStartDownloadContent:(SKPaymentTransaction *)transaction{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didPauseDownloadContent:(SKDownload *)download{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didCancelDownloadContent:(SKDownload *)download{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didReceiveProgressDownloadContent:(SKDownload *)download{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailDownloadContent:(SKDownload *)download{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFinishDownloadContent:(SKDownload *)download{}
-
-
-- (void)notificarePushLib:(NotificarePushLib *)library didStartQRCodeScanner:(UIViewController*)scanner{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didInvalidateScannableSessionWithError:(NSError *)error{}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didDetectScannable:(NotificareScannable *)scannable{}
+- (void)notificarePushLib:(NotificarePushLib *)library didDetectScannable:(NotificareScannable *)scannable{
+    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"scannableDetected" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromScannable:scannable]];
+}
 
 @end

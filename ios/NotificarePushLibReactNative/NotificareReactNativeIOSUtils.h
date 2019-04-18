@@ -56,6 +56,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(NSDictionary *)dictionaryFromRegion:(NotificareRegion *)region;
 
+-(NSDictionary *)dictionaryFromHeading:(NotificareHeading *)heading;
+
+-(NSDictionary *)dictionaryFromVisit:(NotificareVisit *)visit;
+
+-(NSDictionary *)dictionaryFromSKDownload:(SKDownload *)download;
+
+-(NSDictionary *)dictionaryFromScannable:(NotificareScannable *)scannable;
+-(NotificareScannable *)scannableFromDictionary:(NSDictionary *)dictionary;
+
 @end
 
 NS_ASSUME_NONNULL_END

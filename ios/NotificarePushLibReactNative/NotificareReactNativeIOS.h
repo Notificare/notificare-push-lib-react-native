@@ -9,6 +9,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 #import "../Libraries/NotificarePushLib/NotificarePushLib.h"
+//#import <PassKit/PassKit.h>
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>
   +(void)launch:(NSDictionary * _Nullable)launchOptions;
@@ -21,5 +22,5 @@
   +(void)handleOpenURL:(nonnull NSURL *)url withOptions:(NSDictionary * _Nullable)options;
 @end
 
-@interface PushHandler : NSObject <NotificarePushLibDelegate>
+@interface PushHandler : NSObject <NotificarePushLibDelegate/*,PKAddPassesViewControllerDelegate*/>
 @end
