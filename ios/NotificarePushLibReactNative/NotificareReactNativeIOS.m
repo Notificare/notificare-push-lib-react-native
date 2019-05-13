@@ -229,6 +229,7 @@ RCT_REMAP_METHOD(fetchNotificationSettings, fetchNotificationSettingsWithResolve
     [[[NotificarePushLib shared] userNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
         resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotificationSettings:settings]);
     }];
+    
 }
 
 
@@ -248,7 +249,7 @@ RCT_REMAP_METHOD(registerDevice, userID:(NSString * _Nullable)userID userName:(N
     
     [[NotificarePushLib shared] registerDevice:userID withUsername:userName completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDevice:response]);
         } else {
            reject(@"error", [error description], error);
         }
