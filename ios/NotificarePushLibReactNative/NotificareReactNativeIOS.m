@@ -448,18 +448,6 @@ RCT_REMAP_METHOD(fetchNotificationForInboxItem, inboxItem:(nonnull NSDictionary 
     
 }
 
-RCT_REMAP_METHOD(clearPrivateNotification, notification:(nonnull NSDictionary *)notification clearPrivateNotificationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    
-    [[NotificarePushLib shared] clearPrivateNotification:[[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-        if (!error) {
-            resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
-        } else {
-            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
-        }
-    }];
-    
-}
-
 RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
     
     NotificareNotification * item = [[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification];
