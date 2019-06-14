@@ -22,6 +22,9 @@ static UNAuthorizationOptions authorizationOptions = UNAuthorizationOptionBadge 
 static UNNotificationPresentationOptions presentationOptions = UNNotificationPresentationOptionNone;
 static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOptionCustomDismissAction;
 
+#define NOTIFICARE_ERROR @"notificare_error"
+
+
 + (NotificareReactNativeIOS *)getInstance {
   return instance;
 }
@@ -252,7 +255,7 @@ RCT_REMAP_METHOD(registerDevice, userID:(NSString * _Nullable)userID userName:(N
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDevice:response]);
         } else {
-           reject(@"error", [error description], error);
+           reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 }
@@ -272,7 +275,7 @@ RCT_REMAP_METHOD(updatePreferredLanguage, preferredLanguage:(NSString * _Nullabl
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -284,7 +287,7 @@ RCT_REMAP_METHOD(fetchTags, fetchTagsWithResolver:(RCTPromiseResolveBlock)resolv
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -296,7 +299,7 @@ RCT_REMAP_METHOD(addTag, tag:(nonnull NSString *)tag addTagWithResolver:(RCTProm
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 }
@@ -307,7 +310,7 @@ RCT_REMAP_METHOD(addTags, tags:(nonnull NSArray *)tags addTagsWithResolver:(RCTP
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 }
@@ -318,7 +321,7 @@ RCT_REMAP_METHOD(removeTag, tag:(nonnull NSString *)tag removeTagWithResolver:(R
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 }
@@ -330,7 +333,7 @@ RCT_REMAP_METHOD(removeTags, tags:(nonnull NSArray *)tags removeTagsWithResolver
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 }
@@ -341,7 +344,7 @@ RCT_REMAP_METHOD(clearTags, clearTagsWithResolver:(RCTPromiseResolveBlock)resolv
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
 
@@ -357,7 +360,7 @@ RCT_REMAP_METHOD(fetchUserData, fetchUserDataWithResolver:(RCTPromiseResolveBloc
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -378,7 +381,7 @@ RCT_REMAP_METHOD(updateUserData, userData:(nonnull NSArray *)userData updateUser
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -391,7 +394,7 @@ RCT_REMAP_METHOD(fetchDoNotDisturb, fetchDoNotDisturbWithResolver:(RCTPromiseRes
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceDnD:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -403,7 +406,7 @@ RCT_REMAP_METHOD(updateDoNotDisturb, deviceDnD:(nonnull NSDictionary *)deviceDnD
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceDnD:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -415,7 +418,7 @@ RCT_REMAP_METHOD(clearDoNotDisturb, clearDoNotDisturbWithResolver:(RCTPromiseRes
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceDnD:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -427,7 +430,7 @@ RCT_REMAP_METHOD(fetchNotification, notification:(nonnull NSDictionary *)notific
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -439,19 +442,7 @@ RCT_REMAP_METHOD(fetchNotificationForInboxItem, inboxItem:(nonnull NSDictionary 
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
         } else {
-            reject(@"error", [error description], error);
-        }
-    }];
-    
-}
-
-RCT_REMAP_METHOD(clearPrivateNotification, notification:(nonnull NSDictionary *)notification clearPrivateNotificationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    
-    [[NotificarePushLib shared] clearPrivateNotification:[[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-        if (!error) {
-            resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]);
-        } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -477,7 +468,7 @@ RCT_REMAP_METHOD(reply, notification:(nonnull NSDictionary *)notification action
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -493,7 +484,7 @@ RCT_REMAP_METHOD(fetchInbox, fetchInboxWithResolver:(RCTPromiseResolveBlock)reso
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -521,7 +512,7 @@ RCT_REMAP_METHOD(removeFromInbox, inboxItem:(nonnull NSDictionary*)inboxItem rem
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceInbox:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -533,7 +524,7 @@ RCT_REMAP_METHOD(markAsRead, inboxItem:(nonnull NSDictionary*)inboxItem markAsRe
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromDeviceInbox:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -545,7 +536,7 @@ RCT_REMAP_METHOD(clearInbox, clearInboxWithResolver:(RCTPromiseResolveBlock)reso
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -561,7 +552,7 @@ RCT_REMAP_METHOD(fetchAssets, group:(nonnull NSString*)group fetchAssetsWithReso
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -574,7 +565,7 @@ RCT_REMAP_METHOD(fetchPassWithSerial, serial:(nonnull NSString*)serial fetchPass
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromPass:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -586,7 +577,7 @@ RCT_REMAP_METHOD(fetchPassWithBarcode, barcode:(nonnull NSString*)barcode fetchP
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromPass:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -602,7 +593,7 @@ RCT_REMAP_METHOD(fetchProducts, fetchProductsWithResolver:(RCTPromiseResolveBloc
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -618,7 +609,7 @@ RCT_REMAP_METHOD(fetchPurchasedProducts, fetchPurchasedProductsWithResolver:(RCT
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -630,7 +621,7 @@ RCT_REMAP_METHOD(fetchProduct, product:(nonnull NSDictionary*)product fetchProdu
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromProduct:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -652,7 +643,7 @@ RCT_REMAP_METHOD(logCustomEvent, name:(nonnull NSString*)name data:(NSDictionary
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -667,7 +658,7 @@ RCT_REMAP_METHOD(logOpenNotification, notification:(NSDictionary* _Nullable)noti
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -682,7 +673,7 @@ RCT_REMAP_METHOD(logInfluencedNotification, notification:(NSDictionary* _Nullabl
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -697,7 +688,7 @@ RCT_REMAP_METHOD(logReceiveNotification, notification:(NSDictionary* _Nullable)n
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -709,7 +700,7 @@ RCT_REMAP_METHOD(doPushHostOperation, verb:(nonnull NSString*)verb path:(nonnull
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -721,7 +712,7 @@ RCT_REMAP_METHOD(doCloudHostOperation, verb:(nonnull NSString*)verb path:(nonnul
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -733,7 +724,7 @@ RCT_REMAP_METHOD(createAccount, email:(nonnull NSString*)email name:(nonnull NSS
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -745,7 +736,7 @@ RCT_REMAP_METHOD(resetPassword, password:(nonnull NSString*)password token:(nonn
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -757,7 +748,7 @@ RCT_REMAP_METHOD(sendPassword, email:(nonnull NSString*)email sendPasswordWithRe
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -769,7 +760,7 @@ RCT_REMAP_METHOD(login, email:(nonnull NSString*)email password:(nonnull NSStrin
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -789,7 +780,7 @@ RCT_REMAP_METHOD(generateAccessToken, generateAccessTokenWithResolver:(RCTPromis
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -801,7 +792,7 @@ RCT_REMAP_METHOD(changePassword, password:(nonnull NSString*)password changePass
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -814,7 +805,7 @@ RCT_REMAP_METHOD(fetchAccountDetails, fetchAccountDetailsWithResolver:(RCTPromis
         if (!error) {
             resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromUser:response]);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -830,7 +821,7 @@ RCT_REMAP_METHOD(fetchUserPreferences, fetchUserPreferencesWithResolver:(RCTProm
             }
             resolve(payload);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -842,7 +833,7 @@ RCT_REMAP_METHOD(addSegmentToUserPreference, segment:(nonnull NSDictionary*)segm
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
@@ -854,7 +845,7 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
         if (!error) {
             resolve(response);
         } else {
-            reject(@"error", [error description], error);
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
     }];
     
