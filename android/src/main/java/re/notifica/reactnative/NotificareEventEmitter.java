@@ -21,7 +21,7 @@ public class NotificareEventEmitter {
     private ReactContext context;
     private Boolean mounted = false;
     private List<String> eventQueue;
-    private List<ReadableMap> eventParamsQueue;
+    private List<Object> eventParamsQueue;
     private NotificareEventEmitter(ReactContext reactContext) {
         this.context = reactContext;
         this.eventQueue = new ArrayList<>();
@@ -41,7 +41,7 @@ public class NotificareEventEmitter {
      * @param eventName
      */
     public void sendEvent(String eventName) {
-        sendEvent(eventName, (ReadableMap)null);
+        sendEvent(eventName, null, false);
     }
 
     /**
@@ -58,7 +58,7 @@ public class NotificareEventEmitter {
      * @param eventName
      * @param params
      */
-    public void sendEvent(String eventName, @Nullable ReadableMap params) {
+    public void sendEvent(String eventName, @Nullable Object params) {
         sendEvent(eventName, params, false);
     }
 
@@ -68,13 +68,11 @@ public class NotificareEventEmitter {
      * @param params
      * @param queue
      */
-    public void sendEvent(String eventName, @Nullable ReadableMap params, Boolean queue) {
+    public void sendEvent(String eventName, @Nullable Object params, Boolean queue) {
         Log.i(TAG, "send event " + eventName);
         if (context != null && context.hasActiveCatalystInstance() && context.hasCurrentActivity() && mounted) {
             Log.i(TAG, "sent event to current activity");
-            context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(
-                    eventName, params
-            );
+            context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
         } else if (queue) {
             Log.i(TAG, "queueing event until listeners ready");
             eventQueue.add(eventName);

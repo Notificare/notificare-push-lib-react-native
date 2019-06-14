@@ -7,8 +7,9 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
 import re.notifica.Notificare;
+import re.notifica.app.DefaultIntentReceiver;
+import re.notifica.model.NotificareDevice;
 import re.notifica.model.NotificareNotification;
-import re.notifica.push.gcm.DefaultIntentReceiver;
 
 
 public class NotificareReceiver extends DefaultIntentReceiver {
@@ -30,19 +31,22 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onReady() {
-        // This is handled by making the module an onReadyListener
+        // Event is emitted by the onReady listener in the module
+        // Check if notifications are enabled, by default they are not.
+        if (Notificare.shared().isNotificationsEnabled()) {
+            Notificare.shared().enableNotifications();
+        }
+        // Check if location updates are enabled, by default they are not.
+        if (Notificare.shared().isLocationUpdatesEnabled()) {
+            Notificare.shared().enableLocationUpdates();
+        }
     }
 
     @Override
-    public void onRegistrationFinished(String deviceId) {
+    public void onDeviceRegistered(NotificareDevice device) {
         WritableMap map = Arguments.createMap();
-        map.putString("device", deviceId);
+        map.putString("device", device.getDeviceId());
         NotificareEventEmitter.getInstance().sendEvent("didReceiveDeviceToken", map, true);
     }
 
-
-    @Override
-    public void onNotificationOpened(String alert, final String notificationId, final String inboxItemId, Bundle extras) {
-        super.onNotificationOpened(alert, notificationId, inboxItemId, extras);
-    }
 }

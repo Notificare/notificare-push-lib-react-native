@@ -27,6 +27,7 @@ import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareAttachment;
 import re.notifica.model.NotificareContent;
+import re.notifica.model.NotificareDevice;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificareProduct;
@@ -114,6 +115,11 @@ public class NotificareUtils {
         }
         infoMap.putArray("userDataFields", userDataFieldsArray);
         return infoMap;
+    }
+
+    public static WritableMap mapDevice(NotificareDevice device) {
+        WritableMap notificationMap = Arguments.createMap();
+        return notificationMap;
     }
 
     public static WritableMap mapNotification(NotificareNotification notification) {

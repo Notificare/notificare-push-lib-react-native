@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 
@@ -26,8 +26,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 10402
-        versionName "1.4.2"
+        versionCode 20000
+        versionName "2.0.0"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -36,5 +36,8 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    api "re.notifica:notificare-push-lib-android:1.15.0"
+    implementation "re.notifica:notificare-core:2.0.6"
+    compileOnly "re.notifica:notificare-location:2.0.6"
+    compileOnly "re.notifica:notificare-beacon:2.0.6"
+    compileOnly "re.notifica:notificare-scannable:2.0.6"
 }
