@@ -16,12 +16,10 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -48,8 +46,6 @@ import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.model.NotificareUserData;
 import re.notifica.model.NotificareUserDataField;
 import re.notifica.util.Log;
-
-import static re.notifica.Notificare.shared;
 
 class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
