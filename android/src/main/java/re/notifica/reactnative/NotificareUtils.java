@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,20 +18,29 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import re.notifica.Notificare;
 import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareAttachment;
+import re.notifica.model.NotificareBeacon;
 import re.notifica.model.NotificareContent;
+import re.notifica.model.NotificareCoordinates;
 import re.notifica.model.NotificareDevice;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
+import re.notifica.model.NotificarePass;
+import re.notifica.model.NotificarePassRedemption;
+import re.notifica.model.NotificarePoint;
+import re.notifica.model.NotificarePolygon;
 import re.notifica.model.NotificareProduct;
+import re.notifica.model.NotificareRegion;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.util.ISODateFormatter;
 import re.notifica.util.Log;
@@ -81,6 +91,66 @@ public class NotificareUtils {
         return map;
     }
 
+    public static WritableArray mapJSON(JSONArray json) {
+        if (json != null) {
+            WritableArray writableArray = Arguments.createArray();
+            try {
+                for (int i = 0; i < json.length(); i++) {
+                    Object value = json.get(i);
+                    if (value instanceof Float || value instanceof Double) {
+                        writableArray.pushDouble(json.getDouble(i));
+                    } else if (value instanceof Number) {
+                        writableArray.pushInt(json.getInt(i));
+                    } else if (value instanceof String) {
+                        writableArray.pushString(json.getString(i));
+                    } else if (value instanceof JSONObject) {
+                        writableArray.pushMap(mapJSON(json.getJSONObject(i)));
+                    } else if (value instanceof JSONArray) {
+                        writableArray.pushArray(mapJSON(json.getJSONArray(i)));
+                    } else if (value == JSONObject.NULL) {
+                        writableArray.pushNull();
+                    }
+                }
+            } catch (JSONException e) {
+                // fail silently
+            }
+            return writableArray;
+        } else {
+            return null;
+        }
+    }
+
+    public static WritableMap mapJSON(JSONObject json) {
+        if (json != null) {
+            WritableMap writableMap = Arguments.createMap();
+            Iterator<String> iterator = json.keys();
+            try {
+                while (iterator.hasNext()) {
+                    String key = iterator.next();
+                    Object value = json.get(key);
+                    if (value instanceof Float || value instanceof Double) {
+                        writableMap.putDouble(key, json.getDouble(key));
+                    } else if (value instanceof Number) {
+                        writableMap.putInt(key, json.getInt(key));
+                    } else if (value instanceof String) {
+                        writableMap.putString(key, json.getString(key));
+                    } else if (value instanceof JSONObject) {
+                        writableMap.putMap(key, mapJSON(json.getJSONObject(key)));
+                    } else if (value instanceof JSONArray) {
+                        writableMap.putArray(key, mapJSON(json.getJSONArray(key)));
+                    } else if (value == JSONObject.NULL) {
+                        writableMap.putNull(key);
+                    }
+                }
+            } catch (JSONException e) {
+                // fail silently
+            }
+            return writableMap;
+        } else {
+            return null;
+        }
+    }
+
     public static WritableMap mapApplicationInfo(NotificareApplicationInfo notificareApplicationInfo) {
         WritableMap infoMap = Arguments.createMap();
         infoMap.putString("id", notificareApplicationInfo.getId());
@@ -118,8 +188,33 @@ public class NotificareUtils {
     }
 
     public static WritableMap mapDevice(NotificareDevice device) {
-        WritableMap notificationMap = Arguments.createMap();
-        return notificationMap;
+        WritableMap deviceMap = Arguments.createMap();
+        deviceMap.putString("deviceID", device.getDeviceId());
+        deviceMap.putString("userID", device.getUserId());
+        deviceMap.putString("userName", device.getUserName());
+        deviceMap.putDouble("timezone", device.getTimeZoneOffset());
+        deviceMap.putString("osVersion", device.getOsVersion());
+        deviceMap.putString("sdkVersion", device.getSdkVersion());
+        deviceMap.putString("appVersion", device.getAppVersion());
+        deviceMap.putString("deviceString", device.getDeviceString());
+        deviceMap.putString("deviceModel", device.getDeviceString());
+        deviceMap.putString("countryCode", device.getCountry());
+        deviceMap.putString("language", device.getLanguage());
+        deviceMap.putString("region", device.getRegion());
+        deviceMap.putString("transport", device.getTransport());
+        deviceMap.putDouble("latitude", device.getLatitude());
+        deviceMap.putDouble("longitude", device.getLongitude());
+        deviceMap.putDouble("altitude", device.getAltitude());
+        deviceMap.putDouble("speed", device.getSpeed());
+        deviceMap.putDouble("course", device.getCourse());
+        deviceMap.putString("lastRegistered", ISODateFormatter.format(device.getLastActive()));
+        deviceMap.putString("locationServicesAuthStatus", device.getLocationServicesAuthStatus() ? "always" : "none");
+        deviceMap.putBoolean("registeredForNotification", Notificare.shared().isNotificationsEnabled());
+        deviceMap.putBoolean("allowedLocationServices", device.getLocationServicesAuthStatus());
+        deviceMap.putBoolean("allowedUI", device.getAllowedUI());
+        deviceMap.putBoolean("bluetoothEnabled", device.getBluetoothEnabled());
+        deviceMap.putBoolean("bluetoothON", device.getBluetoothEnabled());
+        return deviceMap;
     }
 
     public static WritableMap mapNotification(NotificareNotification notification) {
@@ -289,21 +384,21 @@ public class NotificareUtils {
     public static WritableMap mapAsset(NotificareAsset asset) {
         WritableMap assetMap = Arguments.createMap();
 
-        assetMap.putString("title", asset.getTitle());
-        assetMap.putString("description", asset.getDescription());
-        assetMap.putString("url", asset.getUrl().toString());
+        assetMap.putString("assetTitle", asset.getTitle());
+        assetMap.putString("assetDescription", asset.getDescription());
+        assetMap.putString("assetUrl", asset.getUrl().toString());
 
         WritableMap theMeta = Arguments.createMap();
         theMeta.putString("originalFileName", asset.getOriginalFileName());
         theMeta.putString("key", asset.getKey());
         theMeta.putString("contentType", asset.getContentType());
         theMeta.putInt("contentLength", asset.getContentLength());
-        assetMap.putMap("metaData", theMeta);
+        assetMap.putMap("assetMetaData", theMeta);
 
         WritableMap theButton = Arguments.createMap();
         theButton.putString("label", asset.getButtonLabel());
         theButton.putString("action", asset.getButtonAction());
-        assetMap.putMap("button", theButton);
+        assetMap.putMap("assetButton", theButton);
 
         return assetMap;
     }
@@ -325,33 +420,105 @@ public class NotificareUtils {
         return inboxItemMap;
     }
 
+    public static WritableMap mapBeacon(NotificareBeacon beacon) {
+        WritableMap map = Arguments.createMap();
+        map.putString("beaconId", beacon.getBeaconId());
+        map.putString("beaconName", beacon.getName());
+        map.putString("beaconRegion", beacon.getRegionId());
+        map.putString("beaconUUID", Notificare.shared().getApplicationInfo().getRegionConfig().getProximityUUID());
+        map.putInt("beaconMajor", beacon.getMajor());
+        map.putInt("beaconMinor", beacon.getMinor());
+        map.putBoolean("beaconTriggers", beacon.getTriggers());
+        return map;
+    }
+
+    public static WritableMap mapRegion(NotificareRegion region) {
+        WritableMap map = Arguments.createMap();
+        map.putString("regionId", region.getRegionId());
+        map.putString("regionName", region.getName());
+        map.putInt("regionMajor", region.getMajor());
+        if (region.getGeometry() != null) {
+            map.putMap("regionGeometry", mapPoint(region.getGeometry()));
+        }
+        if (region.getAdvancedGeometry() != null) {
+            map.putMap("regionAdvancedGeometry", mapPolygon(region.getAdvancedGeometry()));
+        }
+        map.putDouble("regionDistance", region.getDistance());
+        map.putString("regionTimezone", region.getTimezone());
+        return map;
+    }
+
+    public static WritableMap mapPoint(NotificarePoint point) {
+        WritableMap map = Arguments.createMap();
+        map.putString("type", point.getType());
+        WritableArray coordinates = Arguments.createArray();
+        coordinates.pushDouble(point.getLongitude());
+        coordinates.pushDouble(point.getLatitude());
+        map.putArray("coordinates", coordinates);
+        return map;
+    }
+
+    public static WritableMap mapPolygon(NotificarePolygon polygon) {
+        WritableMap map = Arguments.createMap();
+        map.putString("type", polygon.getType());
+        WritableArray ring = Arguments.createArray();
+        WritableArray coordinatesList = Arguments.createArray();
+        for (NotificareCoordinates coordinates : polygon.getCoordinates()) {
+            coordinatesList.pushDouble(coordinates.getLongitude());
+            coordinatesList.pushDouble(coordinates.getLatitude());
+        }
+        ring.pushArray(coordinatesList);
+        map.putArray("coordinates", ring);
+        return map;
+    }
+
+    public static WritableMap mapPass(NotificarePass pass) {
+        WritableMap map = Arguments.createMap();
+        map.putString("passbook", pass.getPassbook());
+        map.putString("serial", pass.getSerial());
+        if (pass.getRedeem() == NotificarePass.Redeem.ALWAYS) {
+            map.putString("redeem", "always");
+        } else if (pass.getRedeem() == NotificarePass.Redeem.LIMIT) {
+            map.putString("redeem", "limit");
+        } else if (pass.getRedeem() == NotificarePass.Redeem.ONCE) {
+            map.putString("redeem", "once");
+        }
+        map.putString("token", pass.getToken());
+        if (pass.getData() != null) {
+            map.putMap("data", mapJSON(pass.getData()));
+        }
+        map.putString("date", ISODateFormatter.format(pass.getDate()));
+        map.putInt("limit", pass.getLimit());
+        WritableArray redeemHistory = Arguments.createArray();
+        for (NotificarePassRedemption redemption : pass.getRedeemHistory()) {
+            WritableMap redemptionMap = Arguments.createMap();
+            redemptionMap.putString("comments", redemption.getComments());
+            redemptionMap.putString("date", ISODateFormatter.format(redemption.getDate()));
+            redeemHistory.pushMap(redemptionMap);
+        }
+        map.putArray("redeemHistory", redeemHistory);
+        return map;
+    }
+
     public static WritableArray mapProducts(List<NotificareProduct> products) {
         WritableArray productList = Arguments.createArray();
-
         for (NotificareProduct product : products){
-
-            WritableMap productItemMap = Arguments.createMap();
-            productItemMap.putString("type", product.getType());
-            productItemMap.putString("identifier", product.getIdentifier());
-            productItemMap.putString("name", product.getName());
-            productItemMap.putString("date", ISODateFormatter.format(product.getDate()));
-
-            WritableMap skuDetails = Arguments.createMap();
-            skuDetails.putString("type", product.getSkuDetails().getType());
-            skuDetails.putString("description", product.getSkuDetails().getDescription());
-            skuDetails.putString("price", product.getSkuDetails().getPrice());
-            skuDetails.putString("currencyCode", product.getSkuDetails().getPriceCurrencyCode());
-            skuDetails.putString("productId", product.getSkuDetails().getProductId());
-            skuDetails.putString("title", product.getSkuDetails().getTitle());
-            skuDetails.putDouble("priceAmount", product.getSkuDetails().getPriceAmount());
-            skuDetails.putDouble("priceAmountMicros", product.getSkuDetails().getPriceAmountMicros());
-            productItemMap.putMap("skuDetails", skuDetails);
-
-            productList.pushMap(productItemMap);
+            productList.pushMap(mapProduct(product));
         }
-
-
         return productList;
+    }
+
+    public static WritableMap mapProduct(NotificareProduct product) {
+        WritableMap productItemMap = Arguments.createMap();
+        productItemMap.putString("productType", product.getType());
+        productItemMap.putString("productIdentifier", product.getIdentifier());
+        productItemMap.putString("productName", product.getName());
+        productItemMap.putString("productDescription", product.getSkuDetails().getDescription());
+        productItemMap.putString("productPrice", product.getSkuDetails().getPrice());
+        productItemMap.putString("productCurrency", product.getSkuDetails().getPriceCurrencyCode());
+        productItemMap.putString("productDate", ISODateFormatter.format(product.getDate()));
+        productItemMap.putBoolean("productActive", true);
+        return productItemMap;
     }
 
 }

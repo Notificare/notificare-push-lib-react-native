@@ -26,7 +26,7 @@ public class NotificareReceiver extends DefaultIntentReceiver {
             }
         }
         map.putString("url", urlClicked.toString());
-        NotificareEventEmitter.getInstance().sendEvent("didClickURL", map, true);
+        NotificareEventEmitter.getInstance().sendEvent("urlClickedInNotification", map, true);
     }
 
     @Override
@@ -44,9 +44,7 @@ public class NotificareReceiver extends DefaultIntentReceiver {
 
     @Override
     public void onDeviceRegistered(NotificareDevice device) {
-        WritableMap map = Arguments.createMap();
-        map.putString("device", device.getDeviceId());
-        NotificareEventEmitter.getInstance().sendEvent("didReceiveDeviceToken", map, true);
+        NotificareEventEmitter.getInstance().sendEvent("deviceRegistered", NotificareUtils.mapDevice(device), true);
     }
 
 }

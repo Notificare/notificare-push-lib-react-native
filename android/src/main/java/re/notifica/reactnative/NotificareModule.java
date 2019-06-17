@@ -1,11 +1,11 @@
 package re.notifica.reactnative;
 
-import android.app.Activity;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -17,11 +17,14 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 import javax.annotation.Nullable;
 
@@ -32,20 +35,23 @@ import re.notifica.beacon.BeaconRangingListener;
 import re.notifica.billing.BillingManager;
 import re.notifica.billing.BillingResult;
 import re.notifica.billing.Purchase;
-import re.notifica.model.NotificareAction;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
+import re.notifica.model.NotificarePass;
 import re.notifica.model.NotificareProduct;
+import re.notifica.model.NotificareRegion;
 import re.notifica.model.NotificareTimeOfDay;
 import re.notifica.model.NotificareTimeOfDayRange;
 import re.notifica.model.NotificareUserData;
 import re.notifica.model.NotificareUserDataField;
 import re.notifica.util.Log;
 
-class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
+import static re.notifica.Notificare.shared;
+
+class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
     private static final String TAG = NotificareModule.class.getSimpleName();
     private static final int DEFAULT_LIST_SIZE = 25;
@@ -54,6 +60,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     private Boolean mounted = false;
     private Boolean isBillingReady = false;
+    private LiveData<SortedSet<NotificareInboxItem>> inboxItems;
 
 
     NotificareModule(ReactApplicationContext reactContext) {
@@ -120,6 +127,10 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         mounted = true;
         NotificareEventEmitter.getInstance().setMounted(true);
         Notificare.shared().addNotificareReadyListener(this);
+        if (Notificare.shared().getInboxManager() != null) {
+            inboxItems = Notificare.shared().getInboxManager().getObservableItems();
+            inboxItems.observeForever(this);
+        }
         NotificareEventEmitter.getInstance().processEventQueue();
     }
 
@@ -130,6 +141,9 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void unmount() {
         mounted = false;
         NotificareEventEmitter.getInstance().setMounted(false);
+        if (inboxItems != null) {
+            inboxItems.removeObserver(this);
+        }
         Notificare.shared().removeNotificareReadyListener(this);
     }
 
@@ -250,6 +264,26 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @ReactMethod
     public void fetchDevice(Promise promise) {
         promise.resolve(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
+    }
+
+    @ReactMethod
+    public void fetchPreferredLanguage(Promise promise) {
+        promise.resolve(Notificare.shared().getPreferredLanguage());
+    }
+
+    @ReactMethod
+    public void updatePreferredLanguage(String language, final Promise promise) {
+        Notificare.shared().updatePreferredLanguage(language, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
     }
 
     @ReactMethod
@@ -506,18 +540,12 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(notification.getString("inboxItemId"));
                 if (notificareInboxItem != null) {
                     Notificare.shared().openInboxItem(getCurrentActivity(), notificareInboxItem);
-                    Notificare.shared().getInboxManager().markItem(notificareInboxItem);
                 }
             } else if (notificationId != null && !notificationId.isEmpty()) {
                 Log.i(TAG, "try open as is");
                 // We have a notificationId, let's see if we can create a notification from the payload, otherwise fetch from API
                 NotificareNotification notificareNotification = NotificareUtils.createNotification(notification);
                 if (notificareNotification != null) {
-                    try {
-                        Log.i(TAG, notificareNotification.toJSONObject().toString());
-                    } catch (JSONException e) {
-
-                    }
                     Notificare.shared().openNotification(getCurrentActivity(), notificareNotification);
                 } else {
                     Notificare.shared().fetchNotification(notificationId, new NotificareCallback<NotificareNotification>() {
@@ -661,14 +689,90 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         });
     }
 
+    @ReactMethod
+    public void fetchPassWithSerial(String serial, final Promise promise){
+
+        Notificare.shared().fetchPass(serial, new NotificareCallback<NotificarePass>() {
+            @Override
+            public void onSuccess(NotificarePass notificarePass) {
+                promise.resolve(NotificareUtils.mapPass(notificarePass));
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+
+    }
+
+    @ReactMethod
+    public void fetchPassWithBarcode(String barcode, final Promise promise){
+
+        Notificare.shared().fetchPass(barcode, new NotificareCallback<NotificarePass>() {
+            @Override
+            public void onSuccess(NotificarePass notificarePass) {
+                promise.resolve(NotificareUtils.mapPass(notificarePass));
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+
+    }
+
+    @ReactMethod
+    public void fetchProducts(Promise promise) {
+        if (Notificare.shared().getBillingManager() != null) {
+            promise.resolve(NotificareUtils.mapProducts(Notificare.shared().getBillingManager().getProducts()));
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("billing not enabled"));
+        }
+    }
+
+    @ReactMethod
+    public void fetchPurchasedProducts(Promise promise) {
+        if (Notificare.shared().getBillingManager() != null) {
+            List<Purchase> purchases = Notificare.shared().getBillingManager().getPurchases();
+            List<NotificareProduct> products = new ArrayList<>();
+            for (Purchase purchase : purchases) {
+                NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
+                if (product != null) {
+                    products.add(product);
+                }
+            }
+            promise.resolve(NotificareUtils.mapProducts(products);
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("billing not enabled"));
+        }
+    }
+
+    @ReactMethod
+    public void fetchProduct(ReadableMap product, Promise promise) {
+        if (Notificare.shared().getBillingManager() != null) {
+            NotificareProduct theProduct = Notificare.shared().getBillingManager().getProduct(product.getString("productIdentifier"));
+            if (theProduct != null) {
+                promise.resolve(NotificareUtils.mapProduct(theProduct));
+            } else {
+                promise.reject(DEFAULT_ERROR_CODE, new NotificareError("product not found"));
+            }
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("billing not enabled"));
+        }
+    }
+
     /**
      * Buy a product
      * @param product
      */
     @ReactMethod
     public void buyProduct(ReadableMap product) {
-        NotificareProduct notificareProduct = Notificare.shared().getBillingManager().getProduct(product.getString("identifier"));
-        Notificare.shared().getBillingManager().launchPurchaseFlow(getCurrentActivity(), notificareProduct, this);
+        if (Notificare.shared().getBillingManager() != null) {
+            NotificareProduct notificareProduct = Notificare.shared().getBillingManager().getProduct(product.getString("identifier"));
+            Notificare.shared().getBillingManager().launchPurchaseFlow(getCurrentActivity(), notificareProduct, this);
+        }
     }
 
     /**
@@ -723,7 +827,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      * @param promise
      */
     @ReactMethod
-    public void logOpenNotificationInfluenced(ReadableMap notification, final Promise promise) {
+    public void logInfluencedNotification(ReadableMap notification, final Promise promise) {
         NotificareNotification theNotification = NotificareUtils.createNotification(notification);
         if (theNotification != null) {
             Notificare.shared().getEventLogger().logOpenNotificationInfluenced(theNotification.getNotificationId(), new NotificareCallback<Boolean>() {
@@ -740,6 +844,22 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         } else {
             promise.reject(DEFAULT_ERROR_CODE, new NotificareError("invalid notification"));
         }
+    }
+
+    @ReactMethod
+    public void doCloudhostOperation(String verb, String path, ReadableMap params, ReadableMap headers, ReadableMap body, final Promise promise) {
+        JSONObject jsonData = new JSONObject(body.toHashMap());
+        Notificare.shared().doCloudRequest(verb, path, params.toHashMap(), jsonData, headers.toHashMap(), new NotificareCallback<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject jsonObject) {
+                promise.resolve(NotificareUtils.mapJSON(jsonObject));
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
     }
 
     // ActivityEventListener methods
@@ -868,7 +988,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void onNotificationReceived(NotificareNotification notification) {
         if (notification != null) {
             WritableMap notificationMap = NotificareUtils.mapNotification(notification);
-            sendEvent("notificationReceived", notificationMap, true);
+            sendEvent("remoteNotificationReceivedInForeground", notificationMap, true);
         }
     }
 
@@ -893,8 +1013,20 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @Override
-    public void onRangingBeacons(List<NotificareBeacon> list) {
-
+    public void onRangingBeacons(List<NotificareBeacon> beacons) {
+        WritableMap map = Arguments.createMap();
+        WritableArray beaconsArray = Arguments.createArray();
+        for (NotificareBeacon beacon : beacons) {
+            beaconsArray.pushMap(NotificareUtils.mapBeacon(beacon));
+        }
+        map.putArray("beacons", beaconsArray);
+        if (beacons.size() > 0) {
+            NotificareRegion region = beacons.get(0).getRegion();
+            if (region != null) {
+                map.putMap("region", NotificareUtils.mapRegion(region));
+            }
+        }
+        sendEvent("beaconsInRangeForRegion", beacons);
     }
 
     @Override
@@ -907,21 +1039,42 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @Override
     public void onPurchaseFinished(BillingResult billingResult, Purchase purchase) {
         isBillingReady = false;
-        Notificare.shared().getBillingManager().refresh(this);
+        WritableMap payload = Arguments.createMap();
+        NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
+        if (product != null) {
+            payload.putMap("product", NotificareUtils.mapProduct(product));
+        }
+        if (billingResult.isFailure()) {
+            payload.putString("error", billingResult.getMessage());
+            sendEvent("productTransactionFailed", payload, true);
+        } else if (billingResult.isSuccess()) {
+            sendEvent("productTransactionCompleted", payload, true);
+        }
     }
 
     @Override
     public void onRefreshFinished() {
-        WritableMap payload = Arguments.createMap();
         List<NotificareProduct> list = Notificare.shared().getBillingManager().getProducts();
-        payload.putArray("products", NotificareUtils.mapProducts(list));
-        sendEvent("didLoadStore", payload, true);
+        sendEvent("storeLoaded", NotificareUtils.mapProducts(list), true);
     }
 
     @Override
     public void onRefreshFailed(NotificareError notificareError) {
         WritableMap payload = Arguments.createMap();
         payload.putString("error", notificareError.getMessage());
-        sendEvent("didLoadStore", payload, true);
+        sendEvent("storeFailedToLoad", payload, true);
     }
+
+    @Override
+    public void onChanged(@Nullable SortedSet<NotificareInboxItem> notificareInboxItems) {
+        WritableArray inbox = Arguments.createArray();
+        if (notificareInboxItems != null) {
+            for (NotificareInboxItem item : notificareInboxItems) {
+                inbox.pushMap(NotificareUtils.mapInboxItem(item));
+            }
+            sendEvent("inboxLoaded", inbox);
+            sendEvent("badgeUpdated", Notificare.shared().getInboxManager().getUnreadCount());
+        }
+    }
+
 }
