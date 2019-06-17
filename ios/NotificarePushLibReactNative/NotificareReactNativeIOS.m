@@ -730,6 +730,18 @@ RCT_REMAP_METHOD(createAccount, email:(nonnull NSString*)email name:(nonnull NSS
     
 }
 
+RCT_REMAP_METHOD(validateAccount, token:(nonnull NSString*)token validateAccountWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    
+    [[[NotificarePushLib shared] authManager] validateAccount:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            resolve(response);
+        } else {
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
+        }
+    }];
+    
+}
+
 RCT_REMAP_METHOD(resetPassword, password:(nonnull NSString*)password token:(nonnull NSString*)token resetPasswordWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[[NotificarePushLib shared] authManager] resetPassword:password withToken:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
