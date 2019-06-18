@@ -3,6 +3,7 @@ package re.notifica.reactnative;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -15,6 +16,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.google.android.gms.common.api.CommonStatusCodes;
 
 import org.json.JSONObject;
 
@@ -41,10 +43,14 @@ import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificarePass;
 import re.notifica.model.NotificareProduct;
 import re.notifica.model.NotificareRegion;
+import re.notifica.model.NotificareScannable;
 import re.notifica.model.NotificareTimeOfDay;
 import re.notifica.model.NotificareTimeOfDayRange;
+import re.notifica.model.NotificareUser;
 import re.notifica.model.NotificareUserData;
 import re.notifica.model.NotificareUserDataField;
+import re.notifica.model.NotificareUserPreference;
+import re.notifica.model.NotificareUserSegment;
 import re.notifica.util.Log;
 
 class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
@@ -53,6 +59,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     private static final int DEFAULT_LIST_SIZE = 25;
 
     private static final String DEFAULT_ERROR_CODE = "notificare_error";
+    private static final int SCANNABLE_REQUEST_CODE = 9004;
 
     private Boolean mounted = false;
     private Boolean isBillingReady = false;
@@ -858,6 +865,221 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         });
     }
 
+    @ReactMethod
+    public void createAccount(String email, String name, String password, final Promise promise) {
+        Notificare.shared().createAccount(email, password, name, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void validateAccount(String token, final Promise promise) {
+        Notificare.shared().validateUser(token, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void resetPassword(String token, String password, final Promise promise) {
+        Notificare.shared().resetPassword(password, token, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void sendPassword(String email, final Promise promise) {
+        Notificare.shared().sendPassword(email, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void login(String email, String password, final Promise promise) {
+        Notificare.shared().userLogin(email, password, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void logout(final Promise promise) {
+        Notificare.shared().userLogout(new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void isLoggedIn(Promise promise) {
+        promise.resolve(Notificare.shared().isLoggedIn());
+    }
+
+    @ReactMethod
+    public void generateAccessToken(final Promise promise) {
+        Notificare.shared().generateAccessToken(new NotificareCallback<NotificareUser>() {
+            @Override
+            public void onSuccess(NotificareUser notificareUser) {
+                promise.resolve(NotificareUtils.mapUser(notificareUser));
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void changePassword(String password, final Promise promise) {
+        Notificare.shared().changePassword(password, new NotificareCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void fetchAccountDetails(final Promise promise) {
+        Notificare.shared().fetchUserDetails(new NotificareCallback<NotificareUser>() {
+            @Override
+            public void onSuccess(NotificareUser notificareUser) {
+                promise.resolve(NotificareUtils.mapUser(notificareUser));
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void fetchUserPreferences(final Promise promise) {
+        Notificare.shared().fetchUserPreferences(new NotificareCallback<List<NotificareUserPreference>>() {
+            @Override
+            public void onSuccess(List<NotificareUserPreference> notificareUserPreferences) {
+                WritableArray preferencesArray = Arguments.createArray();
+                for (NotificareUserPreference preference : notificareUserPreferences) {
+                    preferencesArray.pushMap(NotificareUtils.mapUserPreference(preference));
+                }
+                promise.resolve(preferencesArray);
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
+    }
+
+    @ReactMethod
+    public void addSegmentToUserPreference(ReadableMap segment, ReadableMap preference, final Promise promise) {
+        NotificareUserSegment userSegment = NotificareUtils.createUserSegment(segment);
+        NotificareUserPreference userPreference = NotificareUtils.createUserPreference(preference);
+        if (userSegment != null && userPreference != null) {
+            Notificare.shared().userSegmentAddToUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    promise.resolve(null);
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+                    promise.reject(DEFAULT_ERROR_CODE, notificareError);
+                }
+            });
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("invalid parameters"));
+        }
+    }
+
+    @ReactMethod
+    public void removeSegmentFromUserPreference(ReadableMap segment, ReadableMap preference, final Promise promise) {
+        NotificareUserSegment userSegment = NotificareUtils.createUserSegment(segment);
+        NotificareUserPreference userPreference = NotificareUtils.createUserPreference(preference);
+        if (userSegment != null && userPreference != null) {
+            Notificare.shared().userSegmentRemoveFromUserPreference(userSegment, userPreference, new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    promise.resolve(null);
+                }
+
+                @Override
+                public void onError(NotificareError notificareError) {
+                    promise.reject(DEFAULT_ERROR_CODE, notificareError);
+                }
+            });
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("invalid parameters"));
+        }
+    }
+
+    @ReactMethod
+    public void startScannableSession() {
+        if (getCurrentActivity() != null) {
+            Notificare.shared().startScannableActivity(getCurrentActivity(), SCANNABLE_REQUEST_CODE);
+        }
+    }
+
+    @ReactMethod
+    public void presentScannable(ReadableMap scannable) {
+        if (scannable.getMap("notification") != null) {
+            presentNotification(scannable.getMap("notification"));
+        }
+    }
+
     // ActivityEventListener methods
 
     /**
@@ -871,7 +1093,29 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Notificare.shared().handleServiceErrorResolution(requestCode, resultCode, data);
 
-        if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
+        if (requestCode == SCANNABLE_REQUEST_CODE) {
+            WritableMap payload = Arguments.createMap();
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
+                    NotificareScannable scannable = Notificare.shared().extractScannableFromActivityResult(data);
+                    if (scannable != null) {
+                        sendEvent("scannableDetected", NotificareUtils.mapScannable(scannable));
+                    } else {
+                        payload.putString("error", "scannable not found");
+                        sendEvent("scannableSessionInvalidatedWithError", payload, true);
+                    }
+                } else {
+                    payload.putString("error", "scan did not return any results");
+                    sendEvent("scannableSessionInvalidatedWithError", payload, true);
+                }
+            } else if (resultCode == CommonStatusCodes.CANCELED) {
+                payload.putString("error", "scan was canceled");
+                sendEvent("scannableSessionInvalidatedWithError", payload, true);
+            } else {
+                payload.putString("error", "unknown error");
+                sendEvent("scannableSessionInvalidatedWithError", payload, true);
+            }
+        } else if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
             // Billingmanager handled the result
             isBillingReady = true; // wait for purchase to finish before doing other calls
         }

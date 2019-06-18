@@ -273,7 +273,7 @@ RCT_REMAP_METHOD(updatePreferredLanguage, preferredLanguage:(NSString * _Nullabl
     
     [[NotificarePushLib shared] updatePreferredLanguage:preferredLanguage completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -297,7 +297,7 @@ RCT_REMAP_METHOD(addTag, tag:(nonnull NSString *)tag addTagWithResolver:(RCTProm
     
     [[NotificarePushLib shared] addTag:tag completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -308,7 +308,7 @@ RCT_REMAP_METHOD(addTags, tags:(nonnull NSArray *)tags addTagsWithResolver:(RCTP
     
     [[NotificarePushLib shared] addTags:tags completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -319,7 +319,7 @@ RCT_REMAP_METHOD(removeTag, tag:(nonnull NSString *)tag removeTagWithResolver:(R
     
     [[NotificarePushLib shared] removeTag:tag completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -331,7 +331,7 @@ RCT_REMAP_METHOD(removeTags, tags:(nonnull NSArray *)tags removeTagsWithResolver
     
     [[NotificarePushLib shared] removeTags:tags completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -342,7 +342,7 @@ RCT_REMAP_METHOD(clearTags, clearTagsWithResolver:(RCTPromiseResolveBlock)resolv
     
     [[NotificarePushLib shared] clearTags:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -466,7 +466,7 @@ RCT_REMAP_METHOD(reply, notification:(nonnull NSDictionary *)notification action
     
     [[NotificarePushLib shared] reply:[[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification] forAction:[[NotificareReactNativeIOSUtils shared] actionFromDictionary:action]  andData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -534,7 +534,7 @@ RCT_REMAP_METHOD(clearInbox, clearInboxWithResolver:(RCTPromiseResolveBlock)reso
     
     [[[NotificarePushLib shared] inboxManager] clearInbox:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -641,7 +641,7 @@ RCT_REMAP_METHOD(logCustomEvent, name:(nonnull NSString*)name data:(NSDictionary
     
     [[NotificarePushLib shared] logCustomEvent:name withData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -656,7 +656,7 @@ RCT_REMAP_METHOD(logOpenNotification, notification:(NSDictionary* _Nullable)noti
     
     [[NotificarePushLib shared] logEvent:kNotificareEventNotificationOpen withData:eventData completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -671,7 +671,7 @@ RCT_REMAP_METHOD(logInfluencedNotification, notification:(NSDictionary* _Nullabl
     
     [[NotificarePushLib shared] logEvent:kNotificareEventNotificationInfluenced withData:eventData completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -722,7 +722,7 @@ RCT_REMAP_METHOD(createAccount, email:(nonnull NSString*)email name:(nonnull NSS
     
     [[[NotificarePushLib shared] authManager] createAccount:email withName:name andPassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -734,7 +734,7 @@ RCT_REMAP_METHOD(validateAccount, token:(nonnull NSString*)token validateAccount
     
     [[[NotificarePushLib shared] authManager] validateAccount:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -746,7 +746,7 @@ RCT_REMAP_METHOD(resetPassword, password:(nonnull NSString*)password token:(nonn
     
     [[[NotificarePushLib shared] authManager] resetPassword:password withToken:token completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -758,7 +758,7 @@ RCT_REMAP_METHOD(sendPassword, email:(nonnull NSString*)email sendPasswordWithRe
     
     [[[NotificarePushLib shared] authManager] sendPassword:email completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -770,7 +770,7 @@ RCT_REMAP_METHOD(login, email:(nonnull NSString*)email password:(nonnull NSStrin
     
     [[[NotificarePushLib shared] authManager] loginWithUsername:email andPassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -778,8 +778,9 @@ RCT_REMAP_METHOD(login, email:(nonnull NSString*)email password:(nonnull NSStrin
     
 }
 
-RCT_EXPORT_METHOD(logout){
+RCT_REMAP_METHOD(logout, logoutWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[[NotificarePushLib shared] authManager] logoutAccount];
+    resolve(nil);
 }
 
 RCT_REMAP_METHOD(isLoggedIn, isLoggedInResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -790,7 +791,7 @@ RCT_REMAP_METHOD(generateAccessToken, generateAccessTokenWithResolver:(RCTPromis
     
     [[[NotificarePushLib shared] authManager] generateAccessToken:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve([[NotificareReactNativeIOSUtils shared] dictionaryFromUser:response]);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -802,7 +803,7 @@ RCT_REMAP_METHOD(changePassword, password:(nonnull NSString*)password changePass
     
     [[[NotificarePushLib shared] authManager] changePassword:password completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }

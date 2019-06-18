@@ -35,7 +35,12 @@ import re.notifica.model.NotificarePoint;
 import re.notifica.model.NotificarePolygon;
 import re.notifica.model.NotificareProduct;
 import re.notifica.model.NotificareRegion;
+import re.notifica.model.NotificareScannable;
 import re.notifica.model.NotificareTimeOfDayRange;
+import re.notifica.model.NotificareUser;
+import re.notifica.model.NotificareUserPreference;
+import re.notifica.model.NotificareUserPreferenceOption;
+import re.notifica.model.NotificareUserSegment;
 import re.notifica.util.ISODateFormatter;
 import re.notifica.util.Log;
 
@@ -369,7 +374,7 @@ public class NotificareUtils {
 //                }
                 return new NotificareNotification(json);
             } catch (JSONException e) {
-                Log.e(TAG,e.getMessage());
+                Log.e(TAG, e.getMessage());
                 return null;
             }
         }
@@ -513,6 +518,87 @@ public class NotificareUtils {
         productItemMap.putString("productDate", ISODateFormatter.format(product.getDate()));
         productItemMap.putBoolean("productActive", true);
         return productItemMap;
+    }
+
+    public static WritableMap mapUser(NotificareUser user) {
+        WritableMap userMap = Arguments.createMap();
+        userMap.putString("userID", user.getUserId());
+        userMap.putString("userName", user.getUserName());
+        WritableArray segments = Arguments.createArray();
+        if (user.getSegments() != null) {
+            for (String segmentId : user.getSegments()) {
+                segments.pushString(segmentId);
+            }
+        }
+        userMap.putArray("segments", segments);
+        return userMap;
+    }
+
+    public static WritableArray mapUserSegments(List<NotificareUserSegment> userSegments) {
+        WritableArray userSegmentsArray = Arguments.createArray();
+        for (NotificareUserSegment userSegment : userSegments) {
+            userSegmentsArray.pushMap(mapUserSegment(userSegment));
+        }
+        return userSegmentsArray;
+    }
+
+    public static WritableMap mapUserPreference(NotificareUserPreference userPreference) {
+        WritableMap userPreferenceMap = Arguments.createMap();
+        userPreferenceMap.putString("preferenceId", userPreference.getId());
+        userPreferenceMap.putString("preferenceLabel", userPreference.getLabel());
+        userPreferenceMap.putString("preferenceType", userPreference.getPreferenceType());
+        WritableArray options = Arguments.createArray();
+        for (NotificareUserPreferenceOption option : userPreference.getPreferenceOptions()) {
+            WritableMap optionMap = Arguments.createMap();
+            optionMap.putString("segmentId", option.getUserSegmentId());
+            optionMap.putString("segmentLabel", option.getLabel());
+            optionMap.putBoolean("selected", option.isSelected());
+            options.pushMap(optionMap);
+        }
+        userPreferenceMap.putArray("preferenceOptions", options);
+        return userPreferenceMap;
+    }
+
+    public static NotificareUserPreference createUserPreference(ReadableMap userPreferenceMap) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("_id", userPreferenceMap.getString("preferenceId"));
+            json.put("label", userPreferenceMap.getString("preferenceLabel"));
+            json.put("preferenceType", userPreferenceMap.getString("preferenceType"));
+            return new NotificareUserPreference(json);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+
+    public static WritableMap mapUserSegment(NotificareUserSegment userSegment) {
+        WritableMap userSegmentMap = Arguments.createMap();
+        userSegmentMap.putString("segmentId", userSegment.getId());
+        userSegmentMap.putString("segmentLabel", userSegment.getName());
+        return userSegmentMap;
+    }
+
+    public static NotificareUserSegment createUserSegment(ReadableMap userSegmentMap) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("_id", userSegmentMap.getString("segmentId"));
+            json.put("name", userSegmentMap.getString("segmentLabel"));
+            return new NotificareUserSegment(json);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    public static WritableMap mapScannable(NotificareScannable scannable) {
+        WritableMap scannableMap = Arguments.createMap();
+        scannableMap.putString("scannableId", scannable.getScannableId());
+        scannableMap.putString("scannableId", scannable.getName());
+        scannableMap.putString("scannableId", scannable.getType());
+        scannableMap.putString("scannableId", scannable.getTag());
+        scannableMap.putMap("scannableId", mapJSON(scannable.getData()));
+        scannableMap.putMap("notification", mapNotification(scannable.getNotification()));
+        return scannableMap;
     }
 
 }
