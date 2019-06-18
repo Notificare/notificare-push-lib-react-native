@@ -1,5 +1,6 @@
 package re.notifica.reactnative;
 
+import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -746,7 +748,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                     products.add(product);
                 }
             }
-            promise.resolve(NotificareUtils.mapProducts(products);
+            promise.resolve(NotificareUtils.mapProducts(products));
         } else {
             promise.reject(DEFAULT_ERROR_CODE, new NotificareError("billing not enabled"));
         }
@@ -852,7 +854,23 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @ReactMethod
     public void doCloudhostOperation(String verb, String path, ReadableMap params, ReadableMap headers, ReadableMap body, final Promise promise) {
         JSONObject jsonData = new JSONObject(body.toHashMap());
-        Notificare.shared().doCloudRequest(verb, path, params.toHashMap(), jsonData, headers.toHashMap(), new NotificareCallback<JSONObject>() {
+        Map<String,String> paramsMap = new HashMap<>();
+        if (headers != null) {
+            ReadableMapKeySetIterator i = params.keySetIterator();
+            while (i.hasNextKey()) {
+                String key = i.nextKey();
+                paramsMap.put(key, params.getString(key));
+            }
+        }
+        Map<String,String> headersMap= new HashMap<>();
+        if (headers != null) {
+            ReadableMapKeySetIterator i = headers.keySetIterator();
+            while (i.hasNextKey()) {
+                String key = i.nextKey();
+                headersMap.put(key, headers.getString(key));
+            }
+        }
+        Notificare.shared().doCloudRequest(verb, path, paramsMap, jsonData, headersMap, new NotificareCallback<JSONObject>() {
             @Override
             public void onSuccess(JSONObject jsonObject) {
                 promise.resolve(NotificareUtils.mapJSON(jsonObject));
@@ -1090,7 +1108,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      * @param data
      */
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         Notificare.shared().handleServiceErrorResolution(requestCode, resultCode, data);
 
         if (requestCode == SCANNABLE_REQUEST_CODE) {
