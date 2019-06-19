@@ -73,7 +73,7 @@ This new version also introduces breaking changes to almost all the events trigg
 | inboxLoaded | :white_check_mark: | :white_check_mark: |
 | badgeUpdated | :white_check_mark: | :white_check_mark: |
 | remoteNotificationReceivedInBackground | :white_check_mark: | :x: |
-| remoteNotificationReceivedInForeground | :white_check_mark: | : white_check_mark: |
+| remoteNotificationReceivedInForeground | :white_check_mark: | :white_check_mark: |
 | systemNotificationReceivedInBackground | :white_check_mark: | :x: |
 | systemNotificationReceivedInForeground | :white_check_mark: | :x: |
 | unknownNotificationReceived | :white_check_mark: | :x: |
