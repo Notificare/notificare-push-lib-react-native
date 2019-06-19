@@ -16,7 +16,11 @@ A few changes were introduces when initializing the library, mainly a new method
 
 You can find more information about initialization here:
 
-https://docs.notifica.re/sdk/v2/react-native/ios/implementation/ 
+### iOS:
+https://docs.notifica.re/sdk/v2/react-native/ios/implementation/
+
+### Android:
+https://docs.notifica.re/sdk/v2/react-native/android/implementation/
 
 ## Device Registration
 
@@ -28,163 +32,37 @@ Once you decide to register for notifications, those automatically assigned devi
 
 Bottom line, for this version you should remove all the device registration delegates used in previous versions and optionally you can implement the new delegates which are merely informative. You can find more information about device registration here:
 
-https://docs.notifica.re/sdk/v2/ios/implementation/register/ 
+### iOS:
+https://docs.notifica.re/sdk/v2/react-native/ios/implementation/register/ 
 
-## Remote Notifications
+### Android:
+https://docs.notifica.re/sdk/v2/react-native/android/implementation/register/
 
-In SDK 2.0, we've unified notification handling to work as one for all versions from iOS 8 up to iOS 11. We've also simplified the implementation of this functionality by allowing you to take actions for 2 different situations, when notifications are received in foreground or background. Actionable notification are also totally managed by Notificare and you will not have to take care of anything to handle actions. 
-
-Basically for this version you should remove all the notification delegates implemented for previous versions and implement only the following delegates:
-
-```
--(void)notificarePushLib:(NotificarePushLib *)library didReceiveRemoteNotificationInForeground:(nonnull NotificareNotification *)notification withController:(id _Nullable)controller {
- //Here you probably don't want to interrupt the user and simply show that a notification has arrived with an in-app badge
-}
-```
+## Promises
+In this new version we've added support for javascript Promises in all methods that used callback functions. This means that some refactoring is required to make your current implementation work with this plugin. For example a method that would look like this:
 
 ```
--(void)notificarePushLib:(NotificarePushLib *)library didReceiveRemoteNotificationInBackground:(nonnull NotificareNotification *)notification withController:(id _Nullable)controller{
-  //Notification arrive in background and user clicked on it from notfication center or lock screen, here you will want to present it to the user
-}
+Notificare.addTag("tag_example", (data, error) => {
+  if (!error) {
+    //Success
+  } else {
+    //Error
+  }
+});
 ```
 
-Additionally you've also changed the way notifications should be presented, by allowing you to provide us a navigation controller which we should use to present the UI controllers you received in the previous delegates. This will allow you to have more control over how notifications are shown and how you customise the navigation controller where we will stack notification controllers. This must be done by using the following method:
-
+Should now become:
 ```
--(void)notificarePushLib:(NotificarePushLib *)library didReceiveRemoteNotificationInBackground:(nonnull NotificareNotification *)notification withController:(id _Nullable)controller{
-	UINavigationController *navController = (UINavigationController *)self.window.rootViewController;
-	[[NotificarePushLib shared] presentNotification:notification inNavigationController:navController withController:controller];
-}
-```
-
-Another important thing to acknowledge for this new version is the fact that we've unified the local and remote message inbox under a new class, called inboxManager. You will need to change your current inbox implementation to reflect these changes in order to benefit from a super optimised cached version of your messages. 
-
-More in-depth guides can be found here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/push/
-
-## Location Services
-
-In this new version, locations services do not suffer any significant API change. Most of the changes to this functionality are under-the-hood and implementation for previous versions will work in this new versions.
-
-For more information, please read the guides for this functionality located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/location-services/
-
-## Authentication
-
-In SDK 2.0, we've moved all the methods for this functionality into a new class, called authManager. Although most methods remain the same, you'll need to change your current implementation to reflect this change.
-
-For more information, please find more in-depth guides here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/oauth2/
-
-## Segmentation
-
-As mentioned in the previous section, authManager class is now responsible for handling authenticated operations for segmentation.
-
-You can find more information in our in-depth guides located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/segmentation/
-
-## Tags
-
-This functionality remains pretty much the same in this new version. We did add two new methods that you might find interesting when implementing tags. 
-
-You can now add a single tag using the following method:
-
-```
-[[NotificarePushLib shared] addTag:@"tag_press" completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-	if (!error) {
-		//Tag added
-	}
-}];
+Notificare.addTag("tag_example").then((data) => {
+  //Success
+}).catch((e) => {
+  //Error
+});
 ```
 
-And you can remove several tags with one single request by using the method below:
+## Events
+This new version also introduces breaking changes to almost all the events triggered by our plugin. Please review below all the events supported by our new version:
 
-```
-[[NotificarePushLib shared] removeTags:@[@"tag_press", @"tag_news"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-	if (!error) {
-		//Tags removed
-	}
-}];
-```
- 
-You can find more information in our guides located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/tags/
-
-## Monetize
-
-This functionality did not suffer any change in SDK 2.0 and you will not need to change anything in your current implementation.
-
-More in-depth information can be found in our guides located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/monetize/implementation/
-
-## Loyalty
-
-In SDK 2.0, we do not include the PassKit framework by default. This change will allow apps that do not use this functionality to not be flagged as such in the App Store. On the other hand, if your app uses this functionality, you need to implement the following method in your AppDelegate, in order to support native Wallet passes:
-
-```
-#import <PassKit/PassKit.h>
-
--(void)notificarePushLib:(NotificarePushLib *)library didReceivePass:(nonnull NSURL *)pass inNotification:(nonnull NotificareNotification *)notification{
-
-	NSData *data = [[NSData alloc] initWithContentsOfURL:pass];
-	NSError *error;
-
-	//Init a pass object with the data
-	PKPass * pkPass = [[PKPass alloc] initWithData:data error:&error];
-
-	if(!error){
-		//Present PKAddPassesViewController controller in your own navigation controller
-		PKAddPassesViewController * vc = [[PKAddPassesViewController alloc] initWithPass:pkPass];
-		[vc setDelegate:self];
-
-		UINavigationController *navController = (UINavigationController *)self.window.rootViewController;
-
-		[[NotificarePushLib shared] presentWalletPass:notification inNavigationController:navController withController:vc];
-	}
-}
-```
-
-By default if this method is not implemented, every pass you send in a notification will be presented as a web version in a WebView.
-
-Please find more information about this functionality here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/loyalty/implementation/
-
-## Analytics
-
-This functionality did not suffer any change in SDK 2.0 and you will not need to change anything in your current implementation.
-
-More in-depth information can be found in our guides located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/analytics/
-
-## Storage
-
-This functionality did not suffer any change in SDK 2.0 and you will not need to change anything in your current implementation.
-
-More in-depth information can be found in our guides located here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/storage/
-
-## Scannables
-
-There a couple of changes to this functionality in this new version of the SDK. Mainly the way you can present content from a Scannable changed. In order to make it easier for you to handle the content from a NFC tag or QR Code, we've added the following method:
-
-```
-[[NotificarePushLib shared] openScannable:scannable completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-	if (!error) {
-		UINavigationController *navController = (UINavigationController *)self.window.rootViewController;
-		[[NotificarePushLib shared] presentScannable:scannable inNavigationController:navController withController:response];
-	}
-}];
-```
-
-Please find all the information about this functionality here:
-
-https://docs.notifica.re/sdk/v2/ios/implementation/scannables/
+| Event                          |    iOS    |  Android  |
+|--------------------------------|:---------:|----------:|
+| ready                          |    [x]    |    [x]    |
