@@ -301,7 +301,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
             @Override
             public void onSuccess(List<String> tags) {
-                promise.resolve(Arguments.fromArray(tags));
+                promise.resolve(Arguments.fromList(tags));
             }
         });
     }
