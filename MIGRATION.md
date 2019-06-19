@@ -68,10 +68,10 @@ This new version also introduces breaking changes to almost all the events trigg
 | unknownNotificationReceived | :white_check_mark: | :x: |
 | unknownActionForNotificationReceived | :white_check_mark: | :x: |
 | notificationWillOpen | :white_check_mark: | :x: |
-| notificationOpened | :white_check_mark: | :x: |
+| notificationOpened | :white_check_mark: | :white_check_mark: |
 | notificationClosed | :white_check_mark: | :x: |
 | notificationFailedToOpen | :white_check_mark: | :x: |
-| urlClickedInNotification | :white_check_mark: | :x: |
+| urlClickedInNotification | :white_check_mark: | :white_check_mark: |
 | actionWillExecute | :white_check_mark: | :x: |
 | actionExecuted | :white_check_mark: | :x: |
 | shouldPerformSelectorWithUrl | :white_check_mark: | :x: |
@@ -87,18 +87,18 @@ This new version also introduces breaking changes to almost all the events trigg
 | regionEntered | :white_check_mark: | :x: |
 | regionExited | :white_check_mark: | :x: |
 | rangingBeaconsFailed | :white_check_mark: | :x: |
-| beaconsInRangeForRegion | :white_check_mark: | :x: |
+| beaconsInRangeForRegion | :white_check_mark: | :white_check_mark: |
 | headingUpdated | :white_check_mark: | :x: |
 | visitReceived | :white_check_mark: | :x: |
 | accountStateChanged | :white_check_mark: | :x: |
 | accountSessionFailedToRenewWithError | :white_check_mark: | :x: |
 | activationTokenReceived | :white_check_mark: | :x: |
 | resetPasswordTokenReceived | :white_check_mark: | :x: |
-| storeLoaded | :white_check_mark: | :x: |
-| storeFailedToLoad | :white_check_mark: | :x: |
-| productTransactionCompleted | :white_check_mark: | :x: |
+| storeLoaded | :white_check_mark: | :white_check_mark: |
+| storeFailedToLoad | :white_check_mark: | :white_check_mark: |
+| productTransactionCompleted | :white_check_mark: | :white_check_mark: |
 | productTransactionRestored | :white_check_mark: | :x: |
-| productTransactionFailed | :white_check_mark: | :x: |
+| productTransactionFailed | :white_check_mark: | :white_check_mark: |
 | productContentDownloadStarted | :white_check_mark: | :x: |
 | productContentDownloadPaused | :white_check_mark: | :x: |
 | productContentDownloadCancelled | :white_check_mark: | :x: |
@@ -106,6 +106,6 @@ This new version also introduces breaking changes to almost all the events trigg
 | productContentDownloadFailed | :white_check_mark: | :x: |
 | productContentDownloadFinished | :white_check_mark: | :x: |
 | qrCodeScannerStarted | :white_check_mark: | :x: |
-| scannableSessionInvalidatedWithError | :white_check_mark: | :x: |
-| scannableDetected | :white_check_mark: | :x: |
+| scannableSessionInvalidatedWithError | :white_check_mark: | :white_check_mark: |
+| scannableDetected | :white_check_mark: | :white_check_mark: |
 
