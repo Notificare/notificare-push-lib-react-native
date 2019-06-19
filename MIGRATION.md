@@ -65,9 +65,9 @@ This new version also introduces breaking changes to almost all the events trigg
 
 | Event | iOS | Android |
 |-------|:---:|--------:|
-| ready | :heavy_check_mark: | :heavy_check_mark: |
-| deviceRegistered | :heavy_check_mark: | :heavy_check_mark: |
-| notificationSettingsChanged | :heavy_check_mark: | :white_check_mark: |
-| urlOpened | :heavy_check_mark: | :white_check_mark: |
+| ready | :white_check_mark: | :white_check_mark: |
+| deviceRegistered | :white_check_mark: | :white_check_mark: |
+| notificationSettingsChanged | :white_check_mark: | :x: |
+| urlOpened | :white_check_mark: | :x: |
 
 
