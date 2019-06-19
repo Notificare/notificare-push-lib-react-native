@@ -11,22 +11,11 @@ https://docs.notifica.re/sdk/v2/react-native/ios/setup/
 https://docs.notifica.re/sdk/v2/react-native/android/setup/
 
 
-## Initialization
-A few changes were introduces when initializing the library, mainly a new method is required to initialize the library (where you can override Notificare.plist app keys). This creates a clear separation between the moment you initialize our plugin and when you actually want to start using it.
-
-You can find more information about initialization here:
-
-### iOS:
-https://docs.notifica.re/sdk/v2/react-native/ios/implementation/
-
-### Android:
-https://docs.notifica.re/sdk/v2/react-native/android/implementation/
-
 ## Device Registration
 
 When you are migrating from older versions, you will notice that you no longer need to take action whenever a device token is registered, as device registration in SDK 2.0 is totally managed by Notificare. You can still register/unregister a device to/from a userID and userName and Notificare will always keep that information cached in the device. This will make sure that whenever a device token changes everything is correctly handled without the need for your app to handle it. 
 
-It is also important to mention that the first time an app is launched we will assign a UUID token to the device before you even request to register for notifications. Basically with this new SDK all features of Notificare can still be used even if your app does not implement remote notifications. Obviously if you never request to register for notifications, users will never receive remote notifications, although messages will still be in the inbox (if implemented), tags can be registered, location services can be used and pretty much all features will work as expected.
+It is also important to mention that the first time an app is launched we will assign a UUID token to the device before you even request to register for notifications. Basically with this new version, all the features of Notificare can still be used even if your app does not implement remote notifications. Obviously if you never request to register for notifications, users will never receive remote notifications, although messages will still be in the inbox (if implemented), tags can be registered, location services can be used and pretty much all features will work as expected.
 
 Once you decide to register for notifications, those automatically assigned device tokens will be replaced by the APNS tokens assign to each device. 
 
