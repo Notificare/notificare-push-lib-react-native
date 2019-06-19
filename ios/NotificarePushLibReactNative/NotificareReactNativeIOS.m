@@ -178,10 +178,11 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(initializeWithKeyAndSecret:(NSString * _Nullable)key secret:(NSString * _Nullable)secret){
+RCT_EXPORT_METHOD(launch){
     pushHandler = [[PushHandler alloc] init];
-    [[NotificarePushLib shared] initializeWithKey:key andSecret:secret];
+    [[NotificarePushLib shared] initializeWithKey:nil andSecret:nil];
     [[NotificarePushLib shared] setDelegate:pushHandler];
+    [[NotificarePushLib shared] launch];
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
     [[NotificarePushLib shared] didFinishLaunchingWithOptions:[defaults objectForKey:@"notificareLaunchOptions"]];
     [defaults setObject:nil forKey:@"notificareLaunchOptions"];
@@ -198,10 +199,6 @@ RCT_EXPORT_METHOD(initializeWithKeyAndSecret:(NSString * _Nullable)key secret:(N
     if (categoryOptions) {
         [[NotificarePushLib shared] setCategoryOptions:categoryOptions];
     }
-}
-
-RCT_EXPORT_METHOD(launch){
-    [[NotificarePushLib shared] launch];
 }
 
 RCT_EXPORT_METHOD(registerForNotifications) {
