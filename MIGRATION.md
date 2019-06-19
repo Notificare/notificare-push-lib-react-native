@@ -63,6 +63,11 @@ Notificare.addTag("tag_example").then((data) => {
 ## Events
 This new version also introduces breaking changes to almost all the events triggered by our plugin. Please review below all the events supported by our new version:
 
-| Event                          |    iOS    |  Android  |
-|--------------------------------|:---------:|----------:|
-| ready                          |    [x]    |    [x]    |
+| Event | iOS | Android |
+|-------|:---:|--------:|
+| ready | :heavy_check_mark: | :heavy_check_mark: |
+| deviceRegistered | :heavy_check_mark: | :heavy_check_mark: |
+| notificationSettingsChanged | :heavy_check_mark: | :white_check_mark: |
+| urlOpened | :heavy_check_mark: | :white_check_mark: |
+
+
