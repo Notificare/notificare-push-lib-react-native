@@ -64,10 +64,59 @@ Notificare.addTag("tag_example").then((data) => {
 This new version also introduces breaking changes to almost all the events triggered by our plugin. Please review below all the events supported by our new version:
 
 | Event | iOS | Android |
-|-------|:---:|--------:|
+|-------|:---:|:-------:|
 | ready | :white_check_mark: | :white_check_mark: |
 | deviceRegistered | :white_check_mark: | :white_check_mark: |
 | notificationSettingsChanged | :white_check_mark: | :x: |
 | urlOpened | :white_check_mark: | :x: |
-
+| launchUrlReceived | :white_check_mark: | :x: |
+| inboxLoaded | :white_check_mark: | :white_check_mark: |
+| badgeUpdated | :white_check_mark: | :white_check_mark: |
+| remoteNotificationReceivedInBackground | :white_check_mark: | :x: |
+| remoteNotificationReceivedInForeground | :white_check_mark: | : white_check_mark: |
+| systemNotificationReceivedInBackground | :white_check_mark: | :x: |
+| systemNotificationReceivedInForeground | :white_check_mark: | :x: |
+| unknownNotificationReceived | :white_check_mark: | :x: |
+| unknownActionForNotificationReceived | :white_check_mark: | :x: |
+| notificationWillOpen | :white_check_mark: | :x: |
+| notificationOpened | :white_check_mark: | :x: |
+| notificationClosed | :white_check_mark: | :x: |
+| notificationFailedToOpen | :white_check_mark: | :x: |
+| urlClickedInNotification | :white_check_mark: | :x: |
+| actionWillExecute | :white_check_mark: | :x: |
+| actionExecuted | :white_check_mark: | :x: |
+| shouldPerformSelectorWithUrl | :white_check_mark: | :x: |
+| actionNotExecuted | :white_check_mark: | :x: |
+| actionFailedToExecute | :white_check_mark: | :x: |
+| shouldOpenSettings | :white_check_mark: | :x: |
+| locationServiceFailedToStart | :white_check_mark: | :x: |
+| locationServiceAuthorizationStatusReceived | :white_check_mark: | :x: |
+| locationsUpdated | :white_check_mark: | :x: |
+| monitoringForRegionFailed | :white_check_mark: | :x: |
+| monitoringForRegionStarted | :white_check_mark: | :x: |
+| stateForRegionChanged | :white_check_mark: | :x: |
+| regionEntered | :white_check_mark: | :x: |
+| regionExited | :white_check_mark: | :x: |
+| rangingBeaconsFailed | :white_check_mark: | :x: |
+| beaconsInRangeForRegion | :white_check_mark: | :x: |
+| headingUpdated | :white_check_mark: | :x: |
+| visitReceived | :white_check_mark: | :x: |
+| accountStateChanged | :white_check_mark: | :x: |
+| accountSessionFailedToRenewWithError | :white_check_mark: | :x: |
+| activationTokenReceived | :white_check_mark: | :x: |
+| resetPasswordTokenReceived | :white_check_mark: | :x: |
+| storeLoaded | :white_check_mark: | :x: |
+| storeFailedToLoad | :white_check_mark: | :x: |
+| productTransactionCompleted | :white_check_mark: | :x: |
+| productTransactionRestored | :white_check_mark: | :x: |
+| productTransactionFailed | :white_check_mark: | :x: |
+| productContentDownloadStarted | :white_check_mark: | :x: |
+| productContentDownloadPaused | :white_check_mark: | :x: |
+| productContentDownloadCancelled | :white_check_mark: | :x: |
+| productContentDownloadProgress | :white_check_mark: | :x: |
+| productContentDownloadFailed | :white_check_mark: | :x: |
+| productContentDownloadFinished | :white_check_mark: | :x: |
+| qrCodeScannerStarted | :white_check_mark: | :x: |
+| scannableSessionInvalidatedWithError | :white_check_mark: | :x: |
+| scannableDetected | :white_check_mark: | :x: |
 
