@@ -11,21 +11,6 @@
 
     <application>
 
-        <service android:name="re.notifica.push.fcm.PushService"
-            android:exported="false"
-            android:label="Notificare Push Service">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <service android:name="re.notifica.push.fcm.InstanceIDService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
-
         <receiver android:name="re.notifica.reactnative.NotificareReceiver" />
 
     </application>
