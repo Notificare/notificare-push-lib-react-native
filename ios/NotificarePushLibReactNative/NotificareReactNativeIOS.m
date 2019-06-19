@@ -840,7 +840,7 @@ RCT_REMAP_METHOD(addSegmentToUserPreference, segment:(nonnull NSDictionary*)segm
     
     [[[NotificarePushLib shared] authManager] addSegment:[[NotificareReactNativeIOSUtils shared] segmentFromDictionary:segment] toPreference:[[NotificareReactNativeIOSUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -852,7 +852,7 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
     
     [[[NotificarePushLib shared] authManager] removeSegment:[[NotificareReactNativeIOSUtils shared] segmentFromDictionary:segment] fromPreference:[[NotificareReactNativeIOSUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
