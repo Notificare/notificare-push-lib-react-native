@@ -138,10 +138,6 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
             ];
 }
 
-//- (NSArray<NSString*> *)supportedEvents {
-//    return @[@"notificationReceived", @"notificationOpened", @"ready", @"badge", @"systemPush", @"didLoadStore", @"didFailToLoadStore", @"didReceiveDeviceToken", @"willOpenURL", @"willOpenNotification", @"didOpenNotification", @"didClickURL", @"didCloseNotification", @"didFailToOpenNotification", @"willExecuteAction", @"didExecuteAction", @"shouldPerformSelectorWithURL", @"didNotExecuteAction", @"didFailToExecuteAction", @"didReceiveLocationServiceAuthorizationStatus", @"didFailToStartLocationServiceWithError", @"didUpdateLocations", @"monitoringDidFailForRegion", @"didDetermineState", @"didEnterRegion", @"didExitRegion", @"didStartMonitoringForRegion", @"rangingBeaconsDidFailForRegion", @"didRangeBeacons", @"didFailProductTransaction", @"didCompleteProductTransaction", @"didRestoreProductTransaction", @"didStartDownloadContent", @"didPauseDownloadContent", @"didCancelDownloadContent", @"didReceiveProgressDownloadContent", @"didFailDownloadContent", @"didFinishDownloadContent", @"didChangeAccountNotification", @"didFailToRequestAccessNotification", @"didValidateAccount", @"didFailToValidateAccount", @"didReceiveResetPasswordToken"];
-//}
-
 - (dispatch_queue_t)methodQueue
 {
   instance = self;
@@ -844,7 +840,7 @@ RCT_REMAP_METHOD(addSegmentToUserPreference, segment:(nonnull NSDictionary*)segm
     
     [[[NotificarePushLib shared] authManager] addSegment:[[NotificareReactNativeIOSUtils shared] segmentFromDictionary:segment] toPreference:[[NotificareReactNativeIOSUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
@@ -856,7 +852,7 @@ RCT_REMAP_METHOD(removeSegmentFromUserPreference, segment:(nonnull NSDictionary*
     
     [[[NotificarePushLib shared] authManager] removeSegment:[[NotificareReactNativeIOSUtils shared] segmentFromDictionary:segment] fromPreference:[[NotificareReactNativeIOSUtils shared] userPreferenceFromDictionary:userPreference] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            resolve(response);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }
