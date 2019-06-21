@@ -106,7 +106,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      */
     private void sendNotification(ReadableMap notificationMap) {
         if (notificationMap != null) {
-            sendEvent("notificationOpened", notificationMap, true);
+            sendEvent("remoteNotificationReceivedInBackground", notificationMap, true);
         }
     }
 
