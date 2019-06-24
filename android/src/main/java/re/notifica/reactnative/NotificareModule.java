@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
-import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -65,6 +66,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     private Boolean mounted = false;
     private Boolean isBillingReady = false;
+    private Boolean hostCreated = false;
     private LiveData<SortedSet<NotificareInboxItem>> inboxItems;
 
 
@@ -110,6 +112,30 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         }
     }
 
+    /**
+     * Send a validate user token received event
+     * @param token
+     */
+    private void sendValidateUserToken(String token) {
+        if (token != null && !token.isEmpty()) {
+            WritableMap tokenMap = Arguments.createMap();
+            tokenMap.putString("token", token);
+            sendEvent("activationTokenReceived", tokenMap, true);
+        }
+    }
+
+    /**
+     * Send a password reset token received event
+     * @param token
+     */
+    private void sendResetPasswordToken(String token) {
+        if (token != null && !token.isEmpty()) {
+            WritableMap tokenMap = Arguments.createMap();
+            tokenMap.putString("token", token);
+            sendEvent("resetPasswordTokenReceived", tokenMap, true);
+        }
+    }
+
     // React methods
 
 
@@ -147,7 +173,8 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         mounted = false;
         NotificareEventEmitter.getInstance().setMounted(false);
         if (inboxItems != null) {
-            inboxItems.removeObserver(this);
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> inboxItems.removeObserver(NotificareModule.this));
         }
         Notificare.shared().removeNotificareReadyListener(this);
     }
@@ -1146,19 +1173,15 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      */
     @Override
     public void onNewIntent(Intent intent) {
-        Log.d(TAG, "received new intent for activity " + getCurrentActivity());
+        Log.i(TAG, "received new intent for activity " + intent.toString());
         // Check for launch with notification or tokens
         WritableMap notificationMap = parseNotificationIntent(intent);
-        if (getCurrentActivity() != null) {
-            if (notificationMap != null) {
-                sendNotification(notificationMap);
-                getCurrentActivity().setIntent(null);
-            } else {
-                getCurrentActivity().setIntent(intent);
-            }
+        if (notificationMap != null) {
+            sendNotification(notificationMap);
+        } else {
+            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
+            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
         }
-//        sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
-//        sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
     }
 
     // LifecycleEventListener methods
@@ -1179,13 +1202,26 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
             Notificare.shared().getBeaconClient().addRangingListener(this);
         }
         Notificare.shared().addBillingReadyListener(this);
-        if (getCurrentActivity() != null && getCurrentActivity().getIntent() != null) {
+        if (!hostCreated && getCurrentActivity() != null && getCurrentActivity().getIntent() != null) {
             WritableMap notificationMap = parseNotificationIntent(getCurrentActivity().getIntent());
             if (notificationMap != null) {
                 sendNotification(notificationMap);
-                getCurrentActivity().setIntent(null);
+                getCurrentActivity().setIntent(new Intent());
+            } else {
+                String validateToken = Notificare.shared().parseValidateUserIntent(getCurrentActivity().getIntent());
+                if (validateToken != null && !validateToken.isEmpty()) {
+                    sendValidateUserToken(validateToken);
+                    getCurrentActivity().setIntent(new Intent());
+                } else {
+                    String resetPasswordToken = Notificare.shared().parseResetPasswordIntent(getCurrentActivity().getIntent());
+                    if (resetPasswordToken != null && !resetPasswordToken.isEmpty()) {
+                        sendResetPasswordToken(resetPasswordToken);
+                        getCurrentActivity().setIntent(new Intent());
+                    }
+                }
             }
         }
+        hostCreated = true;
     }
 
     /**
