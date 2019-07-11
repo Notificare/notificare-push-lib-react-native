@@ -14,6 +14,7 @@ import {
     NativeModules,
     DeviceEventEmitter,
     TouchableHighlight,
+    PermissionsAndroid,
     View
 } from 'react-native';
 

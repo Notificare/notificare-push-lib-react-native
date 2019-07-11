@@ -258,8 +258,23 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
+    public void isRemoteNotificationsEnabled(Promise promise) {
+        promise.resolve(Notificare.shared().isNotificationsEnabled());
+    }
+
+    @ReactMethod
     public void isLocationUpdatesEnabled(Promise promise) {
         promise.resolve(Notificare.shared().isLocationUpdatesEnabled());
+    }
+
+    @ReactMethod
+    public void isLocationServicesEnabled(Promise promise) {
+        promise.resolve(Notificare.shared().isLocationUpdatesEnabled());
+    }
+
+    @ReactMethod
+    public void isAllowedUIEnabled(Promise promise) {
+        promise.resolve(Notificare.shared().checkAllowedUI());
     }
 
     @ReactMethod
