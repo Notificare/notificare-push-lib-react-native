@@ -443,16 +443,19 @@ RCT_REMAP_METHOD(fetchNotificationForInboxItem, inboxItem:(nonnull NSDictionary 
 
 RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
     
-    NotificareNotification * item = [[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification];
-    id controller = [[NotificarePushLib shared] controllerForNotification:item];
-    if ([self isViewController:controller]) {
-        UINavigationController *navController = [self navigationControllerForViewControllers:controller];
-        [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
-            [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
-        }];
-    } else {
-        [[NotificarePushLib shared] presentNotification:item inNavigationController:[self navigationControllerForRootViewController] withController:controller];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NotificareNotification * item = [[NotificareReactNativeIOSUtils shared] notificationFromDictionary:notification];
+        id controller = [[NotificarePushLib shared] controllerForNotification:item];
+        if ([self isViewController:controller]) {
+            UINavigationController *navController = [self navigationControllerForViewControllers:controller];
+            [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
+            }];
+        } else {
+            [[NotificarePushLib shared] presentNotification:item inNavigationController:[self navigationControllerForRootViewController] withController:controller];
+        }
+    });
+
 }
 
 RCT_REMAP_METHOD(reply, notification:(nonnull NSDictionary *)notification action:(nonnull NSDictionary *)action data:(nonnull NSDictionary *)data replyWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -484,19 +487,23 @@ RCT_REMAP_METHOD(fetchInbox, fetchInboxWithResolver:(RCTPromiseResolveBlock)reso
 }
 
 RCT_EXPORT_METHOD(presentInboxItem:(nonnull NSDictionary*)inboxItem) {
-    NotificareDeviceInbox * item = [[NotificareReactNativeIOSUtils shared] deviceInboxFromDictionary:inboxItem];
-    [[[NotificarePushLib shared] inboxManager] openInboxItem:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-        if (!error) {
-            if ([self isViewController:response]) {
-                UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
-                    [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
-                }];
-            } else {
-                [[NotificarePushLib shared] presentInboxItem:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NotificareDeviceInbox * item = [[NotificareReactNativeIOSUtils shared] deviceInboxFromDictionary:inboxItem];
+        [[[NotificarePushLib shared] inboxManager] openInboxItem:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+            if (!error) {
+                if ([self isViewController:response]) {
+                    UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                        [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
+                    }];
+                } else {
+                    [[NotificarePushLib shared] presentInboxItem:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+                }
             }
-        }
-    }];
+        }];
+    });
+    
 }
 
 RCT_REMAP_METHOD(removeFromInbox, inboxItem:(nonnull NSDictionary*)inboxItem removeFromInboxWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -863,19 +870,21 @@ RCT_EXPORT_METHOD(startScannableSessionWithQRCode){
 
 RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
     
-    NotificareScannable * item = [[NotificareReactNativeIOSUtils shared] scannableFromDictionary:scannable];
-    [[NotificarePushLib shared] openScannable:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
-        if (!error) {
-            if ([self isViewController:response]) {
-                UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
-                    [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
-                }];
-            } else {
-                 [[NotificarePushLib shared] presentScannable:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NotificareScannable * item = [[NotificareReactNativeIOSUtils shared] scannableFromDictionary:scannable];
+        [[NotificarePushLib shared] openScannable:item completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+            if (!error) {
+                if ([self isViewController:response]) {
+                    UINavigationController *navController = [self navigationControllerForViewControllers:response];
+                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                        [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
+                    }];
+                } else {
+                    [[NotificarePushLib shared] presentScannable:item inNavigationController:[self navigationControllerForRootViewController] withController:response];
+                }
             }
-        }
-    }];
+        }];
+    });
     
 }
 
@@ -986,21 +995,22 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
  * Additionally you must import PassKit framework in the NotificareReactNativeIOS.h and implement PKAddPassesViewControllerDelegate in the PushHandler interface
  *
 - (void)notificarePushLib:(NotificarePushLib *)library didReceivePass:(NSURL *)pass inNotification:(NotificareNotification*)notification{
-    
-    NSData *data = [[NSData alloc] initWithContentsOfURL:pass];
-    NSError *error;
-    
-    //init a pass object with the data
-    PKPass * pkPass = [[PKPass alloc] initWithData:data error:&error];
-    
-    if(!error){
-        //present view controller to add the pass to the library
-        PKAddPassesViewController * vc = [[PKAddPassesViewController alloc] initWithPass:pkPass];
-        [vc setDelegate:self];
  
-        [[NotificarePushLib shared] presentWalletPass:notification inNavigationController:[[NotificareReactNativeIOS getInstance] navigationControllerForRootViewController] withController:vc];
-        
-    }
+     dispatch_async(dispatch_get_main_queue(), ^{
+         NSData *data = [[NSData alloc] initWithContentsOfURL:pass];
+         NSError *error;
+ 
+         //init a pass object with the data
+         PKPass * pkPass = [[PKPass alloc] initWithData:data error:&error];
+ 
+         if(!error){
+             //present view controller to add the pass to the library
+             PKAddPassesViewController * vc = [[PKAddPassesViewController alloc] initWithPass:pkPass];
+             [vc setDelegate:self];
+ 
+             [[NotificarePushLib shared] presentWalletPass:notification inNavigationController:[[NotificareReactNativeIOS getInstance] navigationControllerForRootViewController] withController:vc];
+         }
+     });
     
 }
 */
