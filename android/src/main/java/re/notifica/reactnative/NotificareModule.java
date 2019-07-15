@@ -816,9 +816,9 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      */
     @ReactMethod
     public void buyProduct(ReadableMap product) {
-        if (Notificare.shared().getBillingManager() != null) {
+        if (Notificare.shared().getBillingManager() != null && getCurrentActivity() != null) {
             NotificareProduct notificareProduct = Notificare.shared().getBillingManager().getProduct(product.getString("identifier"));
-            Notificare.shared().getBillingManager().launchPurchaseFlow(getCurrentActivity(), notificareProduct, this);
+            getCurrentActivity().runOnUiThread(() -> Notificare.shared().getBillingManager().launchPurchaseFlow(getCurrentActivity(), notificareProduct, this));
         }
     }
 
@@ -1286,8 +1286,8 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     @Override
     public void onServiceError(int errorCode, int requestCode) {
-        if (Notificare.isUserRecoverableError(errorCode)) {
-            Notificare.getErrorDialog(errorCode, getCurrentActivity(), requestCode).show();
+        if (Notificare.isUserRecoverableError(errorCode) && getCurrentActivity() != null) {
+            getCurrentActivity().runOnUiThread(() -> Notificare.getErrorDialog(errorCode, getCurrentActivity(), requestCode).show());
         }
     }
 
