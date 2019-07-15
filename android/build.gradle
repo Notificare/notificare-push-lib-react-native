@@ -40,8 +40,8 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    api "re.notifica:notificare-core:2.0.6"
-    compileOnly "re.notifica:notificare-location:2.0.6"
-    compileOnly "re.notifica:notificare-beacon:2.0.6"
-    compileOnly "re.notifica:notificare-scannable:2.0.6"
+    api "re.notifica:notificare-core:2.0.7"
+    compileOnly "re.notifica:notificare-location:2.0.7"
+    compileOnly "re.notifica:notificare-beacon:2.0.7"
+    compileOnly "re.notifica:notificare-scannable:2.0.7"
 }

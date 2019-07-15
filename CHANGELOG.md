@@ -1,4 +1,5 @@
 2.0.3 15-07-2019
+- Updated to Notificare Android SDK 2.0.7
 - Made sure all UI presentation methods run in main thread
 
 2.0.2 11-07-2019
