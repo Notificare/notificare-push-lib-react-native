@@ -1,3 +1,7 @@
+2.0.4 18-07-2019
+- Updated to iOS 2.1.2
+- Fixed crash when launch options contains a UIApplicationLaunchOptionsURLKey
+
 2.0.3 15-07-2019
 - Updated to Notificare Android SDK 2.0.7
 - Made sure all UI presentation methods run in main thread

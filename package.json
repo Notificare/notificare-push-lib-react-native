@@ -1,6 +1,6 @@
 {
   "name": "notificare-push-lib-react-native",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "React Native module for Notificare",
   "main": "index.js",
   "homepage": "https://github.com/Notificare/notificare-push-lib-react-native#readme",
