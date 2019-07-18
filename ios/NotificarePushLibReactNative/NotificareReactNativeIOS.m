@@ -34,9 +34,17 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 }
     
 + (void)launch:(NSDictionary *)launchOptions {
-  NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-  [defaults setObject:launchOptions forKey:@"notificareLaunchOptions"];
-  [defaults synchronize];
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+   
+    if (launchOptions && [[launchOptions allKeys] containsObject:@"UIApplicationLaunchOptionsURLKey"]) {
+        [defaults setURL:[launchOptions objectForKey:@"UIApplicationLaunchOptionsURLKey"] forKey:@"notificareLaunchOptionsURL"];
+    }
+
+    if (launchOptions && [[launchOptions allKeys] containsObject:@"UIApplicationLaunchOptionsRemoteNotificationKey"]) {
+        [defaults setObject:[launchOptions objectForKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"]  forKey:@"notificareLaunchOptions"];
+    }
+
+    [defaults synchronize];
 }
 
 + (void)setAuthorizationOptions:(UNAuthorizationOptions)options {
@@ -183,9 +191,18 @@ RCT_EXPORT_METHOD(launch){
     [[NotificarePushLib shared] initializeWithKey:nil andSecret:nil];
     [[NotificarePushLib shared] setDelegate:pushHandler];
     [[NotificarePushLib shared] launch];
+    
     NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
-    [[NotificarePushLib shared] didFinishLaunchingWithOptions:[defaults objectForKey:@"notificareLaunchOptions"]];
+    NSMutableDictionary * options = [NSMutableDictionary new];
+    if ([defaults objectForKey:@"notificareLaunchOptions"]) {
+        [options setObject:[defaults objectForKey:@"notificareLaunchOptions"] forKey:@"UIApplicationLaunchOptionsRemoteNotificationKey"];
+    }
+    if ([defaults URLForKey:@"notificareLaunchOptionsURL"]) {
+        [options setObject:[defaults URLForKey:@"notificareLaunchOptionsURL"] forKey:@"UIApplicationLaunchOptionsURLKey"];
+    }
+    [[NotificarePushLib shared] didFinishLaunchingWithOptions:options];
     [defaults setObject:nil forKey:@"notificareLaunchOptions"];
+    [defaults setURL:nil forKey:@"notificareLaunchOptionsURL"];
     [defaults synchronize];
     
     if (authorizationOptions) {
