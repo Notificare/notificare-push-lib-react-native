@@ -897,7 +897,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void doCloudhostOperation(String verb, String path, ReadableMap params, ReadableMap headers, ReadableMap body, final Promise promise) {
         JSONObject jsonData = new JSONObject(body.toHashMap());
         Map<String,String> paramsMap = new HashMap<>();
-        if (headers != null) {
+        if (params != null) {
             ReadableMapKeySetIterator i = params.keySetIterator();
             while (i.hasNextKey()) {
                 String key = i.nextKey();

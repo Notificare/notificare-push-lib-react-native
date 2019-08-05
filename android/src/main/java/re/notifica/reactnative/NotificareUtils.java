@@ -463,8 +463,10 @@ public class NotificareUtils {
         WritableArray ring = Arguments.createArray();
         WritableArray coordinatesList = Arguments.createArray();
         for (NotificareCoordinates coordinates : polygon.getCoordinates()) {
-            coordinatesList.pushDouble(coordinates.getLongitude());
-            coordinatesList.pushDouble(coordinates.getLatitude());
+            WritableArray coordinatesPair = Arguments.createArray();
+            coordinatesPair.pushDouble(coordinates.getLongitude());
+            coordinatesPair.pushDouble(coordinates.getLatitude());
+            coordinatesList.pushArray(coordinatesPair);
         }
         ring.pushArray(coordinatesList);
         map.putArray("coordinates", ring);
@@ -593,10 +595,10 @@ public class NotificareUtils {
     public static WritableMap mapScannable(NotificareScannable scannable) {
         WritableMap scannableMap = Arguments.createMap();
         scannableMap.putString("scannableId", scannable.getScannableId());
-        scannableMap.putString("scannableId", scannable.getName());
-        scannableMap.putString("scannableId", scannable.getType());
-        scannableMap.putString("scannableId", scannable.getTag());
-        scannableMap.putMap("scannableId", mapJSON(scannable.getData()));
+        scannableMap.putString("name", scannable.getName());
+        scannableMap.putString("type", scannable.getType());
+        scannableMap.putString("tag", scannable.getTag());
+        scannableMap.putMap("data", mapJSON(scannable.getData()));
         scannableMap.putMap("notification", mapNotification(scannable.getNotification()));
         return scannableMap;
     }

@@ -6,7 +6,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.4.2'
     }
 }
 
@@ -15,7 +15,8 @@ repositories {
     jcenter()
     google()
     maven {
-        url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
+        url "file:///Users/joris/Developer/Projects/notificare-mvn-repo/releases"
+        //url "https://github.com/Notificare/notificare-mvn-repo/raw/master/releases"
     }
 }
 
@@ -26,8 +27,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 20002
-        versionName "2.0.2"
+        versionCode 20005
+        versionName "2.0.5"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -40,8 +41,8 @@ android {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    api "re.notifica:notificare-core:2.0.7"
-    compileOnly "re.notifica:notificare-location:2.0.7"
-    compileOnly "re.notifica:notificare-beacon:2.0.7"
-    compileOnly "re.notifica:notificare-scannable:2.0.7"
+    api "re.notifica:notificare-core:2.0.8"
+    compileOnly "re.notifica:notificare-location:2.0.8"
+    compileOnly "re.notifica:notificare-beacon:2.0.8"
+    compileOnly "re.notifica:notificare-scannable:2.0.8"
 }
