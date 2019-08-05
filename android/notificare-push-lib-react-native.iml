@@ -17,7 +17,7 @@
         <option name="ALLOW_USER_CONFIGURATION" value="false" />
         <option name="MANIFEST_FILE_RELATIVE_PATH" value="/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/src/main/AndroidManifest.xml" />
         <option name="RES_FOLDER_RELATIVE_PATH" value="/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/src/main/res" />
-        <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/generated/res/resValues/debug" />
+        <option name="RES_FOLDERS_RELATIVE_PATH" value="" />
         <option name="TEST_RES_FOLDERS_RELATIVE_PATH" value="" />
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/src/main/assets" />
         <option name="PROJECT_TYPE" value="1" />
@@ -46,31 +46,19 @@
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/generated/source/r" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/aapt_friendly_merged_manifests" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/annotation_processor_list" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/check_manifest_result" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/compile_library_classes" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/compile_only_not_namespaced_r_class_jar" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/intermediate-jars" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/javac" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/jniLibs" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/library_assets" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/library_java_res" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/library_manifest" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/lint_jar" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/merged_jni_libs" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/merged_manifests" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/merged_shaders" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/packaged_res" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/public_res" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/res" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/runtime_library_classes" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/shader_assets" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/shaders" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/symbols" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/transforms" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/outputs" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/tmp" />
     </content>
     <content url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/src/androidTest/aidl">
       <sourceFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/src/androidTest/aidl" isTestSource="true" />
