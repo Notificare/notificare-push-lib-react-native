@@ -63,7 +63,6 @@
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/packaged_res" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/public_res" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/res" />
-      <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/runtime_library_classes" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/shader_assets" />
       <excludeFolder url="file://$MODULE_DIR$/../../notificare-demo-react-native/node_modules/notificare-push-lib-react-native/android/build/intermediates/shaders" />
