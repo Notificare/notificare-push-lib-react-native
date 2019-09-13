@@ -153,8 +153,9 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 }
 
 - (void)dispatchEvent:(NSString *)event body:(id)notification {
-  [self sendEventWithName:event body:notification];
+     [self sendEventWithName:event body:notification];
 }
+
 
 -(void)close{
     [[[[UIApplication sharedApplication] keyWindow] rootViewController] dismissViewControllerAnimated:YES completion:^{
@@ -184,6 +185,34 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     return result;
 }
 
+-(void)handleLaunchOptions{
+    
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    
+    if ([defaults objectForKey:@"notificareLaunchOptions"] || [defaults objectForKey:@"notificareLaunchOptionsURL"]) {
+        
+        if ([defaults objectForKey:@"notificareLaunchOptions"]) {
+            //Hanldle
+            [[NotificarePushLib shared] fetchNotification:[defaults objectForKey:@"notificareLaunchOptions"] completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+                if (!error) {
+                    [[NotificareReactNativeIOS getInstance] dispatchEvent:@"remoteNotificationReceivedInBackground" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromNotification:response]];
+                }
+            }];
+        }
+        
+        if ([defaults URLForKey:@"notificareLaunchOptionsURL"]) {
+            NSMutableDictionary * payload = [NSMutableDictionary new];
+            [payload setObject:[[defaults URLForKey:@"notificareLaunchOptionsURL"] absoluteString] forKey:@"url"];
+            [[NotificareReactNativeIOS getInstance] dispatchEvent:@"launchUrlReceived" body:payload];
+        }
+        
+        //Clear it
+        [defaults setObject:nil forKey:@"notificareLaunchOptions"];
+        [defaults setURL:nil forKey:@"notificareLaunchOptionsURL"];
+        [defaults synchronize];
+    }
+}
+
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(launch){
@@ -201,9 +230,6 @@ RCT_EXPORT_METHOD(launch){
         [options setObject:[defaults URLForKey:@"notificareLaunchOptionsURL"] forKey:@"UIApplicationLaunchOptionsURLKey"];
     }
     [[NotificarePushLib shared] didFinishLaunchingWithOptions:options];
-    [defaults setObject:nil forKey:@"notificareLaunchOptions"];
-    [defaults setURL:nil forKey:@"notificareLaunchOptionsURL"];
-    [defaults synchronize];
     
     if (authorizationOptions) {
         [[NotificarePushLib shared] setAuthorizationOptions:authorizationOptions];
@@ -216,6 +242,7 @@ RCT_EXPORT_METHOD(launch){
     if (categoryOptions) {
         [[NotificarePushLib shared] setCategoryOptions:categoryOptions];
     }
+    
 }
 
 RCT_EXPORT_METHOD(registerForNotifications) {
@@ -916,6 +943,9 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
 
 - (void)notificarePushLib:(NotificarePushLib *)library onReady:(nonnull NotificareApplication *)application {
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"ready" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromApplication:application]];
+    
+    //At this point let's handle launch options
+    [[NotificareReactNativeIOS getInstance] handleLaunchOptions];
 }
 
 - (void)notificarePushLib:(NotificarePushLib *)library didRegisterDevice:(nonnull NotificareDevice *)device{
