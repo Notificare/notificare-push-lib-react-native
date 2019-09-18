@@ -1,3 +1,15 @@
+2.0.8 18-09-2019
+- Fixed crash in delegate didDetermineState when a beacon region was found
+
+2.0.7 13-09-2019
+- Updated to latest iOS library and necessary changes in handling launch options
+
+2.0.6 09-09-2019
+- Updated to latest iOS library
+
+2.0.5 05-08-2019
+- Updated to latest iOS and Android native libs
+
 2.0.4 18-07-2019
 - Updated to iOS 2.1.2
 - Fixed crash when launch options contains a UIApplicationLaunchOptionsURLKey

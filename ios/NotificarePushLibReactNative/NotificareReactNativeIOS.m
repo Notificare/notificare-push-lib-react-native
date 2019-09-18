@@ -1148,7 +1148,7 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
     }
     
     if([region isKindOfClass:[NotificareBeacon class]]){
-        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromRegion:region] forKey:@"region"];
+        [payload setObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromBeacon:region] forKey:@"region"];
     }
     
     [[NotificareReactNativeIOS getInstance] dispatchEvent:@"stateForRegionChanged" body:payload];
