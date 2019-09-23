@@ -1,3 +1,7 @@
+2.0.9 23-09-2019
+- Fixed registerDevice in Android
+- Fixed updateUserData in Android
+
 2.0.8 18-09-2019
 - Fixed crash in delegate didDetermineState when a beacon region was found
 

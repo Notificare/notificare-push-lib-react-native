@@ -290,7 +290,9 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      * @param promise
      */
     @ReactMethod
-    public void registerDevice(String deviceId, String userId, String userName, final Promise promise) {
+    public void registerDevice(String userId, String userName, final Promise promise) {
+        Notificare.shared().setUserId(userId);
+        Notificare.shared().setUserName(userName);
         Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {
             @Override
             public void onSuccess(String result) {
