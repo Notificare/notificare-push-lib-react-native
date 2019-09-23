@@ -1,3 +1,6 @@
+2.0.10 23-09-2019
+- Start inbox observing on main thread
+
 2.0.9 23-09-2019
 - Fixed registerDevice in Android
 - Fixed updateUserData in Android

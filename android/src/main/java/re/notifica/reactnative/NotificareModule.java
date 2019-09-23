@@ -159,8 +159,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         NotificareEventEmitter.getInstance().setMounted(true);
         Notificare.shared().addNotificareReadyListener(this);
         if (Notificare.shared().getInboxManager() != null) {
-            inboxItems = Notificare.shared().getInboxManager().getObservableItems();
-            inboxItems.observeForever(this);
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                inboxItems = Notificare.shared().getInboxManager().getObservableItems();
+                inboxItems.observeForever(this);
+            });
         }
         NotificareEventEmitter.getInstance().processEventQueue();
     }
@@ -293,7 +296,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void registerDevice(String userId, String userName, final Promise promise) {
         Notificare.shared().setUserId(userId);
         Notificare.shared().setUserName(userName);
-        Notificare.shared().registerDevice(deviceId, userId, userName, new NotificareCallback<String>() {
+        Notificare.shared().registerDevice(new NotificareCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 promise.resolve(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
