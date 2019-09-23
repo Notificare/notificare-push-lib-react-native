@@ -468,13 +468,13 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
-    public void updateUserData(ReadableMap userData, final Promise promise) {
+    public void updateUserData(ReadableArray userData, final Promise promise) {
 
-        Map<String, Object> fields = NotificareUtils.createMap(userData);
         NotificareUserData data = new NotificareUserData();
-        for (String key : fields.keySet()) {
-            if (fields.get(key) != null) {
-                data.setValue(key, fields.get(key).toString());
+        for (int i = 0; i < userData.size(); i++) {
+            ReadableMap userDataFieldMap = userData.getMap(i);
+            if (userDataFieldMap != null && userDataFieldMap.hasKey("key")) {
+                data.setValue(userDataFieldMap.getString("key"), userDataFieldMap.getString("value"));
             }
         }
 
@@ -490,7 +490,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
             }
         });
     }
-
 
     @ReactMethod
     public void fetchDoNotDisturb(final Promise promise) {
