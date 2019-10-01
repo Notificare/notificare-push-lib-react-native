@@ -8,7 +8,7 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import "../Libraries/NotificarePushLib/NotificarePushLib.h"
+#import "NotificarePushLib.h"
 //#import <PassKit/PassKit.h>
 
 @interface NotificareReactNativeIOS : RCTEventEmitter <RCTBridgeModule>

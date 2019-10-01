@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "../Libraries/NotificarePushLib/NotificarePushLib.h"
+#import "NotificarePushLib.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
