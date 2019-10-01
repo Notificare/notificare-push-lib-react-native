@@ -240,6 +240,16 @@ RCT_EXPORT_METHOD(stopLocationUpdates) {
     [[NotificarePushLib shared] stopLocationUpdates];
 }
 
+RCT_REMAP_METHOD(clearDeviceLocation, clearDeviceLocationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[NotificarePushLib shared] clearDeviceLocation:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            resolve(nil);
+        } else {
+           reject(NOTIFICARE_ERROR, [error localizedDescription], error);
+        }
+    }];
+}
+
 RCT_REMAP_METHOD(isLocationServicesEnabled, isLocationServicesEnabledWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([[NotificarePushLib shared] locationServicesEnabled]));
 }
