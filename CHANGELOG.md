@@ -1,4 +1,4 @@
-2.0.11 01-10-2019
+2.0.12 01-10-2019
 - Added missing properties to Android inbox item
 
 2.0.10 23-09-2019

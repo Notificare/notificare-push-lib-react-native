@@ -414,20 +414,20 @@ public class NotificareUtils {
         inboxItemMap.putString("inboxId", notificareInboxItem.getItemId());
         inboxItemMap.putString("notification", notificareInboxItem.getNotification().getNotificationId());
         inboxItemMap.putString("message", notificareInboxItem.getNotification().getMessage());
-        inboxItemMap.put("title", notificareInboxItem.getTitle());
-        inboxItemMap.put("subtitle", notificareInboxItem.getSubtitle());
+        inboxItemMap.putString("title", notificareInboxItem.getTitle());
+        inboxItemMap.putString("subtitle", notificareInboxItem.getSubtitle());
         if (notificareInboxItem.getAttachment() != null) {
-            JSONObject attachmentsMap = new JSONObject();
-            attachmentsMap.put("mimeType", notificareInboxItem.getAttachment().getMimeType());
-            attachmentsMap.put("uri", notificareInboxItem.getAttachment().getUri());
-            inboxItemMap.put("attachment", attachmentsMap);
+            WritableMap attachmentsMap = Arguments.createMap();
+            attachmentsMap.putString("mimeType", notificareInboxItem.getAttachment().getMimeType());
+            attachmentsMap.putString("uri", notificareInboxItem.getAttachment().getUri());
+            inboxItemMap.putMap("attachment", attachmentsMap);
         }
         if (notificareInboxItem.getExtra() != null) {
-            JSONObject extraMap = new JSONObject();
+            WritableMap extraMap = Arguments.createMap();
             for (HashMap.Entry<String, String> prop : notificareInboxItem.getExtra().entrySet()) {
-                extraMap.put(prop.getKey(), prop.getValue());
+                extraMap.putString(prop.getKey(), prop.getValue());
             }
-            inboxItemMap.put("extra", extraMap);
+            inboxItemMap.putMap("extra", extraMap);
         }
         inboxItemMap.putString("time", ISODateFormatter.format(notificareInboxItem.getTimestamp()));
         inboxItemMap.putBoolean("opened", notificareInboxItem.getStatus());

@@ -287,7 +287,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     /**
      * Register device with Notificare API
-     * @param deviceId
      * @param userId
      * @param userName
      * @param promise
