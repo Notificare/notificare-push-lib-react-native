@@ -207,9 +207,9 @@ public class NotificareUtils {
         deviceMap.putDouble("speed", device.getSpeed());
         deviceMap.putDouble("course", device.getCourse());
         deviceMap.putString("lastRegistered", ISODateFormatter.format(device.getLastActive()));
-        deviceMap.putString("locationServicesAuthStatus", device.getLocationServicesAuthStatus() ? "always" : "none");
+        deviceMap.putString("locationServicesAuthStatus", device.getLocationServicesAuthStatus());
         deviceMap.putBoolean("registeredForNotification", Notificare.shared().isNotificationsEnabled());
-        deviceMap.putBoolean("allowedLocationServices", device.getLocationServicesAuthStatus());
+        deviceMap.putBoolean("allowedLocationServices", Notificare.shared().isLocationUpdatesEnabled());
         deviceMap.putBoolean("allowedUI", device.getAllowedUI());
         deviceMap.putBoolean("bluetoothEnabled", device.getBluetoothEnabled());
         deviceMap.putBoolean("bluetoothON", device.getBluetoothEnabled());

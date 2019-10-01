@@ -1,3 +1,8 @@
+2.1.0 01-10-2019
+- Updated to use ReactNative 0.60+
+- Updated to Android SDK 2.1.0
+- Updated to iOS SDK 2.2.0
+
 2.0.12 01-10-2019
 - Added missing properties to Android inbox item
 

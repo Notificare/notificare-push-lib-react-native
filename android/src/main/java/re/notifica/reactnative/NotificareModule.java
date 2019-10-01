@@ -1,8 +1,8 @@
 package re.notifica.reactnative;
 
 import android.app.Activity;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -56,7 +56,7 @@ import re.notifica.model.NotificareUserPreference;
 import re.notifica.model.NotificareUserSegment;
 import re.notifica.util.Log;
 
-class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificationReceivedListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
+class NotificareModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener, Observer<SortedSet<NotificareInboxItem>>, Notificare.OnNotificareReadyListener, Notificare.OnServiceErrorListener, Notificare.OnNotificareNotificationListener, BeaconRangingListener, Notificare.OnBillingReadyListener, BillingManager.OnRefreshFinishedListener, BillingManager.OnPurchaseFinishedListener {
 
     private static final String TAG = NotificareModule.class.getSimpleName();
     private static final int DEFAULT_LIST_SIZE = 25;
@@ -1214,7 +1214,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         Log.d(TAG, "host resume for activity " + getCurrentActivity());
         Notificare.shared().addServiceErrorListener(this);
         Notificare.shared().setForeground(true);
-        Notificare.shared().addNotificationReceivedListener(this);
+        Notificare.shared().addNotificareNotificationListener(this);
         Notificare.shared().getEventLogger().logStartSession();
         if (Notificare.shared().getBeaconClient() != null) {
             Notificare.shared().getBeaconClient().addRangingListener(this);
@@ -1250,7 +1250,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void onHostPause() {
         Log.d(TAG, "host pause for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
-        Notificare.shared().removeNotificationReceivedListener(this);
+        Notificare.shared().removeNotificareNotificationListener(this);
         Notificare.shared().setForeground(false);
         Notificare.shared().getEventLogger().logEndSession();
         if (Notificare.shared().getBeaconClient() != null) {
@@ -1267,7 +1267,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     public void onHostDestroy() {
         Log.d(TAG, "host destroy for activity " + getCurrentActivity());
         Notificare.shared().removeServiceErrorListener(this);
-        Notificare.shared().removeNotificationReceivedListener(this);
+        Notificare.shared().removeNotificareNotificationListener(this);
         Notificare.shared().setForeground(false);
         Notificare.shared().getEventLogger().logEndSession();
         if (Notificare.shared().getBeaconClient() != null) {
@@ -1294,12 +1294,15 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         }
     }
 
-    // OnNotificationReceivedListener
+    // OnNotificareNotificationListener
 
     @Override
-    public void onNotificationReceived(NotificareNotification notification) {
+    public void onNotificareNotification(NotificareNotification notification, NotificareInboxItem inboxItem, Boolean shouldPresent) {
         if (notification != null) {
             WritableMap notificationMap = NotificareUtils.mapNotification(notification);
+            if (inboxItem != null) {
+                notificationMap.putString("inboxItemId", inboxItem.getItemId());
+            }
             sendEvent("remoteNotificationReceivedInForeground", notificationMap, true);
         }
     }
