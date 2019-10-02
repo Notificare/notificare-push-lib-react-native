@@ -236,6 +236,23 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
+    public void clearLocation(Promise promise) {
+        Notificare.shared().clearLocation(new NotificareCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+                promise.resolve(null);
+            }
+
+            @Override
+            public void onError(NotificareError error) {
+                promise.reject(DEFAULT_ERROR_CODE, error);
+            }
+
+        });
+    }
+
+    @ReactMethod
     public void enableBeacons() {
         Notificare.shared().enableBeacons();
     }

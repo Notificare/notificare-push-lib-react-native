@@ -15,7 +15,14 @@
       "email": "joris@notifica.re"
     }
   ],
-  "dependencies": {},
+  "peerDependencies": {
+    "react": "^16.8.6",
+    "react-native": ">=0.59.0-rc.0 <1.0.x"
+  },
+  "devDependencies": {
+    "react": "^16.8.6",
+    "react-native": "^0.60.5"
+  },
   "license": "MIT",
   "keywords": [
     "react-component",
