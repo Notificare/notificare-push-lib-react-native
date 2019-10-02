@@ -240,7 +240,7 @@ RCT_EXPORT_METHOD(stopLocationUpdates) {
     [[NotificarePushLib shared] stopLocationUpdates];
 }
 
-RCT_REMAP_METHOD(clearDeviceLocation, clearDeviceLocationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_REMAP_METHOD(clearLocation, clearLocationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[NotificarePushLib shared] clearDeviceLocation:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
             resolve(nil);
