@@ -10,7 +10,7 @@ require "json"
   s.homepage     = package['homepage']
   s.license      = package['license']
   s.platform     = :ios, "9.0"
-  s.source       = { :git => "https://github.com/Notificare/notificare-push-lib-react-native.git", :tag => "{s.version}" }
+  s.source       = { :git => "https://github.com/Notificare/notificare-push-lib-react-native.git", :tag => s.version.to_s }
   s.source_files  = "ios/**/*.{h,m}"
   s.dependency "React"
   s.dependency "notificare-push-lib", "2.2.0"
