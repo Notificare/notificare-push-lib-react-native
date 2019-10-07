@@ -30,9 +30,9 @@ export default class App extends Component {
         };
     }
 
-    componentWillMount() {
+    componentDidMount() {
 
-        console.log("componentWillMount");
+        console.log("componentDidMount");
 
         Notificare.launch();
 

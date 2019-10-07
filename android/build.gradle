@@ -66,10 +66,10 @@ repositories {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    api "re.notifica:notificare-core:2.1.0"
-    compileOnly "re.notifica:notificare-location:2.1.0"
-    compileOnly "re.notifica:notificare-beacon:2.1.0"
-    compileOnly "re.notifica:notificare-scannable:2.1.0"
+    api "re.notifica:notificare-core:2.1.1"
+    compileOnly "re.notifica:notificare-location:2.1.1"
+    compileOnly "re.notifica:notificare-beacon:2.1.1"
+    compileOnly "re.notifica:notificare-scannable:2.1.1"
 }
 
 def configureReactNativePom(def pom) {

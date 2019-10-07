@@ -1,6 +1,6 @@
 {
   "name": "notificare-push-lib-react-native",
-  "version": "2.1.0-beta.0",
+  "version": "2.1.0",
   "description": "React Native module for Notificare",
   "main": "index.js",
   "homepage": "https://github.com/Notificare/notificare-push-lib-react-native#readme",
@@ -17,7 +17,7 @@
   ],
   "peerDependencies": {
     "react": "^16.8.6",
-    "react-native": ">=0.59.0-rc.0 <1.0.x"
+    "react-native": ">=0.60.0 <1.0.x"
   },
   "devDependencies": {
     "react": "^16.8.6",
