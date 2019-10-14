@@ -1,3 +1,6 @@
+2.1.1 14-10-2019
+- Added event queue to iOS
+
 2.1.0 01-10-2019
 - Updated to use ReactNative 0.60+
 - Updated to Android SDK 2.1.0
