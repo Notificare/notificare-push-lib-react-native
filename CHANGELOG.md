@@ -1,3 +1,6 @@
+2.1.2 17-10-2019
+- Updated podspec to use iOS lib 2.2.1
+
 2.1.1 14-10-2019
 - Added event queue to iOS
 
