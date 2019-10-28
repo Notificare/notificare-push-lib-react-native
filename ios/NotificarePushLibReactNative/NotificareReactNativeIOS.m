@@ -245,6 +245,14 @@ RCT_REMAP_METHOD(clearLocation, clearLocationWithResolver:(RCTPromiseResolveBloc
     }];
 }
 
+RCT_EXPORT_METHOD(enableBeacons) {
+  // no-op
+}
+
+RCT_EXPORT_METHOD(disableBeacons) {
+  // no-op
+}
+
 RCT_REMAP_METHOD(isLocationServicesEnabled, isLocationServicesEnabledWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([[NotificarePushLib shared] locationServicesEnabled]));
 }
@@ -645,6 +653,15 @@ RCT_EXPORT_METHOD(buyProduct:(nonnull NSDictionary*)product) {
     }];
     
 }
+
+RCT_EXPORT_METHOD(enableBilling) {
+  // no-op
+}
+
+RCT_EXPORT_METHOD(disableBilling) {
+  // no-op
+}
+
 
 RCT_REMAP_METHOD(logCustomEvent, name:(nonnull NSString*)name data:(NSDictionary* _Nullable)data logCustomEventWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
