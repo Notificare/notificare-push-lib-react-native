@@ -1,3 +1,6 @@
+2.1.3 29-10-2019
+- Guard against passing NaN values in Android device location
+
 2.1.2 28-10-2019
 - Added no-op for Android-only methods in iOS
 - Updated podspec to use iOS lib 2.2.2

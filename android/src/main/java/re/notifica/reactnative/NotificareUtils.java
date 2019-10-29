@@ -201,12 +201,24 @@ public class NotificareUtils {
         deviceMap.putString("language", device.getLanguage());
         deviceMap.putString("region", device.getRegion());
         deviceMap.putString("transport", device.getTransport());
-        deviceMap.putDouble("latitude", device.getLatitude());
-        deviceMap.putDouble("longitude", device.getLongitude());
-        deviceMap.putDouble("altitude", device.getAltitude());
-        deviceMap.putDouble("speed", device.getSpeed());
-        deviceMap.putDouble("course", device.getCourse());
-        deviceMap.putString("lastRegistered", ISODateFormatter.format(device.getLastActive()));
+        if (!Double.isNaN(device.getLatitude())) {
+            deviceMap.putDouble("latitude", device.getLatitude());
+        }
+        if (!Double.isNaN(device.getLongitude())) {
+            deviceMap.putDouble("longitude", device.getLongitude());
+        }
+        if (!Double.isNaN(device.getAltitude())) {
+            deviceMap.putDouble("altitude", device.getAltitude());
+        }
+        if (!Double.isNaN(device.getSpeed())) {
+            deviceMap.putDouble("speed", device.getSpeed());
+        }
+        if (!Double.isNaN(device.getCourse())) {
+            deviceMap.putDouble("course", device.getCourse());
+        }
+        if (device.getLastActive() != null) {
+            deviceMap.putString("lastRegistered", ISODateFormatter.format(device.getLastActive()));
+        }
         deviceMap.putString("locationServicesAuthStatus", device.getLocationServicesAuthStatus());
         deviceMap.putBoolean("registeredForNotification", Notificare.shared().isNotificationsEnabled());
         deviceMap.putBoolean("allowedLocationServices", Notificare.shared().isLocationUpdatesEnabled());
