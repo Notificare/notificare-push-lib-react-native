@@ -1,3 +1,6 @@
+2.2.0 30-10-2019
+- Updated to Android SDK 2.2.0
+
 2.1.3 29-10-2019
 - Guard against passing NaN values in Android device location
 

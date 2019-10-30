@@ -331,7 +331,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
      */
     @ReactMethod
     public void fetchDevice(Promise promise) {
-        promise.resolve(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
+        if (Notificare.shared().getRegisteredDevice() != null) {
+            promise.resolve(NotificareUtils.mapDevice(Notificare.shared().getRegisteredDevice()));
+        } else {
+            promise.resolve(null);
+        }
     }
 
     @ReactMethod
@@ -516,7 +520,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         Notificare.shared().fetchDoNotDisturb(new NotificareCallback<NotificareTimeOfDayRange>() {
             @Override
             public void onSuccess(NotificareTimeOfDayRange dnd) {
-                promise.resolve(NotificareUtils.mapTimeOfDayRange(dnd));
+                if (dnd != null) {
+                    promise.resolve(NotificareUtils.mapTimeOfDayRange(dnd));
+                } else {
+                    promise.resolve(null);
+                }
             }
 
             @Override
