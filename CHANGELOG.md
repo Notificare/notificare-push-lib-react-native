@@ -1,3 +1,7 @@
+2.2.1 12-11-2019
+- Updated to Android SDK 2.2.1
+- Updated to iOS SDK 2.2.3
+
 2.2.0 30-10-2019
 - Updated to Android SDK 2.2.0
 

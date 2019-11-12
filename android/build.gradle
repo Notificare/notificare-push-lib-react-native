@@ -35,8 +35,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
-        versionCode 20200
-        versionName "2.2.0"
+        versionCode 20201
+        versionName "2.2.1"
     }
     compileOptions {
         sourceCompatibility = '1.8'
@@ -66,10 +66,10 @@ repositories {
 
 dependencies {
     implementation "com.facebook.react:react-native:+"
-    api "re.notifica:notificare-core:2.2.0"
-    compileOnly "re.notifica:notificare-location:2.2.0"
-    compileOnly "re.notifica:notificare-beacon:2.2.0"
-    compileOnly "re.notifica:notificare-scannable:2.2.0"
+    api "re.notifica:notificare-core:2.2.1"
+    compileOnly "re.notifica:notificare-location:2.2.1"
+    compileOnly "re.notifica:notificare-beacon:2.2.1"
+    compileOnly "re.notifica:notificare-scannable:2.2.1"
 }
 
 def configureReactNativePom(def pom) {
