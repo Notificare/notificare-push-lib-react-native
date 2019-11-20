@@ -1,3 +1,7 @@
+2.2.2 20-11-2019
+- Updated to iOS SDK 2.2.4
+- Changes to isViewController method
+
 2.2.1 12-11-2019
 - Updated to Android SDK 2.2.1
 - Updated to iOS SDK 2.2.3

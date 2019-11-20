@@ -12,6 +12,8 @@
 #import "NotificareReactNativeIOSUtils.h"
 #import "NotificareReactNativeIOSPushHandler.h"
 #import "UIImage+FromBundle.h"
+#import "NotificareNone.h"
+#import "NotificareURLScheme.h"
 
 @implementation NotificareReactNativeIOS
 
@@ -183,7 +185,8 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     BOOL result = YES;
     if ([[controller class] isEqual:[UIAlertController class]] ||
         [[controller class] isEqual:[SKStoreProductViewController class]] ||
-        [[controller class] isEqual:[NSObject class]] ||
+        [[controller class] isEqual:[NotificareNone class]] ||
+        [[controller class] isEqual:[NotificareURLScheme class]] ||
         controller == nil) {
         result = NO;
     }
