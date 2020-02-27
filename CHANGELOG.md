@@ -1,3 +1,6 @@
+2.2.4 27-02-2020
+- Check partially fetched notifications when fetching inbox items 
+
 2.2.3 19-02-2020
 - Updated to iOS SDK 2.2.6
 - Updated to React Native 0.61.5

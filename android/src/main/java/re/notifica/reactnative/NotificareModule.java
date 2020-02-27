@@ -582,7 +582,17 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         if (Notificare.shared().getInboxManager() != null) {
             NotificareInboxItem notificareInboxItem = Notificare.shared().getInboxManager().getItem(inboxItem.getString("inboxId"));
             if (notificareInboxItem != null) {
-                promise.resolve(NotificareUtils.mapNotification(notificareInboxItem.getNotification()));
+                Notificare.shared().fetchInboxItem(notificareInboxItem, new NotificareCallback<NotificareInboxItem>() {
+                    @Override
+                    public void onSuccess(NotificareInboxItem fetchedInboxItem) {
+                        promise.resolve(NotificareUtils.mapNotification(fetchedInboxItem.getNotification()));
+                    }
+
+                    @Override
+                    public void onError(NotificareError notificareError) {
+                        promise.reject(DEFAULT_ERROR_CODE, notificareError);
+                    }
+                });
             } else {
                 promise.reject(DEFAULT_ERROR_CODE, new NotificareError("inbox item not found"));
             }
