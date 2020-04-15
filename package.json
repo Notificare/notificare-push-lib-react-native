@@ -1,6 +1,6 @@
 {
   "name": "notificare-push-lib-react-native",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "React Native module for Notificare",
   "main": "index.js",
   "homepage": "https://github.com/Notificare/notificare-push-lib-react-native#readme",
@@ -16,12 +16,12 @@
     }
   ],
   "peerDependencies": {
-    "react": "^16.9.0",
+    "react": "^16.11.0",
     "react-native": ">=0.60.0 <1.0.x"
   },
   "devDependencies": {
-    "react": "^16.9.0",
-    "react-native": "^0.61.5"
+    "react": "^16.11.0",
+    "react-native": "^0.62.2"
   },
   "license": "MIT",
   "keywords": [
