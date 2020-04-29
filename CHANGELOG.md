@@ -1,3 +1,6 @@
+2.2.6 29-04-2020
+- Updated to Android SDK 2.2.3
+
 2.2.5 15-04-2020
 - Updated to Android SDK 2.2.2
 
