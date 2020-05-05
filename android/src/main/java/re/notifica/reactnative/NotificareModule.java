@@ -932,8 +932,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
-    public void doCloudhostOperation(String verb, String path, ReadableMap params, ReadableMap headers, ReadableMap body, final Promise promise) {
-        JSONObject jsonData = new JSONObject(body.toHashMap());
+    public void doCloudHostOperation(String verb, String path, ReadableMap params, ReadableMap headers, ReadableMap body, final Promise promise) {
+        JSONObject jsonData = null;
+        if (body != null) {
+            body = new JSONObject(body.toHashMap());
+        }
         Map<String,String> paramsMap = new HashMap<>();
         if (params != null) {
             ReadableMapKeySetIterator i = params.keySetIterator();
@@ -950,7 +953,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 headersMap.put(key, headers.getString(key));
             }
         }
-        Notificare.shared().doCloudRequest(verb, path, paramsMap, jsonData, headersMap, new NotificareCallback<JSONObject>() {
+        Notificare.shared().doCloudRequest(verb, "/api" + path, paramsMap, jsonData, headersMap, new NotificareCallback<JSONObject>() {
             @Override
             public void onSuccess(JSONObject jsonObject) {
                 promise.resolve(NotificareUtils.mapJSON(jsonObject));
