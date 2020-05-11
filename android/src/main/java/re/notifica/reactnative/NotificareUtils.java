@@ -553,6 +553,7 @@ public class NotificareUtils {
         WritableMap userMap = Arguments.createMap();
         userMap.putString("userID", user.getUserId());
         userMap.putString("userName", user.getUserName());
+        userMap.putString("accessToken", user.getAccessToken());
         WritableArray segments = Arguments.createArray();
         if (user.getSegments() != null) {
             for (String segmentId : user.getSegments()) {
