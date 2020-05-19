@@ -97,7 +97,9 @@ public class NotificareUtils {
             try {
                 for (int i = 0; i < json.length(); i++) {
                     Object value = json.get(i);
-                    if (value instanceof Float || value instanceof Double) {
+                    if (value instanceof Boolean) {
+                        writableArray.pushBoolean(json.getBoolean(i));
+                    } else if (value instanceof Float || value instanceof Double) {
                         writableArray.pushDouble(json.getDouble(i));
                     } else if (value instanceof Number) {
                         writableArray.pushInt(json.getInt(i));
@@ -128,7 +130,9 @@ public class NotificareUtils {
                 while (iterator.hasNext()) {
                     String key = iterator.next();
                     Object value = json.get(key);
-                    if (value instanceof Float || value instanceof Double) {
+                    if (value instanceof Boolean) {
+                        writableMap.putBoolean(key, json.getBoolean(key));
+                    } else if (value instanceof Float || value instanceof Double) {
                         writableMap.putDouble(key, json.getDouble(key));
                     } else if (value instanceof Number) {
                         writableMap.putInt(key, json.getInt(key));
