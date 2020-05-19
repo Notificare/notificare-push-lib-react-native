@@ -1,3 +1,8 @@
+Upcoming release
+- Fix `doCloudHostOperation` invocations
+- Add `accessToken` to `NotificareUser`
+- Fix user preferences parsing
+
 2.2.6 29-04-2020
 - Updated to Android SDK 2.2.3
 
