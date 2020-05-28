@@ -1379,7 +1379,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 map.putMap("region", NotificareUtils.mapRegion(region));
             }
         }
-        sendEvent("beaconsInRangeForRegion", beacons);
+        sendEvent("beaconsInRangeForRegion", map);
     }
 
     @Override
