@@ -723,7 +723,7 @@ RCT_REMAP_METHOD(logReceiveNotification, notification:(NSDictionary* _Nullable)n
     
 }
 
-RCT_REMAP_METHOD(doPushHostOperation, verb:(nonnull NSString*)verb path:(nonnull NSString*)path params:(NSDictionary<NSString *,NSString *> * _Nullable)params body:(NSDictionary* _Nullable)body doPushHostOperationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_REMAP_METHOD(doPushHostOperation, verb:(nonnull NSString*)verb path:(nonnull NSString*)path params:(NSDictionary * _Nullable)params body:(NSDictionary* _Nullable)body doPushHostOperationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[NotificarePushLib shared] doPushHostOperation:verb path:path URLParams:params bodyJSON:body completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
@@ -735,7 +735,7 @@ RCT_REMAP_METHOD(doPushHostOperation, verb:(nonnull NSString*)verb path:(nonnull
     
 }
 
-RCT_REMAP_METHOD(doCloudHostOperation, verb:(nonnull NSString*)verb path:(nonnull NSString*)path params:(NSDictionary<NSString *,NSString *> * _Nullable)params headers:(NSDictionary<NSString *,NSString *> * _Nullable)headers body:(NSDictionary* _Nullable)body doCloudHostOperationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_REMAP_METHOD(doCloudHostOperation, verb:(nonnull NSString*)verb path:(nonnull NSString*)path params:(NSDictionary * _Nullable)params headers:(NSDictionary * _Nullable)headers body:(NSDictionary* _Nullable)body doCloudHostOperationWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[NotificarePushLib shared] doCloudHostOperation:verb path:path URLParams:params customHeaders:headers bodyJSON:body completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
