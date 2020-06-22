@@ -132,8 +132,6 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
              @"beaconsInRangeForRegion",
              @"headingUpdated",
              @"visitReceived",
-             @"accountStateChanged",
-             @"accountSessionFailedToRenewWithError",
              @"activationTokenReceived",
              @"resetPasswordTokenReceived",
              @"storeLoaded",

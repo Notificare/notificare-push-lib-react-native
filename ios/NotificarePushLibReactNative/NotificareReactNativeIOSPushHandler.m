@@ -315,16 +315,6 @@
     [self dispatchEvent:@"visitReceived" body:[[NotificareReactNativeIOSUtils shared] dictionaryFromVisit:visit]];
 }
 
-- (void)notificarePushLib:(NotificarePushLib *)library didChangeAccountState:(NSDictionary *)info{
-    [self dispatchEvent:@"accountStateChanged" body:info];
-}
-
-- (void)notificarePushLib:(NotificarePushLib *)library didFailToRenewAccountSessionWithError:(NSError * _Nullable)error{
-    NSMutableDictionary * payload = [NSMutableDictionary new];
-    [payload setObject:[error localizedDescription] forKey:@"error"];
-    [self dispatchEvent:@"accountSessionFailedToRenewWithError" body:payload];
-}
-
 - (void)notificarePushLib:(NotificarePushLib *)library didReceiveActivationToken:(NSString *)token{
     NSMutableDictionary * payload = [NSMutableDictionary new];
     [payload setObject:token forKey:@"token"];
