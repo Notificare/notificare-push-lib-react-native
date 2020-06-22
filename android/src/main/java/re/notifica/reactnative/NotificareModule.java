@@ -151,6 +151,14 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     /**
+     * Un-launch the module.
+     */
+    @ReactMethod
+    public void unlaunch() {
+        Notificare.shared().unlaunch();
+    }
+
+    /**
      * Mount the module, listen for ready events and process event queue
      */
     @ReactMethod
