@@ -430,6 +430,7 @@ public class NotificareUtils {
         WritableMap inboxItemMap = Arguments.createMap();
         inboxItemMap.putString("inboxId", notificareInboxItem.getItemId());
         inboxItemMap.putString("notification", notificareInboxItem.getNotification().getNotificationId());
+        inboxItemMap.putString("type", notificareInboxItem.getType());
         inboxItemMap.putString("message", notificareInboxItem.getNotification().getMessage());
         inboxItemMap.putString("title", notificareInboxItem.getTitle());
         inboxItemMap.putString("subtitle", notificareInboxItem.getSubtitle());
