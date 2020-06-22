@@ -197,6 +197,10 @@ RCT_EXPORT_METHOD(launch){
     [[NotificarePushLib shared] launch];
 }
 
+RCT_EXPORT_METHOD(unlaunch){
+    [[NotificarePushLib shared] unlaunch];
+}
+
 RCT_EXPORT_METHOD(registerForNotifications) {
   [[NotificarePushLib shared] registerForNotifications];
 }
