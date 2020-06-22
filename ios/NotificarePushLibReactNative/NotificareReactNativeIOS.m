@@ -466,7 +466,6 @@ RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
         id controller = [[NotificarePushLib shared] controllerForNotification:item];
         if ([self isViewController:controller]) {
             UINavigationController *navController = [self navigationControllerForViewControllers:controller];
-            [navController setModalPresentationStyle:UIModalPresentationFullScreen];
             [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
                 [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
             }];
@@ -513,7 +512,6 @@ RCT_EXPORT_METHOD(presentInboxItem:(nonnull NSDictionary*)inboxItem) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [navController setModalPresentationStyle:UIModalPresentationFullScreen];
                     [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
                         [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
                     }];
@@ -905,7 +903,6 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [navController setModalPresentationStyle:UIModalPresentationFullScreen];
                     [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
                         [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
                     }];
