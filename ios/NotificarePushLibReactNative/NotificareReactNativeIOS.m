@@ -810,11 +810,9 @@ RCT_REMAP_METHOD(login, email:(nonnull NSString*)email password:(nonnull NSStrin
 RCT_REMAP_METHOD(logout, logoutWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[[NotificarePushLib shared] authManager] logoutAccount:^(id  _Nullable response, NSError * _Nullable error) {
           if (!error) {
-              result(nil);
+              resolve(nil);
           } else {
-              result([FlutterError errorWithCode:NOTIFICARE_ERROR
-                                         message:error.localizedDescription
-                                         details:nil]);
+              reject(NOTIFICARE_ERROR, [error localizedDescription], error);
           }
     }];
 }
