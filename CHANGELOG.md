@@ -1,10 +1,11 @@
-2.3.0 22-06-2020
+2.3.0 25-06-2020
 - Fix `doCloudHostOperation` invocations
 - Add `accessToken` to `NotificareUser`
 - Fix user preferences parsing
 - Fix ranging beacons payload
 - Update Android SDK to v2.3.0
 - Update iOS SDK to v2.3.2
+- Allow `carPlay` in authorization options
 
 2.2.6 29-04-2020
 - Updated to Android SDK 2.2.3
