@@ -221,6 +221,9 @@ public class NotificareUtils {
         if (!Double.isNaN(device.getCourse())) {
             deviceMap.putDouble("course", device.getCourse());
         }
+        if (!Double.isNaN(device.getAccuracy())) {
+            deviceMap.putDouble("accuracy", device.getAccuracy());
+        }
         if (device.getLastActive() != null) {
             deviceMap.putString("lastRegistered", ISODateFormatter.format(device.getLastActive()));
         }
