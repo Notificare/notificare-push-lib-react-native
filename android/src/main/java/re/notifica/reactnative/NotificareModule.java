@@ -741,6 +741,25 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
+    public void markAllAsRead(final Promise promise) {
+        if (Notificare.shared().getInboxManager() != null) {
+            Notificare.shared().getInboxManager().markAll(new NotificareCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                    promise.resolve(null);
+                }
+
+                @Override
+                public void onError(NotificareError error) {
+                    promise.reject(DEFAULT_ERROR_CODE, error);
+                }
+            });
+        } else {
+            promise.reject(DEFAULT_ERROR_CODE, new NotificareError("inbox not enabled"));
+        }
+    }
+
+    @ReactMethod
     public void clearInbox(final Promise promise) {
         if (Notificare.shared().getInboxManager() != null) {
             Notificare.shared().getInboxManager().clearInbox(new NotificareCallback<Integer>() {
