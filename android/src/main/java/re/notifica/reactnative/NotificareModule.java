@@ -36,8 +36,8 @@ import re.notifica.NotificareCallback;
 import re.notifica.NotificareError;
 import re.notifica.beacon.BeaconRangingListener;
 import re.notifica.billing.BillingManager;
-import re.notifica.billing.BillingResult;
-import re.notifica.billing.Purchase;
+import re.notifica.billing.NotificareBillingResult;
+import re.notifica.billing.NotificarePurchase;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
@@ -828,9 +828,9 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @ReactMethod
     public void fetchPurchasedProducts(Promise promise) {
         if (Notificare.shared().getBillingManager() != null) {
-            List<Purchase> purchases = Notificare.shared().getBillingManager().getPurchases();
+            List<NotificarePurchase> purchases = Notificare.shared().getBillingManager().getPurchases();
             List<NotificareProduct> products = new ArrayList<>();
-            for (Purchase purchase : purchases) {
+            for (NotificarePurchase purchase : purchases) {
                 NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
                 if (product != null) {
                     products.add(product);
@@ -1224,9 +1224,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 payload.putString("error", "unknown error");
                 sendEvent("scannableSessionInvalidatedWithError", payload, true);
             }
-        } else if (Notificare.shared().getBillingManager() != null && Notificare.shared().getBillingManager().handleActivityResult(requestCode, resultCode, data)) {
-            // Billingmanager handled the result
-            isBillingReady = true; // wait for purchase to finish before doing other calls
         }
     }
 
@@ -1335,8 +1332,8 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     @Override
     public void onServiceError(int errorCode, int requestCode) {
-        if (Notificare.isUserRecoverableError(errorCode) && getCurrentActivity() != null) {
-            getCurrentActivity().runOnUiThread(() -> Notificare.getErrorDialog(errorCode, getCurrentActivity(), requestCode).show());
+        if (Notificare.shared().getServiceManager().isUserRecoverableError(errorCode) && getCurrentActivity() != null) {
+            getCurrentActivity().runOnUiThread(() -> Notificare.shared().getServiceManager().getErrorDialog(errorCode, getCurrentActivity(), requestCode).show());
         }
     }
 
@@ -1392,14 +1389,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     @Override
     public void onBillingReady() {
-        if (!isBillingReady) {
-            Notificare.shared().getBillingManager().refresh(this);
-        }
+        Notificare.shared().getBillingManager().refresh(this);
     }
 
     @Override
-    public void onPurchaseFinished(BillingResult billingResult, Purchase purchase) {
-        isBillingReady = false;
+    public void onPurchaseFinished(NotificareBillingResult billingResult, NotificarePurchase purchase) {
         WritableMap payload = Arguments.createMap();
         NotificareProduct product = Notificare.shared().getBillingManager().getProduct(purchase.getProductId());
         if (product != null) {
