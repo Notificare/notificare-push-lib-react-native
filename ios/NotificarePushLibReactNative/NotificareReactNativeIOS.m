@@ -66,6 +66,10 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     categoryOptions = options;
 }
 
++ (void)continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nonnull))restorationHandler {
+    [[NotificarePushLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
+}
+
 + (void)didRegisterForRemoteNotificationsWithDeviceToken:(nonnull NSData *)deviceToken{
     [[NotificarePushLib shared] didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
 }
