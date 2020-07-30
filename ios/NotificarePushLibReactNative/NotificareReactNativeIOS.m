@@ -550,6 +550,18 @@ RCT_REMAP_METHOD(markAsRead, inboxItem:(nonnull NSDictionary*)inboxItem markAsRe
     
 }
 
+RCT_REMAP_METHOD(markAllAsRead, markAllAsReadWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+
+    [[[NotificarePushLib shared] inboxManager] markAllAsRead:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            resolve(nil);
+        } else {
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
+        }
+    }];
+
+}
+
 RCT_REMAP_METHOD(clearInbox, clearInboxWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     
     [[[NotificarePushLib shared] inboxManager] clearInbox:^(id  _Nullable response, NSError * _Nullable error) {
