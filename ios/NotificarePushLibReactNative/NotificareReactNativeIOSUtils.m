@@ -59,6 +59,7 @@ static NotificareReactNativeIOSUtils *utils;
     [data setValue:[device altitude] forKey:@"altitude"];
     [data setValue:[device floor] forKey:@"floor"];
     [data setValue:[device course] forKey:@"course"];
+    [data setValue:[device accuracy] forKey:@"accuracy"];
     [data setValue:[device lastRegistered] forKey:@"lastRegistered"];
     [data setValue:[device locationServicesAuthStatus] forKey:@"locationServicesAuthStatus"];
     [data setValue:[NSNumber numberWithBool:[device registeredForNotifications]] forKey:@"registeredForNotifications"];
