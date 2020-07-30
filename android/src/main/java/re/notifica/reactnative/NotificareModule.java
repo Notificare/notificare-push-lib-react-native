@@ -1261,6 +1261,10 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         } else {
             sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
             sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
+
+            if (getCurrentActivity() != null) {
+                Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), intent);
+            }
         }
     }
 
@@ -1297,6 +1301,11 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                     if (resetPasswordToken != null && !resetPasswordToken.isEmpty()) {
                         sendResetPasswordToken(resetPasswordToken);
                         getCurrentActivity().setIntent(new Intent());
+                    } else {
+                        Boolean dynamicLinkHandled = Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), getCurrentActivity().getIntent());
+                        if (dynamicLinkHandled) {
+                            getCurrentActivity().setIntent(new Intent());
+                        }
                     }
                 }
             }
