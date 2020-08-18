@@ -226,6 +226,18 @@
     
 }
 
+- (void)notificarePushLib:(NotificarePushLib *)library didReceiveLocationServiceAccuracyAuthorization:(NotificareGeoAccuracyAuthorization)accuracy {
+    NSMutableDictionary * payload = [NSMutableDictionary new];
+    
+    if (accuracy == NotificareGeoAccuracyAuthorizationFull) {
+        [payload setObject:@"full" forKey:@"accuracy"];
+    } else if (accuracy == NotificareGeoGeoAccuracyAuthorizationReduced) {
+        [payload setObject:@"reduced" forKey:@"accuracy"];
+    }
+
+    [self dispatchEvent:@"locationServiceAccuracyAuthorizationReceived" body:payload];
+}
+
 - (void)notificarePushLib:(NotificarePushLib *)library didUpdateLocations:(NSArray<NotificareLocation*> *)locations{
     NSMutableArray * payload = [NSMutableArray new];
     for (NotificareLocation * location in locations) {

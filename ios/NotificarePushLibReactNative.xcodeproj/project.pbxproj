@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4005274222663F82008CD36D /* NotificareReactNativeIOSUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 4005274122663F82008CD36D /* NotificareReactNativeIOSUtils.m */; };
 		5DA03AB21DD213360077017E /* NotificareReactNativeIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 5DA03AB01DD213360077017E /* NotificareReactNativeIOS.m */; };
+		F227B0BF24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = F227B0BD24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,8 @@
 		5DA03AA11DD212270077017E /* libNotificarePushLibReactNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNotificarePushLibReactNative.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DA03AB01DD213360077017E /* NotificareReactNativeIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificareReactNativeIOS.m; sourceTree = "<group>"; };
 		5DA03AB11DD213360077017E /* NotificareReactNativeIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareReactNativeIOS.h; sourceTree = "<group>"; };
+		F227B0BD24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotificareReactNativeIOSPushHandler.m; sourceTree = "<group>"; };
+		F227B0BE24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotificareReactNativeIOSPushHandler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +64,8 @@
 		5DA03AA31DD212270077017E /* NotificarePushLibReactNative */ = {
 			isa = PBXGroup;
 			children = (
+				F227B0BE24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.h */,
+				F227B0BD24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.m */,
 				5DA03AB01DD213360077017E /* NotificareReactNativeIOS.m */,
 				5DA03AB11DD213360077017E /* NotificareReactNativeIOS.h */,
 				4005274022663F82008CD36D /* NotificareReactNativeIOSUtils.h */,
@@ -128,6 +133,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F227B0BF24EAD47F009075E6 /* NotificareReactNativeIOSPushHandler.m in Sources */,
 				4005274222663F82008CD36D /* NotificareReactNativeIOSUtils.m in Sources */,
 				5DA03AB21DD213360077017E /* NotificareReactNativeIOS.m in Sources */,
 			);

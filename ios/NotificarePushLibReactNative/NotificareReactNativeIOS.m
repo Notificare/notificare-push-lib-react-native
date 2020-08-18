@@ -126,6 +126,7 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
              @"shouldOpenSettings",
              @"locationServiceFailedToStart",
              @"locationServiceAuthorizationStatusReceived",
+             @"locationServiceAccuracyAuthorizationReceived",
              @"locationsUpdated",
              @"monitoringForRegionFailed",
              @"monitoringForRegionStarted",
@@ -936,6 +937,16 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
         }];
     });
     
+}
+
+RCT_EXPORT_METHOD(requestAlwaysAuthorizationForLocationUpdates) {
+    [[NotificarePushLib shared] requestAlwaysAuthorizationForLocationUpdates];
+}
+
+RCT_EXPORT_METHOD(requestTemporaryFullAccuracyAuthorization: (nonnull NSString*) purposeKey) {
+    if (@available(iOS 14.0, *)) {
+        [[NotificarePushLib shared] requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
+    }
 }
 
 @end
