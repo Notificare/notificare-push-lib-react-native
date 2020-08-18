@@ -1460,4 +1460,13 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         }
     }
 
+    @ReactMethod
+    public void requestAlwaysAuthorizationForLocationUpdates() {
+        // no-op
+    }
+
+    @ReactMethod
+    public void requestTemporaryFullAccuracyAuthorization(String purposeKey) {
+        // no-op
+    }
 }
