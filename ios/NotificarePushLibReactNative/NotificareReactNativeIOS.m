@@ -949,4 +949,16 @@ RCT_EXPORT_METHOD(requestTemporaryFullAccuracyAuthorization: (nonnull NSString*)
     }
 }
 
+RCT_REMAP_METHOD(fetchLink, url:(nonnull NSString*)url fetchLinkWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    NSURL* nsUrl = [NSURL URLWithString:url];
+
+    [[NotificarePushLib shared] fetchLink:nsUrl completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
+        if (!error) {
+            resolve([response absoluteString]);
+        } else {
+            reject(NOTIFICARE_ERROR, [error localizedDescription], error);
+        }
+    }];
+}
+
 @end

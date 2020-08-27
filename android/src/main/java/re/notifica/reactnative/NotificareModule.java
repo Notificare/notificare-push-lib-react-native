@@ -4,6 +4,7 @@ import android.app.Activity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -41,6 +42,7 @@ import re.notifica.billing.NotificarePurchase;
 import re.notifica.model.NotificareApplicationInfo;
 import re.notifica.model.NotificareAsset;
 import re.notifica.model.NotificareBeacon;
+import re.notifica.model.NotificareDynamicLink;
 import re.notifica.model.NotificareInboxItem;
 import re.notifica.model.NotificareNotification;
 import re.notifica.model.NotificarePass;
@@ -1206,6 +1208,23 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         if (scannable.getMap("notification") != null) {
             presentNotification(scannable.getMap("notification"));
         }
+    }
+
+    @ReactMethod
+    public void fetchLink(String url, final Promise promise) {
+        Uri uri = Uri.parse(url);
+
+        Notificare.shared().fetchDynamicLink(uri, new NotificareCallback<NotificareDynamicLink>() {
+            @Override
+            public void onSuccess(NotificareDynamicLink notificareDynamicLink) {
+                promise.resolve(notificareDynamicLink.getTarget());
+            }
+
+            @Override
+            public void onError(NotificareError notificareError) {
+                promise.reject(DEFAULT_ERROR_CODE, notificareError);
+            }
+        });
     }
 
     // ActivityEventListener methods
