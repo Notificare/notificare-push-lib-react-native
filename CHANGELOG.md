@@ -1,3 +1,6 @@
+2.3.1 28-08-2020
+- Add `urlOpened` event to Android
+
 2.3.0 25-06-2020
 - Fix `doCloudHostOperation` invocations
 - Add `accessToken` to `NotificareUser`
