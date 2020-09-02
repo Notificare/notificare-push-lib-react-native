@@ -1,3 +1,6 @@
+Upcoming release
+- Fix `updateUserData` method consistency between platforms
+
 2.3.1 28-08-2020
 - Add `urlOpened` event to Android
 
