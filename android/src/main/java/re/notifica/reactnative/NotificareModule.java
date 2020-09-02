@@ -504,8 +504,13 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         NotificareUserData data = new NotificareUserData();
         for (int i = 0; i < userData.size(); i++) {
             ReadableMap userDataFieldMap = userData.getMap(i);
-            if (userDataFieldMap != null && userDataFieldMap.hasKey("key")) {
-                data.setValue(userDataFieldMap.getString("key"), userDataFieldMap.getString("value"));
+            if (userDataFieldMap != null && !userDataFieldMap.isNull("key") && userDataFieldMap.hasKey("value")) {
+                String key = userDataFieldMap.getString("key");
+                String value = !userDataFieldMap.isNull("value") ? userDataFieldMap.getString("value") : null;
+                data.setValue(key, value);
+            } else {
+                promise.reject(DEFAULT_ERROR_CODE, new NotificareError("invalid user data"));
+                return;
             }
         }
 
