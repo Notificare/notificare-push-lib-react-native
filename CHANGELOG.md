@@ -1,4 +1,4 @@
-Upcoming release
+2.3.2 03-09-2020
 - Fix `updateUserData` method consistency between platforms
 
 2.3.1 28-08-2020

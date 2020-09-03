@@ -35,8 +35,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
-        versionCode 20300
-        versionName "2.3.0"
+        versionCode 20302
+        versionName "2.3.2"
     }
     compileOptions {
         sourceCompatibility = '1.8'
