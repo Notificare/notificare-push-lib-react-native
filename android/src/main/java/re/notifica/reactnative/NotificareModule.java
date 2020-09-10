@@ -506,8 +506,13 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         NotificareUserData data = new NotificareUserData();
         for (int i = 0; i < userData.size(); i++) {
             ReadableMap userDataFieldMap = userData.getMap(i);
-            if (userDataFieldMap != null && userDataFieldMap.hasKey("key")) {
-                data.setValue(userDataFieldMap.getString("key"), userDataFieldMap.getString("value"));
+            if (userDataFieldMap != null && !userDataFieldMap.isNull("key") && userDataFieldMap.hasKey("value")) {
+                String key = userDataFieldMap.getString("key");
+                String value = !userDataFieldMap.isNull("value") ? userDataFieldMap.getString("value") : null;
+                data.setValue(key, value);
+            } else {
+                promise.reject(DEFAULT_ERROR_CODE, new NotificareError("invalid user data"));
+                return;
             }
         }
 
@@ -1273,18 +1278,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @Override
     public void onNewIntent(Intent intent) {
         Log.i(TAG, "received new intent for activity " + intent.toString());
-        // Check for launch with notification or tokens
-        WritableMap notificationMap = parseNotificationIntent(intent);
-        if (notificationMap != null) {
-            sendNotification(notificationMap);
-        } else {
-            sendValidateUserToken(Notificare.shared().parseValidateUserIntent(intent));
-            sendResetPasswordToken(Notificare.shared().parseResetPasswordIntent(intent));
-
-            if (getCurrentActivity() != null) {
-                Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), intent);
-            }
-        }
+        handleIntent(intent, false);
     }
 
     // LifecycleEventListener methods
@@ -1306,28 +1300,8 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         }
         Notificare.shared().addBillingReadyListener(this);
         if (!hostCreated && getCurrentActivity() != null && getCurrentActivity().getIntent() != null) {
-            WritableMap notificationMap = parseNotificationIntent(getCurrentActivity().getIntent());
-            if (notificationMap != null) {
-                sendNotification(notificationMap);
-                getCurrentActivity().setIntent(new Intent());
-            } else {
-                String validateToken = Notificare.shared().parseValidateUserIntent(getCurrentActivity().getIntent());
-                if (validateToken != null && !validateToken.isEmpty()) {
-                    sendValidateUserToken(validateToken);
-                    getCurrentActivity().setIntent(new Intent());
-                } else {
-                    String resetPasswordToken = Notificare.shared().parseResetPasswordIntent(getCurrentActivity().getIntent());
-                    if (resetPasswordToken != null && !resetPasswordToken.isEmpty()) {
-                        sendResetPasswordToken(resetPasswordToken);
-                        getCurrentActivity().setIntent(new Intent());
-                    } else {
-                        Boolean dynamicLinkHandled = Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), getCurrentActivity().getIntent());
-                        if (dynamicLinkHandled) {
-                            getCurrentActivity().setIntent(new Intent());
-                        }
-                    }
-                }
-            }
+                        
+            handleIntent(getCurrentActivity().getIntent(), true);
         }
         hostCreated = true;
     }
@@ -1398,6 +1372,46 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     // Utility methods
+
+    private void handleIntent(Intent intent, boolean clearIntent) {
+        // Check for launch with notification or tokens
+        WritableMap notificationMap = parseNotificationIntent(intent);
+        if (notificationMap != null) {
+            sendNotification(notificationMap);
+
+            if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
+        } else {
+            String token = Notificare.shared().parseValidateUserIntent(intent);
+            if (token != null && !token.isEmpty()) {
+                sendValidateUserToken(token);
+
+                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
+                return;
+            }
+
+            token = Notificare.shared().parseResetPasswordIntent(intent);
+            if (token != null && !token.isEmpty()) {
+                sendResetPasswordToken(token);
+
+                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
+                return;
+            }
+
+            Boolean dynamicLinkHandled = Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), intent);
+            if (dynamicLinkHandled) {
+                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
+                return;
+            }
+
+            if (intent.getData() != null) {
+                WritableMap payload = Arguments.createMap();
+                payload.putString("url", intent.getData().toString());
+                sendEvent("urlOpened", payload, true);
+
+                if (clearIntent) getCurrentActivity().setIntent(new Intent());
+            }
+        }
+    }
 
     /**
      * Parse notification from launch intent

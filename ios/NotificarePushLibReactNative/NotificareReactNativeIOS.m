@@ -393,11 +393,7 @@ RCT_REMAP_METHOD(updateUserData, userData:(nonnull NSArray *)userData updateUser
     
     [[NotificarePushLib shared] updateUserData:data completionHandler:^(id  _Nullable response, NSError * _Nullable error) {
         if (!error) {
-            NSMutableArray * payload = [NSMutableArray array];
-            for (NotificareUserData * userData in response) {
-                [payload addObject:[[NotificareReactNativeIOSUtils shared] dictionaryFromUserData:userData]];
-            }
-            resolve(payload);
+            resolve(nil);
         } else {
             reject(NOTIFICARE_ERROR, [error localizedDescription], error);
         }

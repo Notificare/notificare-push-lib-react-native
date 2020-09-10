@@ -8,6 +8,12 @@
 - add 'ephemeral' authorization status
 - add `requestAlwaysAuthorizationForLocationUpdates` and `requestTemporaryFullAccuracyAuthorization` methods
 
+2.3.2 03-09-2020
+- Fix `updateUserData` method consistency between platforms
+
+2.3.1 28-08-2020
+- Add `urlOpened` event to Android
+
 2.3.0 25-06-2020
 - Fix `doCloudHostOperation` invocations
 - Add `accessToken` to `NotificareUser`
