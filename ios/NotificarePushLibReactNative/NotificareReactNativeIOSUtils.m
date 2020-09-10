@@ -134,7 +134,11 @@ static NotificareReactNativeIOSUtils *utils;
     if([notification notificationInfo]){
         [data setObject:[notification notificationInfo] forKey:@"info"];
     }
-    
+
+    if([notification notificationTargetContentIdentifier]){
+        [data setObject:[notification notificationTargetContentIdentifier] forKey:@"targetContentIdentifier"];
+    }
+
     NSMutableArray * content = [NSMutableArray array];
     for (NotificareContent * c in [notification notificationContent]) {
         NSMutableDictionary * cont = [NSMutableDictionary dictionary];
@@ -189,6 +193,10 @@ static NotificareReactNativeIOSUtils *utils;
     
     if ([dictionary objectForKey:@"info"]) {
         [notification setNotificationInfo:[dictionary objectForKey:@"info"]];
+    }
+
+    if ([dictionary objectForKey:@"targetContentIdentifier"]) {
+        [notification setNotificationTargetContentIdentifier:[dictionary objectForKey:@"targetContentIdentifier"]];
     }
     
     NSMutableArray * content = [NSMutableArray array];
