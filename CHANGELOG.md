@@ -1,3 +1,7 @@
+## 2.4.1
+- Update dependencies
+- Fix logkitty & lodash vulnerabilities
+
 ## 2.4.0-beta.2
 - Add `targetContentIdentifier` to `NotificareNotification`
 - Update native iOS SDK to v2.4.0-beta.7
