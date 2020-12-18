@@ -273,6 +273,16 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     }
 
     @ReactMethod
+    public void enableBeaconForegroundService() {
+        Notificare.shared().enableBeaconForegroundService();
+    }
+
+    @ReactMethod
+    public void disableBeaconForegroundService() {
+        Notificare.shared().disableBeaconForegroundService();
+    }
+
+    @ReactMethod
     public void enableBilling() {
         Notificare.shared().enableBilling();
     }

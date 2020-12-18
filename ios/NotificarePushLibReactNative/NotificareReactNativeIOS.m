@@ -263,6 +263,14 @@ RCT_EXPORT_METHOD(disableBeacons) {
   // no-op
 }
 
+RCT_EXPORT_METHOD(enableBeaconForegroundService) {
+    // no-op
+}
+
+RCT_EXPORT_METHOD(disableBeaconForegroundService) {
+    // no-op
+}
+
 RCT_REMAP_METHOD(isLocationServicesEnabled, isLocationServicesEnabledWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(@([[NotificarePushLib shared] locationServicesEnabled]));
 }
