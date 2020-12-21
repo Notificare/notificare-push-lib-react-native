@@ -1,3 +1,8 @@
+## 2.5.0
+- Update native Android SDK to 2.5.0
+- Update native iOS SDK to 2.5.0
+- Add beacon scanning foreground service
+
 ## 2.4.1
 - Update dependencies
 - Fix logkitty & lodash vulnerabilities
