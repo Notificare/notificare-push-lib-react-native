@@ -405,7 +405,9 @@ public class NotificareUtils {
 
         assetMap.putString("assetTitle", asset.getTitle());
         assetMap.putString("assetDescription", asset.getDescription());
-        assetMap.putString("assetUrl", asset.getUrl().toString());
+        if (asset.getUrl() != null) {
+            assetMap.putString("assetUrl", asset.getUrl().toString());
+        }
         assetMap.putMap("assetExtra", mapJSON(asset.getExtra()));
 
         WritableMap theMeta = Arguments.createMap();
