@@ -1494,7 +1494,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @Override
     public void onChanged(@Nullable SortedSet<NotificareInboxItem> notificareInboxItems) {
         WritableArray inbox = Arguments.createArray();
-        if (notificareInboxItems != null) {
+        if (notificareInboxItems != null && Notificare.shared().getInboxManager() != null) {
             for (NotificareInboxItem item : notificareInboxItems) {
                 inbox.pushMap(NotificareUtils.mapInboxItem(item));
             }
