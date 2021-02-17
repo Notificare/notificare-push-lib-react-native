@@ -439,7 +439,9 @@ public class NotificareUtils {
             inboxItemMap.putString("notification", notificareInboxItem.getNotification().getNotificationId());
         }
         inboxItemMap.putString("type", notificareInboxItem.getType());
-        inboxItemMap.putString("message", notificareInboxItem.getNotification().getMessage());
+        if (notificareInboxItem.getNotification() != null) {
+            inboxItemMap.putString("message", notificareInboxItem.getNotification().getMessage());
+        }
         inboxItemMap.putString("title", notificareInboxItem.getTitle());
         inboxItemMap.putString("subtitle", notificareInboxItem.getSubtitle());
         if (notificareInboxItem.getAttachment() != null) {
