@@ -13,5 +13,5 @@ require "json"
   s.source       = { :git => "https://github.com/Notificare/notificare-push-lib-react-native.git", :tag => s.version.to_s }
   s.source_files  = "ios/**/*.{h,m}"
   s.dependency "React"
-  s.dependency "notificare-push-lib", "2.5.0"
+  s.dependency "notificare-push-lib", "2.5.1"
 end
