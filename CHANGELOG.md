@@ -1,3 +1,7 @@
+## 2.5.3
+- Prevent crash on mapping inbox items without a notification
+- Update native iOS dependency
+
 ## 2.5.2
 - Prevent crash on inbox updates after un-launching
 
