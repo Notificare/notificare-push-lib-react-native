@@ -35,8 +35,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
-        versionCode 20503
-        versionName "2.5.3"
+        versionCode 20504
+        versionName "2.5.4"
     }
     compileOptions {
         sourceCompatibility = '1.8'
@@ -67,7 +67,7 @@ repositories {
 }
 
 dependencies {
-    def notificare_version = '2.5.0'
+    def notificare_version = '2.5.1'
 
     implementation "com.facebook.react:react-native:+"
     api "re.notifica:notificare-core:$notificare_version"
