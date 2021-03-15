@@ -1,3 +1,6 @@
+## 2.5.4
+- Update native Android dependency
+
 ## 2.5.3
 - Prevent crash on mapping inbox items without a notification
 - Update native iOS dependency
