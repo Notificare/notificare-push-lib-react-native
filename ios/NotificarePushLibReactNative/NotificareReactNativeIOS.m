@@ -14,6 +14,7 @@
 #import "UIImage+FromBundle.h"
 #import "NotificareNone.h"
 #import "NotificareURLScheme.h"
+#import "UIColor+Hex.h"
 
 @implementation NotificareReactNativeIOS
 
@@ -175,7 +176,18 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 
 -(UINavigationController*)navigationControllerForViewControllers:(id)object{
     UINavigationController *navController = [UINavigationController new];
-    [[(UIViewController *)object navigationItem] setLeftBarButtonItem:[[UIBarButtonItem alloc] initWithImage:[UIImage imageFromBundle:@"closeIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(close)]];
+    [[navController view] setBackgroundColor:[UIColor whiteColor]];
+
+    UIViewController* notificationController = (UIViewController *)object;
+    NSDictionary* theme = [[NotificareAppConfig shared] themeForController:notificationController];
+
+    UIBarButtonItem* closeButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageFromBundle:@"closeIcon"] style:UIBarButtonItemStylePlain target:self action:@selector(close)];
+    if (theme && [theme objectForKey:@"ACTION_BUTTON_TEXT_COLOR"]) {
+        [closeButton setTintColor:[UIColor colorWithHexString:[theme objectForKey:@"ACTION_BUTTON_TEXT_COLOR"]]];
+    }
+
+    [[notificationController navigationItem] setLeftBarButtonItem: closeButton];
+
     return navController;
 }
 
@@ -477,7 +489,7 @@ RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
         id controller = [[NotificarePushLib shared] controllerForNotification:item];
         if ([self isViewController:controller]) {
             UINavigationController *navController = [self navigationControllerForViewControllers:controller];
-            [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+            [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
                 [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
             }];
         } else {
@@ -523,7 +535,7 @@ RCT_EXPORT_METHOD(presentInboxItem:(nonnull NSDictionary*)inboxItem) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
                         [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
                     }];
                 } else {
@@ -931,7 +943,7 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:NO completion:^{
+                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
                         [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
                     }];
                 } else {
