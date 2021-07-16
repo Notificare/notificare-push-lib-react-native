@@ -1,3 +1,8 @@
+## 2.6.0
+- Update native Android dependency
+- Update native iOS dependency
+- Handle test device registration
+
 ## 2.5.5
 - Update native iOS dependency
 - Improve present notifications, inbox items & scannables transition & styling
