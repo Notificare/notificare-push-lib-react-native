@@ -1413,6 +1413,10 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 return;
             }
 
+            if (Notificare.shared().handleTestDeviceIntent(intent)) {
+                return;
+            }
+
             if (intent.getData() != null) {
                 WritableMap payload = Arguments.createMap();
                 payload.putString("url", intent.getData().toString());
