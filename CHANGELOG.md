@@ -1,3 +1,6 @@
+## 2.6.1
+- Prevent the native Android module from breaking the React Native Linking module
+
 ## 2.6.0
 - Update native Android dependency
 - Update native iOS dependency

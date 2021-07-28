@@ -1288,7 +1288,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     @Override
     public void onNewIntent(Intent intent) {
         Log.i(TAG, "received new intent for activity " + intent.toString());
-        handleIntent(intent, false);
+        handleIntent(intent);
     }
 
     // LifecycleEventListener methods
@@ -1310,8 +1310,7 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
         }
         Notificare.shared().addBillingReadyListener(this);
         if (!hostCreated && getCurrentActivity() != null && getCurrentActivity().getIntent() != null) {
-                        
-            handleIntent(getCurrentActivity().getIntent(), true);
+            handleIntent(getCurrentActivity().getIntent());
         }
         hostCreated = true;
     }
@@ -1383,19 +1382,16 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
 
     // Utility methods
 
-    private void handleIntent(Intent intent, boolean clearIntent) {
+    private void handleIntent(Intent intent) {
         // Check for launch with notification or tokens
         WritableMap notificationMap = parseNotificationIntent(intent);
         if (notificationMap != null) {
             sendNotification(notificationMap);
-
-            if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
         } else {
             String token = Notificare.shared().parseValidateUserIntent(intent);
             if (token != null && !token.isEmpty()) {
                 sendValidateUserToken(token);
 
-                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
                 return;
             }
 
@@ -1403,13 +1399,10 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
             if (token != null && !token.isEmpty()) {
                 sendResetPasswordToken(token);
 
-                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
                 return;
             }
 
-            Boolean dynamicLinkHandled = Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), intent);
-            if (dynamicLinkHandled) {
-                if (clearIntent && getCurrentActivity() != null) getCurrentActivity().setIntent(new Intent());
+            if (Notificare.shared().handleDynamicLinkIntent(getCurrentActivity(), intent)) {
                 return;
             }
 
@@ -1421,8 +1414,6 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
                 WritableMap payload = Arguments.createMap();
                 payload.putString("url", intent.getData().toString());
                 sendEvent("urlOpened", payload, true);
-
-                if (clearIntent) getCurrentActivity().setIntent(new Intent());
             }
         }
     }
