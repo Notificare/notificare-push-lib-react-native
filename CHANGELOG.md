@@ -1,3 +1,30 @@
+## 2.7.0-beta.1
+- Update native Android dependency to 2.7.0-beta.4
+- Update native iOS dependency to 2.7-beta2
+- Update plugin gradle file
+- Add handled flags for openUrl and continueUserActivity
+
+##### BREAKING CHANGE: ANDROID NOTIFICATION TRAMPOLINE
+Add the following to your `Manifest.xml`:
+
+```xml
+<activity android:name=".MainActivity">
+
+    <!-- existing intent filters  -->
+
+    <intent-filter>
+        <action android:name="re.notifica.intent.action.RemoteMessageOpened" />
+        <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
+
+</activity>
+```
+
+For more information about this subject please take a look at [this](https://github.com/Notificare/notificare-push-lib-android-src/blob/2.7-dev/UPGRADE.md#breaking-change-trampoline-intents) section.
+
+##### BREAKING CHANGE: ANDROID BLUETOOTH PERMISSION
+From Android 12 and up, bluetooth scanning permissions have to be requested at runtime. This impacts the geofencing functionality of our library. 
+
 ## 2.6.1
 - Prevent the native Android module from breaking the React Native Linking module
 

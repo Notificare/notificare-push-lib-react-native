@@ -1383,6 +1383,8 @@ class NotificareModule extends ReactContextBaseJavaModule implements ActivityEve
     // Utility methods
 
     private void handleIntent(Intent intent) {
+        if (Notificare.shared().handleTrampolineIntent(intent)) return;
+
         // Check for launch with notification or tokens
         WritableMap notificationMap = parseNotificationIntent(intent);
         if (notificationMap != null) {

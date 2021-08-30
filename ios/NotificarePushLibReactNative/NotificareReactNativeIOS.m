@@ -67,8 +67,8 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     categoryOptions = options;
 }
 
-+ (void)continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nonnull))restorationHandler {
-    [[NotificarePushLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
++ (BOOL)continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nonnull))restorationHandler {
+    return [[NotificarePushLib shared] continueUserActivity:userActivity restorationHandler:restorationHandler];
 }
 
 + (void)didRegisterForRemoteNotificationsWithDeviceToken:(nonnull NSData *)deviceToken{
@@ -87,12 +87,15 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
     }];
 }
 
-+ (void)handleOpenURL:(nonnull NSURL *)url withOptions:(NSDictionary * _Nullable)options{
-    [[NotificarePushLib shared] handleOpenURL:url withOptions:options];
++ (BOOL)handleOpenURL:(nonnull NSURL *)url withOptions:(NSDictionary * _Nullable)options{
+    BOOL granted = [[NotificarePushLib shared] handleOpenURL:url withOptions:options];
+
     NSMutableDictionary * payload = [NSMutableDictionary new];
     [payload setObject:[url absoluteString] forKey:@"url"];
     [payload setObject:options forKey:@"options"];
     [[NotificareReactNativeIOSPushHandler shared] dispatchEvent:@"urlOpened" body:payload];
+
+    return granted;
 }
 
 + (nullable NSString *)parseURIPayload:(NSData*)data{
