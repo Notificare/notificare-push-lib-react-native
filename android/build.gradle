@@ -8,7 +8,7 @@ buildscript {
             jcenter()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:4.1.3'
+            classpath 'com.android.tools.build:gradle:7.0.1'
         }
     }
 }
@@ -21,10 +21,10 @@ def safeExtGet(prop, fallback) {
 
 // Matches values in recent template from React Native
 // https://github.com/facebook/react-native/blob/0.65-stable/template/android/build.gradle#L5-L9
-def DEFAULT_COMPILE_SDK_VERSION = 30
-def DEFAULT_BUILD_TOOLS_VERSION = "30.0.2"
+def DEFAULT_COMPILE_SDK_VERSION = 31
+def DEFAULT_BUILD_TOOLS_VERSION = "31.0.0"
 def DEFAULT_MIN_SDK_VERSION = 16
-def DEFAULT_TARGET_SDK_VERSION = 30
+def DEFAULT_TARGET_SDK_VERSION = 31
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
