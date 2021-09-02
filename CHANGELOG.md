@@ -1,3 +1,7 @@
+## 2.7.0-beta.2
+- Target Android 12
+- Fix bluetooth check in native Android
+
 ## 2.7.0-beta.1
 - Update native Android dependency to 2.7.0-beta.4
 - Update native iOS dependency to 2.7-beta2
