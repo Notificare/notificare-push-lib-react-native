@@ -3,7 +3,9 @@
 
     <application>
 
-        <receiver android:name="re.notifica.reactnative.NotificareReceiver" />
+        <receiver
+            android:name="re.notifica.reactnative.NotificareReceiver"
+            android:exported="false" />
 
     </application>
 
