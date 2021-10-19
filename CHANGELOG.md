@@ -1,3 +1,7 @@
+## 2.7.0
+- Update native dependencies
+- Fix notification opens from cold app start
+
 ## 2.7.0-beta.2
 - Target Android 12
 - Fix bluetooth check in native Android
