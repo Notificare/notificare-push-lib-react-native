@@ -171,8 +171,12 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 }
 
 
+-(UIViewController*)rootViewController {
+    return [[[[UIApplication sharedApplication] delegate] window] rootViewController];
+}
+
 -(void)close{
-    [[[[UIApplication sharedApplication] keyWindow] rootViewController] dismissViewControllerAnimated:YES completion:^{
+    [[self rootViewController] dismissViewControllerAnimated:YES completion:^{
         
     }];
 }
@@ -195,7 +199,7 @@ static UNNotificationCategoryOptions categoryOptions = UNNotificationCategoryOpt
 }
 
 -(UINavigationController*)navigationControllerForRootViewController{
-    UINavigationController * navController = (UINavigationController*)[[[UIApplication sharedApplication] keyWindow] rootViewController];
+    UINavigationController * navController = (UINavigationController*)[self rootViewController];
     return navController;
 }
 
@@ -492,7 +496,7 @@ RCT_EXPORT_METHOD(presentNotification:(nonnull NSDictionary*)notification) {
         id controller = [[NotificarePushLib shared] controllerForNotification:item];
         if ([self isViewController:controller]) {
             UINavigationController *navController = [self navigationControllerForViewControllers:controller];
-            [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
+            [[self rootViewController] presentViewController:navController animated:YES completion:^{
                 [[NotificarePushLib shared] presentNotification:item inNavigationController:navController withController:controller];
             }];
         } else {
@@ -538,7 +542,7 @@ RCT_EXPORT_METHOD(presentInboxItem:(nonnull NSDictionary*)inboxItem) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
+                    [[self rootViewController] presentViewController:navController animated:YES completion:^{
                         [[NotificarePushLib shared] presentInboxItem:item inNavigationController:navController withController:response];
                     }];
                 } else {
@@ -946,7 +950,7 @@ RCT_EXPORT_METHOD(presentScannable:(nonnull NSDictionary*)scannable) {
             if (!error) {
                 if ([self isViewController:response]) {
                     UINavigationController *navController = [self navigationControllerForViewControllers:response];
-                    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:navController animated:YES completion:^{
+                    [[self rootViewController] presentViewController:navController animated:YES completion:^{
                         [[NotificarePushLib shared] presentScannable:item inNavigationController:navController withController:response];
                     }];
                 } else {
