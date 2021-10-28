@@ -1,3 +1,6 @@
+## 2.7.1
+- Update native iOS dependency
+
 ## 2.7.0
 - Update native dependencies
 - Fix notification opens from cold app start
