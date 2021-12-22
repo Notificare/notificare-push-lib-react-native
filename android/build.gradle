@@ -5,7 +5,7 @@ buildscript {
     if (project == rootProject) {
         repositories {
             google()
-            jcenter()
+            mavenCentral()
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:7.0.1'
@@ -32,8 +32,8 @@ android {
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', DEFAULT_MIN_SDK_VERSION)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
-        versionCode 20701
-        versionName "2.7.1"
+        versionCode 20702
+        versionName "2.7.2"
     }
     compileOptions {
         sourceCompatibility = '1.8'
@@ -51,7 +51,7 @@ repositories {
     }
 
     google()
-    jcenter()
+    mavenCentral()
 
     maven { url "https://maven.notifica.re/releases" }
     maven { url "https://maven.notifica.re/prereleases" }
@@ -63,7 +63,7 @@ dependencies {
     // noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
-    def notificare_version = '2.7.0'
+    def notificare_version = '2.7.2'
     api "re.notifica:notificare-core:$notificare_version"
     compileOnly "re.notifica:notificare-location:$notificare_version"
     compileOnly "re.notifica:notificare-beacon:$notificare_version"
