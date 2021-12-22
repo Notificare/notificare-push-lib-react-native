@@ -5,7 +5,7 @@ buildscript {
     if (project == rootProject) {
         repositories {
             google()
-            jcenter()
+            mavenCentral()
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:7.0.1'
@@ -51,7 +51,7 @@ repositories {
     }
 
     google()
-    jcenter()
+    mavenCentral()
 
     maven { url "https://maven.notifica.re/releases" }
     maven { url "https://maven.notifica.re/prereleases" }
